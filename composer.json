@@ -1,0 +1,21 @@
+{
+    "name": "cigamit/ansiblereports",
+    "description": "",
+    "license": "BSD-3-Clause",
+    "type": "composer-plugin",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    },
+    "require": {
+        "php": ">=8.0",
+        "ext-openssl": "*",
+        "ext-dom": "*",
+        "twig/twig": "~2.0",
+        "composer/composer": "*",
+        "composer-plugin-api": "*",
+        "phpmailer/phpmailer": "*",
+        "sebastian/diff": "*"
+    }
+}

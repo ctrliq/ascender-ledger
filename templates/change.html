@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper  text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+		<div class="bd-example">
+			<h3>Change</h3>
+				<table class="table table-striped datatable-columns">
+					<thead>
+						<tr>
+							<th>Field</th>
+							<th>Value</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr><td>Date</td><td>{{ (change.time - 21600)|date("m/d/Y G:i")  }}</td></tr>
+						{% if job.actor %}
+						<tr><td>User</td><td>{{ job.actor }}</td></tr>
+						{% endif %}
+						{% if job.host %}
+						<tr><td>Controller</td><td>{{ job.host }}</td></tr>
+						{% endif %}
+						{% if job.project %}
+						<tr><td>Project</td><td>{{ (job.project | split('-'))[0] }}</td></tr>
+						{% endif %}
+						{% if job.scm_branch != '' %}
+						<tr><td>SCM Branch</td><td>{{ job.scm_branch }}</td></tr>
+						{% endif %}
+						{% if job.inventory %}
+						<tr><td>Inventory</td><td>{{ (job.inventory | split('-'))[0] }}</td></tr>
+						{% endif %}
+						<tr><td>Host</td><td>{{ hosts[change.host] }}</td></tr>
+						{% if job.name %}
+						<tr><td>Job Template</td><td><a href='https://{{ job.host }}/#/jobs/playbook/{{ change.job }}' target=_new{{ change.job }}>{{ job.name }}</a></td></tr>
+						{% endif %}
+						{% if job.execution_environment %}
+						<tr><td>Execution Environment</td><td>{{ (job.execution_environment | split('-'))[0] }}</td></tr>
+						{% endif %}
+						{% if job.job_type %}
+						<tr><td>Job Type</td><td>{{ job.job_type | capitalize }}</td></tr>
+						{% endif %}
+						<tr><td>Playbook</td><td>{{ change.playbook }}</td></tr>
+						<tr><td>Play</td><td>{{ change.play }}</td></tr>
+						<tr><td>Role</td><td>{{ change.role }}</td></tr>
+						<tr><td>Task</td><td>{{ change.task }}</td></tr>
+						<tr><td>Module</td><td>{{ change.task_action }}</td></tr>
+						<tr><td>Data</td><td><pre>{{ res | raw }}</pre></td></tr>
+					</tbody>
+				</table>
+		</div>
+	</div>
+</div>
+
+
+
+
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+{% endblock %}

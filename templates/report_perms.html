@@ -1,0 +1,165 @@
+{% extends 'layout.html' %}
+{% block body %}
+            <div class="wrapper wrapper-content">
+                <h3>Permissions</h3><br>
+                <div class="row">
+                    <div class="col">
+                        <div class="row bd-example">
+                            <div class="col">
+                                <h3>Users</h3>
+                                <div class="table-responsive">
+                                    <table class="table table-striped datatable-columns">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Role</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+    {% for i,p in perms %}
+                                            <tr>
+                                                <td>{{ users[i] }}</td>
+                                                <td>{{ roles[p.role] }}</td>
+                                                <td>
+    {% if p.role != 'owner' %}
+                                                    <a href="/reports/perms/{{ report.id }}/user/remove/{{ p.user }}" class='btn btn-primary btn-xs' type='button' name=deleteuserperm id=deleteuserperm><i class="fa fa-trash"></i></a>
+    {% endif %}
+                                                </td>
+                                            </tr>
+    {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br><button class="btn btn-primary btn-s" type="button" name=usermb id=usermb data-bs-toggle="modal" data-bs-target="#usermodal">Add User</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="row bd-example">
+                            <div class="col">
+                                <h3>Teams</h3>
+                                <div class="table-responsive">
+                                    <table class="table table-striped datatable-columns">
+                                        <thead>
+                                            <tr>
+                                                <th>Team</th>
+                                                <th>Role</th>
+                                                <th></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+    {% for i,p in tperms %}
+                                            <tr>
+                                                <td>{{ users[i] }}</td>
+                                                <td>{{ roles[p.role] }}</td>
+                                                <td>
+                                                    <a href="/reports/perms/{{ report.id }}/team/remove/{{ p.user }}" class='btn btn-primary btn-xs' type='button' name=deleteuserperm id=deleteuserperm><i class="fa fa-trash"></i></a>
+                                                </td>
+                                            </tr>
+    {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <br><button class="btn btn-primary btn-s" type="button" name=teammb id=teammb data-bs-toggle="modal" data-bs-target="#teammodal">Add Team</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+
+            <div class="modal fade" id="usermodal" tabindex="-1" aria-labelledby="usermlabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="usermlabel">Add User</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" action=/reports/ id=adduserform class="form-horizontal">
+                            <input type=hidden name=action value=adduserperm>
+                            <input type=hidden name=report value={{ report.id }}>
+        
+                            <div class="form-group"><label class="col-sm-3 control-label">User</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control chosen-select" name=user id=user>
+                {% for i,u in users %}{% if i != report.owner and perms[i] is not defined %}
+                                            <option value="{{ i }}">{{ u }}</option>
+                {% endif %}{% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                
+                            <div class="form-group"><label class="col-sm-3 control-label">Role</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control" name=role id=role>
+                                        <option value="view">Viewer</option>
+                                        <option value="edit">Editor</option>
+                                    </select>
+                                </div>
+                            </div>
+                
+                            <div class="form-group">
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-white" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="modal fade" id="teammodal" tabindex="-1" aria-labelledby="teammlabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="teammlabel">Add Team</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        <form method="post" action=/reports/ id=addteamform class="form-horizontal">
+                            <input type=hidden name=action value=addteamperm>
+                            <input type=hidden name=report value={{ report.id }}>
+        
+                            <div class="form-group"><label class="col-sm-3 control-label">Team</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control chosen-select" name=team id=team>
+                {% for i,u in teams %}{% if tperms[i] is not defined %}
+                                        <option value="{{ i }}">{{ u }}</option>
+                {% endif %}{% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+        
+                            <div class="form-group"><label class="col-sm-3 control-label">Role</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control" name=role id=role>
+                                        <option value="view">Viewer</option>
+                                        <option value="edit">Editor</option>
+                                    </select>
+                                </div>
+                            </div>
+                
+                            <div class="form-group">
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-white" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Add</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+$(".chosen-select").chosen({ search_contains: true });
+{% endblock %}

@@ -1,0 +1,21 @@
+<tr>
+	<td width=90>
+		{% if r.role == "owner" or r.role == "admin" or r.role == "edit" %}
+			<a href="/reports/edit/{{ r['id'] }}" class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-edit"></i></a>
+		{% endif %}
+		{% if r.role == "owner" or r.role == "admin" or r.role == "edit" %}
+			<a href="/reports/perms/{{ r['id'] }}" class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-users"></i></a>
+		{% endif %}
+		{% if r.role == "owner" or r.role == "admin" or r.role == "edit" %}
+			<a href="/reports/{{ r['id'] }}/schedule/" class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-calendar"></i></a>
+		{% endif %}
+	</td>
+	<td><a href="/reports/view/{{ r['id'] }}">{{ r['name'] }}</a></td>
+	<td>{{ users[r['owner']] }}</td>
+	<td>{{ r['created']|date("m/d/Y H:i") }}</td>
+	<td width=30>
+		{% if r.role == "owner" or r.role == "admin" %}
+			<a href="/reports/delete/{{ r['id'] }}" class="btn btn-danger btn-xs dltlink"  type="button" name=delete id=delete><i class="fa fa-trash"></i></a>
+		{% endif %}
+	</td>
+</tr>

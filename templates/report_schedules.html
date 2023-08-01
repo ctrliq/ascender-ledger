@@ -1,0 +1,65 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper  text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+		<div class="bd-example">
+			<table class="table table-striped datatable-users">
+				<thead>
+					<tr>
+						<th></th>
+                        <th>Subject</th>
+                        <th>Start</th>
+                        <th>Repeat</th>
+                        <th>Next</th>
+						<th>Owner</th>
+						<th>Emails</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+{% for s in schedules %}
+					<tr>
+						<td width="30">
+                            <a href="/reports/{{ report.id }}/schedule/{{ s['id'] }}/edit" class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-edit"></i></a>
+                        </td>
+						<td nowrap>{{ s.subject }}</td>
+						<td nowrap>{{ s.start | date("m/d/Y H:i T") }}</td>
+                        <td nowrap>{{ reoccur[s.repeat] }}</td>
+						<td nowrap>{{ s.next | date("m/d/Y H:i T") }}</td>
+						<td nowrap>{{ users[s.owner] }}</td>
+                        <td>{{ s.emails }}</td>
+						<td width="30">
+                            <a href="/reports/{{ report.id }}/schedule/{{ s['id'] }}/delete" class="btn btn-danger btn-xs dltlink"  type="button" name=delete id=delete><i class="fa fa-trash"></i></a>
+                        </td>
+					</tr>
+{% endfor %}
+				</tbody>
+			</table>
+		</div>
+        <br><a href="/reports/{{ report.id }}/schedule/new"><button type="button" class="btn btn-primary btn-s">Add Schedule</button></a>
+	</div>
+</div>
+
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+	$('.datatable-users').DataTable({
+		order: [[1, 'asc']],
+		pageLength: 25,
+		responsive: true,
+		buttons: []
+	});
+
+    var classname = document.getElementsByClassName("dltlink");
+	for (var i = 0; i < classname.length; i++) {
+		classname[i].addEventListener('click',
+			function(event) {
+				var t = confirm("Are you sure you want to delete this Schedule?");
+				if (!t) {
+					event.preventDefault();
+				}
+			}, false);
+	}
+{% endblock %}

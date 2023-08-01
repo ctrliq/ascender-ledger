@@ -1,0 +1,86 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff; width: 50%">
+		<div class="bd-example col-sm-3">
+			<form method="post" action=/settings/save/ id=settingform class="form-horizontal">
+					<div class="mb-3">
+						<label class="form-label">DB Version</label>
+						<div>
+							<input type="text" class="form-control" name=db_version id=db_version value='{{ settings.db_version }}' disabled>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Disable Email</label>
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=disable_email id=disable_email {% if settings.disable_email %}checked{% endif %}>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Is Development Site</label>
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=is_dev id=is_dev {% if settings.is_dev %}checked{% endif %}>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Remove Invocation from Changes</label>
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=remove_invocation id=remove_invocation {% if settings.remove_invocation %}checked{% endif %}>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Email From Name</label>
+						<div>
+							<input type="text" class="form-control" name=email_fromname id=email_fromname value='{{ settings.email_fromname }}'>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Email From Address</label>
+						<div>
+							<input type="text" class="form-control" name=email_from id=email_from value='{{ settings.email_from }}'>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Hosts Retention (Days)</label>
+						<div>
+							<select class="form-control" name=hosts_retention id=hosts_retention>
+								{% for i in range(30, 360, 30) %}
+								<option{% if settings.hosts_retention == i %} selected{% endif %}>{{ i }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Facts Retention (Days)</label>
+						<div>
+							<select class="form-control" name=facts_retention id=facts_retention>
+								{% for i in range(30, 360, 30) %}
+								<option{% if settings.facts_retention == i %} selected{% endif %}>{{ i }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Changes Retention (Days)</label>
+						<div>
+							<select class="form-control" name=changes_retention id=changes_retention>
+								{% for i in range(30, 360, 30) %}
+								<option{% if settings.changes_retention == i %} selected{% endif %}>{{ i }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="hr-line-dashed"></div>
+					<div class="mb-3">
+						<div class="col-sm-offset-2">
+							<a href=/ class="btn btn-white" name=cancel>Cancel</a>
+							<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
+						</div>
+					</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

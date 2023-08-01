@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff; width: 50%">
+		<div class="bd-example col-sm-3">
+			<form method="post" action="/reports/{{ report.id }}/schedule/{{ schedule.id }}/save" id=scheduleform class="form-horizontal">
+					<div class="mb-3">
+						<label class="form-label">Subject</label>
+						<div>
+							<input type="text" class="form-control" name=subject id=subject value='{{ schedule.subject }}'>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Enabled</label>
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=enabled id=enabled {% if schedule.enabled %}checked{% endif %}>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Start</label>
+						<div>
+							<input type="text" class="form-control" name=start id=start value='{{ schedule.start | date("m/d/Y H:i") }}'>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Repeat</label>
+						<div>
+							<select class="form-control" name=repeat id=repeat>
+								{% for k,i in reoccur %}
+								<option{% if schedule.repeat == i %} selected{% endif %} value="{{ k }}">{{ i }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Emails</label>
+						<div>
+							<input type="text" class="form-control" name=emails id=emails value='{{ schedule.emails }}'>
+						</div>
+					</div>
+
+                    
+					<div class="hr-line-dashed"></div>
+					<div class="mb-3">
+						<div class="col-sm-offset-2">
+							<a href=/ class="btn btn-white" name=cancel>Cancel</a>
+							<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
+						</div>
+					</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}

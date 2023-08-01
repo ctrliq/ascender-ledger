@@ -1,0 +1,18 @@
+<?php
+
+global $mydb;
+
+$sql_server = "";
+$port = '3306';
+$mydb = "";
+$sql_user = "";
+$sql_pass = "";
+
+define('BASE_URL', '');
+
+define('FIRSTKEY', '');
+define('SECONDKEY', '');
+
+define('SMTP_SERVER', '');
+define('SMTP_USER', '');
+define('SMTP_PASSWORD', '');

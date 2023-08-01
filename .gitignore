@@ -1,0 +1,6 @@
+includes/config.php
+twig/cache/*
+*.txt
+composer.lock
+myadmin*
+vendor/*

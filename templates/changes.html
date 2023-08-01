@@ -1,0 +1,113 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+		<div class="bd-example">
+			<div class="bd-example" style="padding: 9px">
+				<form action="/changes/">
+					<div class="row filters">
+
+						<label for="hosts" class="col-sm-1 col-form-label text-end">Hosts</label>
+						<div class="col">
+							<select class="form-control form-select-sm chosen-select" name=hosts id=hosts>
+								<option></option>
+			{% for i,h in hosts %}
+								<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<label for="playbooks" class="col-sm-1 col-form-label text-end">Playbooks</label>
+						<div class="col">
+							<select class="form-control form-select-sm chosen-select" name=playbooks id=playbooks>
+								<option></option>
+			{% for p in playbooks %}
+								<option{% if playbook == p %} selected{% endif %}>{{ p }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<label for="csearch" class="col-sm-1 col-form-label text-end">Search</label>
+						<div class="col">
+							<input type="text" class="form-control form-control-sm" name=csearch id=csearch value="{{ csearch }}">
+						</div>
+						<div class="col">
+							<a href=/changes/?clear=1><button type="button" class="btn btn-primary btn-s">Clear</button></a>
+							<input type="submit" style="display: none" />
+						</div>
+					</div>
+				</form>
+
+			</div>
+			<br><br>
+			<table class="table table-striped datatable-facts">
+				<thead>
+					<tr>
+						<th></th>
+						<th>Date</th>
+						<th>Host</th>
+						<th>Playbook</th>
+						<th>Role</th>
+						<th>Task</th>
+						<th>Module</th>
+						<th style="display:none;">Changes</th>
+					</tr>
+					</thead>
+					<tbody>
+	{% for r in changes %}
+					<tr>
+						<td width=30><a href='/changes/view/{{ r['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-eye"></i></a></td>
+						<td nowrap>{{ (r['time'] - 21600)|date("m/d/Y G:i") }}</td>
+						<td nowrap>{{ hosts[r['host']] }}</td>
+						<td>{{ r['playbook'] }}</td>
+						<td>{{ r['role'] }}</td>
+						<td>{{ r['task'] }}</td>
+						<td>{{ r['task_action'] }}</td>
+						<td style="display:none;">{{ r['res'] }}</td>
+					</tr>
+	{% endfor %}
+				</tbody>
+			</table>
+
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+
+	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true });
+
+	function change_host_filter () {
+		var host = $("#hosts").find(":selected").attr("id");
+		if (host == undefined) {
+			host = "";
+		}
+		window.location = "/changes/?host=" + host;
+	}
+
+	function change_playbook_filter () {
+		var playbook = $("#playbooks").find(":selected").val();
+		if (playbook == undefined) {
+			playbook = "";
+		}
+		window.location = "/changes/?playbook=" + playbook;
+	}
+
+	$("#hosts").change(change_host_filter);
+	$("#playbooks").change(change_playbook_filter);
+
+
+	$('.datatable-facts').DataTable({
+		"columnDefs" : [{"targets":1, "type":"date-us"},{"targets":7, "visible":false}],
+		pageLength: 25,
+		responsive: true,
+		"columnDefs" : [{"targets":1, "type":"date-us"}],
+		buttons: []
+	});
+{% endblock %}

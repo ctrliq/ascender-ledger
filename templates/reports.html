@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+<div class="wrapper  text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+		<div class="bd-example">
+			<table class="table table-striped datatable-reports border-secondary">
+		{% include 'parts/reports_table_thead.html' %}
+				<tbody>
+		{% for r in reports %}
+				{% include 'parts/reports_table_body_tr.html' %}
+		{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<br><a href=/reports/new/><button type="button" class="btn btn-primary btn-s">Create New Report</button></a>
+	</div>
+</div>
+
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+	var classname = document.getElementsByClassName("dltlink");
+	for (var i = 0; i < classname.length; i++) {
+		classname[i].addEventListener('click',
+			function(event) {
+				var t = confirm("Are you sure you want to delete this Report?");
+				if (!t) {
+					event.preventDefault();
+				}
+			}, false);
+	}
+	$('.datatable-reports').DataTable({
+		order: [[1, 'asc']],
+		"columnDefs" : [{"targets":3, "type":"date-us"}],
+		pageLength: 25,
+		responsive: true,
+		buttons: []
+	});
+{% endblock %}

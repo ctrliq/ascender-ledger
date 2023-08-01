@@ -1,0 +1,61 @@
+
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper  text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+		<div class="bd-example">
+			<h1>{{ report.name }}</h1>
+
+			<table class="table table-striped datatable-reports">
+				<thead>
+					<tr>
+{% for d,k in columns %}
+						<th>{{ d }}</th>
+{% endfor %}
+					</tr>
+				</thead>
+				<tbody>
+{% for h,d in data %}
+					<tr>
+{% for f,v in d %}
+					<td>{{ v }}</td>
+{% endfor %}
+				</tr>
+{% endfor %}
+				</tbody>
+			</table>
+
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+	$('.datatable-reports').DataTable({
+		order: [[{{ report.sortc }}, '{{ report.sortd }}']],
+		pageLength: 50,
+		responsive: true,
+		dom: '<"html5buttons d-flex justify-content-center"B>lTfgitp',
+		buttons: [
+			'copy',
+			'csv',
+			{extend: 'excel', title: '{{ report.name }}'},
+			{extend: 'pdf', title: '{{ report.name }}'},
+			{extend: 'print',
+				customize: function (win){
+					$(win.document.body).addClass('white-bg');
+					$(win.document.body).css('font-size', '10px');
+
+					$(win.document.body).find('table')
+							.addClass('compact')
+							.css('font-size', 'inherit');
+			}
+			}
+		]
+	});
+{% endblock %}

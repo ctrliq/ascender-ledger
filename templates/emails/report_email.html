@@ -1,0 +1,23 @@
+
+{% block body %}
+<h1>{{ report.name }}</h1>
+
+<table style="border: solid 1px #ccc; border-spacing: 0px; width: 90%">
+    <thead>
+        <tr style="border: solid 1px #ccc;">
+{% for d,k in columns %}
+            <th style="border: solid  1px #ccc; padding: 8px">{{ d }}</th>
+{% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+{% for h,d in data %}
+        <tr style="border: solid 1px #ccc;">
+{% for f,v in d %}
+        <td style="border: solid 1px #ccc; padding: 8px">{{ v }}</td>
+{% endfor %}
+    </tr>
+{% endfor %}
+    </tbody>
+</table>
+{% endblock %}

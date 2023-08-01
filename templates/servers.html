@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper  text-bg-light">
+{% if msg %}<font color=green><center>{{ msg }}</center></font><br>{% endif %}
+{% if error %}<font color=red><center>{{ error }}</center></font><br>{% endif %}
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+		<div class="bd-example">
+			<table class="table table-striped datatable-users">
+				<thead>
+					<tr>
+						<th></th>
+						<th>Name</th>
+						<th>IP Address</th>
+						<th>Trusted</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+{% for u in servers %}
+					<tr>
+						<td width="30">
+	{% if u.trusted %}
+                            <a href='/servers/trust/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-lock"></i></a>
+	{% else %}
+                            <a href='/servers/trust/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-lock-open"></i></a>
+	{% endif %}
+                        </td>
+						<td nowrap>{{ u.name }}</td>
+						<td nowrap>{{ u.ip }}</td>
+						<td>{% if u.trusted %}Yes{% else %}No{% endif %}</td>
+						<td width="30">
+                            <a href='/servers/delete/{{ u['id'] }}' class="btn btn-danger btn-xs dltlink"  type="button" name=delete id=delete><i class="fa fa-trash"></i></a>
+                        </td>
+					</tr>
+{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+	$('.datatable-servers').DataTable({
+		order: [[1, 'asc']],
+		pageLength: 25,
+		responsive: true,
+		buttons: []
+	});
+
+    var classname = document.getElementsByClassName("dltlink");
+	for (var i = 0; i < classname.length; i++) {
+		classname[i].addEventListener('click',
+			function(event) {
+				var t = confirm("Are you sure you want to delete this Server?");
+				if (!t) {
+					event.preventDefault();
+				}
+			}, false);
+	}
+{% endblock %}

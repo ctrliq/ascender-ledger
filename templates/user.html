@@ -1,0 +1,122 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff; width: 50%">
+		<div class="bd-example">
+			<form method="post" action=/users/save/{{ user.id }} id=saform class="form-horizontal" enctype="multipart/form-data">
+				<input type=hidden name=action value=save>
+				<div class="mb-3">
+                    <label for="name" class="col-sm-3 form-label">Name</label>
+					<div class="col">
+                        <input type="text" class="form-control" name=name id=name value='{{ user.name }}'>
+                    </div>
+				</div>
+				<div class="mb-3">
+                    <label for="username" class="col-sm-3 form-label">Username</label>
+					<div class="col">
+                        <input type="text" class="form-control" name=username id=username value='{{ user.username }}'>
+                    </div>
+				</div>
+				<div class="mb-3">
+                    <label for="email" class="col-sm-3 form-label">Email</label>
+					<div class="col">
+                        <input type="text" class="form-control" name=email id=email value='{{ user.email }}'>
+                    </div>
+				</div>
+				<div class="mb-3">
+                    <label for="type" class="col-sm-3 form-label">Enabled</label>
+					<div class="col">
+                        <select class="form-control" name=enabled id=enabled>
+							<option value="1">Yes</option>
+							<option value="0"{% if not user.enabled %} selected{% endif %}>No</option>
+						</select>
+                    </div>
+				</div>
+				<div class="mb-3">
+                    <label for="type" class="col-sm-3 form-label">Type</label>
+					<div class="col">
+                        <select class="form-control" name=super id=super>
+							<option value="0">Standard</option>
+							<option value="1"{% if user.super %} selected{% endif %}>Admin</option>
+						</select>
+                    </div>
+				</div>
+{% if account.code %}
+				<div class="mb-3">
+                    <label class="col-sm-3 form-label"></label>
+					<div class="col-sm-8">
+                        <font color=red><b>You must change your password</b></font>
+                    </div>
+				</div>
+{% endif %}
+                <div class="mb-3">
+                    <label for="newpass" class="col-sm-3 form-label">Change Password</label>
+					<div class="col-sm-4"><input type="password" class="form-control" name=newpass id=newpass value=''><div name=passmatch id=passmin style="display: none;"><font color=red>Passwords must be a minimum of 8 characters</font></div></div>
+					<div class="col-sm-4"><input type="password" class="form-control" name=newpass2 id=newpass2 value=''><div name=passmatch id=passmatch style="display: none;"><font color=red>Passwords must match</font></div></div>
+				</div>
+				<div class="hr-line-dashed"></div>
+				<div class="mb-3">
+					<div class="col-sm-4 col-sm-offset-2">
+						<a href=/ class="btn btn-white" name=cancel>Cancel</a>
+						<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block javascriptinc %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pwstrength-bootstrap/3.1.1/pwstrength-bootstrap.min.js" integrity="sha512-VMd5IUFVM9MRhGzKSpKVZu/Rm4Wm3i8dC6eYqEtOcTaG1vn5RmwUWFiYfh4nagbeQRhQuSnHULnZ9B+st2rZ0g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock %}
+{% block javascript %}
+	function check_pass () {
+		var p1 = $("#newpass").val();
+		var p2 = $("#newpass2").val();
+
+		if (p1.length < 8) {
+			$("#passmin").show();
+			$("#save").prop('disabled', true);
+			return;
+		} else {
+			$("#passmin").hide();
+			$("#save").prop('disabled', false);
+		}
+
+		if (p1 != '' && p1 != p2) {
+			$("#passmatch").show();
+			$("#save").prop('disabled', true);
+		} else {
+			$("#passmatch").hide();
+			$("#save").prop('disabled', false);
+		}
+	}
+
+	$('#newpass').change(check_pass);
+	$('#newpass2').change(check_pass);
+
+	var options2 = {};
+	options2.ui = {
+		container: "#ibox-content",
+		showStatus: true,
+		showProgressBar: false,
+		viewports: {
+			verdict: ".pwstrength_viewport_verdict"
+		}
+	};
+	$('#newpass').pwstrength(options2);
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,135 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<br><br>
+<div class="wrapper  text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff; width: 50%">
+		<div class="bd-example">
+			<form method="post" action=/profile/ id=saform class="form-horizontal" enctype="multipart/form-data">
+				<input type=hidden name=action value=save>
+				<div class="mb-3">
+					<label class="form-label">Name</label>
+					<div class="col">
+						<input type="text" class="form-control" name=name id=name value='{{ name }}'>
+					</div>
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Email</label>
+					<div class="col">
+						<input type="text" class="form-control" name=email id=email value='{{ account.email }}' disabled>
+					</div>
+				</div>
+{% if account.code %}
+				<div class="mb-3">
+					<label class="form-label"></label>
+					<div class="col">
+						<font color=red><b>You must change your password</b></font>
+					</div>
+				</div>
+{% else %}
+				<div class="mb-3">
+					<label class="form-label">Current Password</label>
+					<div class="col-sm-4">
+						<input type="password" class="form-control" name=cpass id=cpass value=''>
+					</div>
+					<div name=entercurrent id=entercurrent style="display: none;">
+						<font color=red>You must enter your current Password to change your password</font>
+					</div>
+	{% if error == "current" %}
+					<div>
+						<font color=red>Your current password was incorrect!</font>
+					</div>
+	{% endif %}
+				</div>
+{% endif %}
+				<div class="mb-3">
+					<label class="form-label">New Password</label>
+					<div class="col-sm-4">
+						<input type="password" class="form-control" name=newpass id=newpass value=''>
+						<div name=passmatch id=passmin style="display: none;">
+							<font color=red>Passwords must be a minimum of 8 characters</font>
+						</div>
+					</div>
+					<div class="col-sm-4">
+						<input type="password" class="form-control" name=newpass2 id=newpass2 value=''>
+						<div name=passmatch id=passmatch style="display: none;">
+							<font color=red>Passwords must match</font>
+						</div>
+					</div>
+				</div>
+				<div class="hr-line-dashed"></div>
+				<div class="mb-3">
+					<div class="col col-sm-offset-2">
+						<a href=/ class="btn btn-white" name=cancel>Cancel</a>
+						<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block javascriptinc %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pwstrength-bootstrap/3.1.1/pwstrength-bootstrap.min.js" integrity="sha512-VMd5IUFVM9MRhGzKSpKVZu/Rm4Wm3i8dC6eYqEtOcTaG1vn5RmwUWFiYfh4nagbeQRhQuSnHULnZ9B+st2rZ0g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{% endblock %}
+{% block javascript %}
+	function check_pass () {
+		var p1 = $("#newpass").val();
+		var p2 = $("#newpass2").val();
+{% if account.code == "" %}
+		var p3 = $("#cpass").val();
+
+		if (p1.length > 0 && p3.length < 1) {
+			$("#entercurrent").show();
+			$("#save").prop('disabled', true);
+		} else {
+			$("#entercurrent").hide();
+			$("#save").prop('disabled', false);
+		}
+{% endif %}
+		if (p1.length < 8) {
+			$("#passmin").show();
+			$("#save").prop('disabled', true);
+			return;
+		} else {
+			$("#passmin").hide();
+			$("#save").prop('disabled', false);
+		}
+
+		if (p1 != '' && p1 != p2) {
+			$("#passmatch").show();
+			$("#save").prop('disabled', true);
+		} else {
+			$("#passmatch").hide();
+			$("#save").prop('disabled', false);
+		}
+	}
+
+	$('#newpass').change(check_pass);
+	$('#newpass2').change(check_pass);
+	$('#cpass').change(check_pass);
+
+	var options2 = {};
+	options2.ui = {
+		container: "#ibox-content",
+		showStatus: true,
+		showProgressBar: false,
+		viewports: {
+			verdict: ".pwstrength_viewport_verdict"
+		}
+	};
+	$('#newpass').pwstrength(options2);
+
+
+{% endblock %}
+
+
+
+
+
+
+
+
+
