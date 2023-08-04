@@ -1,102 +1,106 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Ascender Ledger</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css"/>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css" integrity="sha512-yVvxUQV0QESBt1SyZbNJMAwyKvFTLMyXSyBHDO4BG5t7k/Lw34tyqlSDlKIrIENIzCl+RVUNjmCPG+V/GMesRw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="/css/app.css" rel="stylesheet">
-    <style>
-    {% block css %}{% endblock %}
-    </style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Ascender Ledger</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap5.min.css"/>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/2.2.3/css/buttons.bootstrap5.min.css"/>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css" integrity="sha512-yVvxUQV0QESBt1SyZbNJMAwyKvFTLMyXSyBHDO4BG5t7k/Lw34tyqlSDlKIrIENIzCl+RVUNjmCPG+V/GMesRw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link href="/css/app.css" rel="stylesheet">
+	<style>
+	{% block css %}{% endblock %}
+	</style>
 
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap5.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap5.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/dataTables.buttons.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.bootstrap5.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.html5.min.js"></script>
+	<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
 
 </head>
 <body>
 	<header class="navbar navbar-expand-lg navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-                <a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3 text-white text-decoration-none">
-                    <span class="fs-4 d-none d-sm-inline"><img src="/img/AscenderLedger_logo_h_rev_S_side.png" style="height: 60px"></span>
-                </a>
+				<a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3 text-white text-decoration-none">
+					<span class="fs-4 d-none d-sm-inline"><img src="/img/AscenderLedger_logo_rev.svg" style="height: 60px"></span>
+				</a>
 <div class="topnav navbar-nav justify-content-end ms-auto">
-    <div class="nav-item text-nowrap">
+	<div class="nav-item text-nowrap">
 
-         <li class="nav-item dropdown ms-auto">
-          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="navicon fa fa-user"></i> {{ account.name }}
-          </a>
-          <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-            <li><a class="dropdown-item" href="/profile/">Profile</a></li>
-            <li><a class="dropdown-item" href="/logout/">Logout</a></li>
-          </ul>
+		 <li class="nav-item dropdown ms-auto">
+		  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+			<i class="navicon fa fa-user"></i> {{ account.name }}
+		  </a>
+		  <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+			<li><a class="dropdown-item" href="/profile/">Profile</a></li>
+			<li><a class="dropdown-item" href="/logout/">Logout</a></li>
+		  </ul>
 		</li>
-    </div>
+	</div>
   </div>
 	</header>
 
 <div class="container-fluid">
 
-    <div class="row flex-nowrap">
-        <div class="col-auto px-0 page-sidebar">
-            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-<br><br><br>
-                <br><br>
-                <ul class="nav flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
-                    <li class="pf-c-nav__link">
-                        <a href="/reports/" class="nav-link px-0 align-middle{% if server == '/reports.php' %} active{%endif %}">
-                            <i class="navicon fa fa-table"></i> <span class="ms-1 d-none d-sm-inline">Reports</span> </a>
-                    </li>
-                    <li class="pf-c-nav__link">
-                        <a href="/changes/" class="nav-link px-0 align-middle{% if server == '/changes.php' %} active{%endif %}">
-                            <i class="navicon fa fa-file" style="width: 20px"></i> <span class="ms-1 d-none d-sm-inline">Changes</span></a>
-                    </li>
-                    <li class="pf-c-nav__link">
-                        <a href="/facts/" class="nav-link px-0 align-middle{% if server == '/facts.php' %} active{%endif %}">
-                            <i class="navicon fa fa-puzzle-piece" style="width: 20px"></i> <span class="ms-1 d-none d-sm-inline">Facts</span></a>
-                    </li>
+	<div class="row flex-nowrap">
+		<div class="col-auto px-0 page-sidebar">
+			<div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+			<br><br><br>
+				<br><br>
+				<ul class="nav flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+					<li class="pf-c-nav__link">
+						<a href="/reports/" class="nav-link px-0 align-middle{% if server == '/reports.php' %} active{%endif %}">
+							<i class="navicon fa fa-table"></i> <span class="ms-1 d-none d-sm-inline">Reports</span> </a>
+					</li>
+{% if account.view_changes %}
+					<li class="pf-c-nav__link">
+						<a href="/changes/" class="nav-link px-0 align-middle{% if server == '/changes.php' %} active{%endif %}">
+							<i class="navicon fa fa-file" style="width: 20px"></i> <span class="ms-1 d-none d-sm-inline">Changes</span></a>
+					</li>
+{% endif %}
+{% if account.view_facts %}
+					<li class="pf-c-nav__link">
+						<a href="/facts/" class="nav-link px-0 align-middle{% if server == '/facts.php' %} active{%endif %}">
+							<i class="navicon fa fa-puzzle-piece" style="width: 20px"></i> <span class="ms-1 d-none d-sm-inline">Facts</span></a>
+					</li>
+{% endif %}
 {% if account.super %}
-                    <li>
-                        <a href="#submenu3" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-0 align-middle" aria-expanded="true">
-                            <i class="navicon fa fa-cog"></i> <span class="ms-1 d-none d-sm-inline">Admin</span> </a>
-                            <ul class="{% if server != '/users.php' and server != '/settings.php' and server != '/servers.php' %}collapse {%endif %} nav flex-column ms-4" id="submenu3" data-bs-parent="#menu">
-                            <li class="w-100">
-                                <a href="/users/" class="nav-link px-0{% if server == '/users.php' %} active{%endif %}"> <i class="navicon fa fa-users"></i> <span class="d-none d-sm-inline">Users</span> </a>
-                            </li>
-                            <li class="w-100">
-                                <a href="/servers/" class="nav-link px-0{% if server == '/servers.php' %} active{%endif %}"> <i class="navicon fas fa-network-wired"></i> <span class="d-none d-sm-inline">Servers</span> </a>
-                            </li>
+					<li>
+						<a href="#submenu3" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-0 align-middle" aria-expanded="true">
+							<i class="navicon fa fa-cog"></i> <span class="ms-1 d-none d-sm-inline">Admin</span> </a>
+							<ul class="{% if server != '/users.php' and server != '/settings.php' and server != '/servers.php' %}collapse {%endif %} nav flex-column ms-4" id="submenu3" data-bs-parent="#menu">
+							<li class="w-100">
+								<a href="/users/" class="nav-link px-0{% if server == '/users.php' %} active{%endif %}"> <i class="navicon fa fa-users"></i> <span class="d-none d-sm-inline">Users</span> </a>
+							</li>
+							<li class="w-100">
+								<a href="/servers/" class="nav-link px-0{% if server == '/servers.php' %} active{%endif %}"> <i class="navicon fas fa-network-wired"></i> <span class="d-none d-sm-inline">Servers</span> </a>
+							</li>
 
-                                <li class="w-100">
-                                    <a href="/settings/" class="nav-link px-0{% if server == '/settings.php' %} active{%endif %}"> <i class="navicon fas fa-wrench"></i> <span class="d-none d-sm-inline">Settings</span> </a>
-                                </li>
-                        </ul>
-                    </li>
+								<li class="w-100">
+									<a href="/settings/" class="nav-link px-0{% if server == '/settings.php' %} active{%endif %}"> <i class="navicon fas fa-wrench"></i> <span class="d-none d-sm-inline">Settings</span> </a>
+								</li>
+						</ul>
+					</li>
 {% endif %}
 {% if is_dev %}
-                    <br><center><font color=red><strong>*** DEV SITE ***</strong></font></center>
+					<br><center><font color=red><strong>*** DEV SITE ***</strong></font></center>
 {% endif %}
-                </ul>
-            </div>
-        </div>
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-0 py-4">
+				</ul>
+			</div>
+		</div>
+		<main class="col-md-9 ms-sm-auto col-lg-10 px-md-0 py-4">
 {% block body %}{% endblock %}
-        </div>
-    </div>
+		</div>
+	</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>

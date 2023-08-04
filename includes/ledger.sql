@@ -3,8 +3,7 @@ SET time_zone = '+00:00';
 SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
-DROP TABLE IF EXISTS `changes`;
-CREATE TABLE `changes` (
+CREATE TABLE IF NOT EXISTS `changes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `server` varchar(128) NOT NULL DEFAULT '',
   `host` int(11) NOT NULL,
@@ -24,8 +23,7 @@ CREATE TABLE `changes` (
   KEY `host` (`host`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `facts`;
-CREATE TABLE `facts` (
+CREATE TABLE IF NOT EXISTS `facts` (
   `host` int(11) NOT NULL,
   `fact` varchar(128) NOT NULL,
   `type` varchar(32) NOT NULL,
@@ -37,8 +35,7 @@ CREATE TABLE `facts` (
   KEY `type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `jobs`;
-CREATE TABLE `jobs` (
+CREATE TABLE IF NOT EXISTS `jobs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `job` int(11) NOT NULL,
   `job_template_id` int(11) NOT NULL,
@@ -58,8 +55,7 @@ CREATE TABLE `jobs` (
   KEY `actor` (`actor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `hosts`;
-CREATE TABLE `hosts` (
+CREATE TABLE IF NOT EXISTS `hosts` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `hostname` varchar(128) NOT NULL,
   `time` int(11) NOT NULL DEFAULT 0,
@@ -67,8 +63,7 @@ CREATE TABLE `hosts` (
   KEY `hostname` (`hostname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `log_emails`;
-CREATE TABLE `log_emails` (
+CREATE TABLE IF NOT EXISTS `log_emails` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date` int(11) NOT NULL,
   `to` tinytext NOT NULL,
@@ -78,8 +73,7 @@ CREATE TABLE `log_emails` (
   KEY `date` (`date`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `mail_queue`;
-CREATE TABLE `mail_queue` (
+CREATE TABLE IF NOT EXISTS `mail_queue` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `status` int(11) NOT NULL DEFAULT 0,
   `created` int(11) NOT NULL DEFAULT 0,
@@ -97,8 +91,7 @@ CREATE TABLE `mail_queue` (
   KEY `status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `reports`;
-CREATE TABLE `reports` (
+CREATE TABLE IF NOT EXISTS `reports` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `owner` int(11) NOT NULL,
   `name` varchar(256) NOT NULL,
@@ -112,8 +105,7 @@ CREATE TABLE `reports` (
   KEY `created` (`created`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `reports_perms`;
-CREATE TABLE `reports_perms` (
+CREATE TABLE IF NOT EXISTS `reports_perms` (
   `report` int(11) NOT NULL,
   `user` int(11) NOT NULL,
   `role` varchar(16) NOT NULL DEFAULT 'view',
@@ -128,8 +120,7 @@ INSERT INTO `reports` (`id`, `owner`, `name`, `created`, `filters`, `columns`, `
 (1,	1,	'Linux Servers',	1663558186,	'YToxOntpOjA7YTozOntzOjQ6ImZhY3QiO3M6MTQ6ImFuc2libGVfc3lzdGVtIjtzOjc6ImNvbXBhcmUiO3M6MjoiZXEiO3M6NToidmFsdWUiO3M6NToiTGludXgiO319',	'YTo3OntzOjg6Ikhvc3RuYW1lIjtzOjE2OiJhbnNpYmxlX2hvc3RuYW1lIjtzOjEwOiJJUCBBZGRyZXNzIjtzOjI4OiJhbnNpYmxlX2RlZmF1bHRfaXB2NC5hZGRyZXNzIjtzOjY6IkRpc3RybyI7czoyMDoiYW5zaWJsZV9kaXN0cmlidXRpb24iO3M6MTQ6IkRpc3RybyBWZXJzaW9uIjtzOjI4OiJhbnNpYmxlX2Rpc3RyaWJ1dGlvbl92ZXJzaW9uIjtzOjE0OiJQeXRob24gVmVyc2lvbiI7czoyMjoiYW5zaWJsZV9weXRob25fdmVyc2lvbiI7czo0OiJDUFVzIjtzOjIzOiJhbnNpYmxlX3Byb2Nlc3Nvcl92Y3B1cyI7czo2OiJNZW1vcnkiO3M6MTk6ImFuc2libGVfbWVtdG90YWxfbWIiO30=',	0,	'asc'),
 (2,	1,	'Windows Servers',	1664418280,	'YToxOntpOjA7YTozOntzOjQ6ImZhY3QiO3M6MTc6ImFuc2libGVfb3NfZmFtaWx5IjtzOjc6ImNvbXBhcmUiO3M6MjoiZXEiO3M6NToidmFsdWUiO3M6NzoiV2luZG93cyI7fX0=',	'YTo2OntzOjg6Ikhvc3RuYW1lIjtzOjE2OiJhbnNpYmxlX2hvc3RuYW1lIjtzOjEwOiJJUCBBZGRyZXNzIjtzOjIyOiJhbnNpYmxlX2lwX2FkZHJlc3Nlcy4wIjtzOjEwOiJPUyBWZXJzaW9uIjtzOjIwOiJhbnNpYmxlX2Rpc3RyaWJ1dGlvbiI7czoxMDoiUG93ZXJzaGVsbCI7czoyNjoiYW5zaWJsZV9wb3dlcnNoZWxsX3ZlcnNpb24iO3M6NDoiQ1BVcyI7czoyMzoiYW5zaWJsZV9wcm9jZXNzb3JfdmNwdXMiO3M6NjoiTWVtb3J5IjtzOjE5OiJhbnNpYmxlX21lbXRvdGFsX21iIjt9',	0,	'asc');
 
-DROP TABLE IF EXISTS `reports_schedules`;
-CREATE TABLE `reports_schedules` (
+CREATE TABLE IF NOT EXISTS `reports_schedules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `enabled` tinyint(1) NOT NULL DEFAULT 1,
   `report` int(11) NOT NULL,
@@ -148,17 +139,7 @@ CREATE TABLE `reports_schedules` (
   KEY `enabled` (`enabled`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `sessions`;
-CREATE TABLE `sessions` (
-  `id` varchar(32) NOT NULL,
-  `access` int(10) unsigned DEFAULT NULL,
-  `user` int(11) DEFAULT 0,
-  `data` text DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-DROP TABLE IF EXISTS `servers`;
-CREATE TABLE `servers` (
+CREATE TABLE IF NOT EXISTS `servers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(128) NOT NULL,
   `ip` varchar(15) NOT NULL,
@@ -168,15 +149,21 @@ CREATE TABLE `servers` (
   KEY `trusted` (`trusted`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `settings`;
-CREATE TABLE `settings` (
+CREATE TABLE IF NOT EXISTS `sessions` (
+  `id` varchar(32) NOT NULL,
+  `access` int(10) unsigned DEFAULT NULL,
+  `user` int(11) DEFAULT 0,
+  `data` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `settings` (
   `setting` varchar(64) NOT NULL,
   `value` text NOT NULL,
   PRIMARY KEY (`setting`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
   `username` varchar(64) NOT NULL,
@@ -184,6 +171,8 @@ CREATE TABLE `users` (
   `password` varchar(128) NOT NULL,
   `enabled` tinyint(1) NOT NULL DEFAULT 1,
   `registered` tinyint(1) NOT NULL DEFAULT 0,
+  `view_changes` tinyint(1) NOT NULL DEFAULT 1,
+  `view_facts` tinyint(1) NOT NULL DEFAULT 1,
   `code` varchar(256) NOT NULL DEFAULT '',
   `super` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),

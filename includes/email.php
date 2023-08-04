@@ -3,8 +3,8 @@
 use PHPMailer\PHPMailer;
 
 function send_email($to, $subject, $message) {
-	$from     = read_setting('email_from', 'reports@ledger.local');
-	$fromname = read_setting('email_fromname', 'Ansible Ledger');
+	$from     = read_setting('email_from', 'ledger@ascender.local');
+	$fromname = read_setting('email_fromname', 'Ascender Ledger');
 
 	if (read_setting('disable_email', 0)) {
 		return true;
@@ -69,42 +69,49 @@ function process_queue_email($email) {
 	$subject  = $email['subject'];
 	$message  = $email['message'];
 
-	$mail = new PHPMailer\PHPMailer(true);
+	$server = read_setting('smtp_server', '');
 
-	try {
-		//$mail->SMTPDebug = 4;
-		$mail->isSMTP();
-		$mail->Host        = SMTP_SERVER;
-		$mail->SMTPAuth    = true;
-		$mail->Username    = SMTP_USER;
-		$mail->Password    = SMTP_PASSWORD;
-		$mail->SMTPSecure  = 'tls';
-		$mail->Port        = 587;
-		$mail->SMTPOptions = array(
-			'ssl' => array(
-				'verify_peer'       => false,
-				'verify_peer_name'  => false,
-				'allow_self_signed' => true
-			)
-		);
+	if ($server != '') {
+		$mail = new PHPMailer\PHPMailer(true);
+		try {
+			$mail->SMTPDebug = 4;
+			$mail->isSMTP();
+			$mail->Host        = $server;
+			$mail->SMTPAuth    = true;
+			$mail->Username    = read_setting('smtp_username', '');
+			$mail->Password    = secured_decrypt(read_setting('smtp_password', ''));
+			$mail->Port        = read_setting('smtp_port', 25);
+			if (read_setting('smtp_security', '') != '') {
+				$mail->SMTPSecure  = read_setting('smtp_security');
+			}
+			$mail->SMTPAutoTLS = true;
 
-		$mail->setFrom($from, $fromname);
-		$mail->addAddress($to);
-		$mail->addReplyTo($from, $fromname);
+			$mail->SMTPOptions = array(
+				'ssl' => array(
+					'verify_peer'       => false,
+					'verify_peer_name'  => false,
+					'allow_self_signed' => true
+				)
+			);
 
-		$mail->isHTML(true);
-		$mail->Subject = $subject;
-		$mail->Body    = $message;
-		$mail->AltBody = strip_tags(str_replace('<br>', "\n", $message));
+			$mail->setFrom($from, $fromname);
+			$mail->addAddress($to);
+			$mail->addReplyTo($from, $fromname);
 
-		$status = $mail->send();
-		log_email($to, $subject, $status);
-		db_execute_prepare('DELETE FROM `mail_queue` WHERE `id` = ?', array($email['id']));
-	} catch (Exception $e) {
-		// Need to create a log in the DB
-		$error = str_replace(' https://github.com/PHPMailer/PHPMailer/wiki/Troubleshooting', '', strip_tags($e->errorMessage())) . ' (Attempt ' . ($email['attempts'] + 1) . ')';
-		log_email($to, $subject, $error);
-		db_execute_prepare('UPDATE `mail_queue` SET `last_attempt` = ?, `status` = 1, `attempts` = ?, `error` = ? WHERE `id` = ?', array(time(), $email['attempts'] + 1, $error, $email['id']));
+			$mail->isHTML(true);
+			$mail->Subject = $subject;
+			$mail->Body    = $message;
+			$mail->AltBody = strip_tags(str_replace('<br>', "\n", $message));
+
+			$status = $mail->send();
+			log_email($to, $subject, $status);
+			db_execute_prepare('DELETE FROM `mail_queue` WHERE `id` = ?', array($email['id']));
+		} catch (Exception $e) {
+			// Need to create a log in the DB
+			$error = str_replace(' https://github.com/PHPMailer/PHPMailer/wiki/Troubleshooting', '', strip_tags($e->errorMessage())) . ' (Attempt ' . ($email['attempts'] + 1) . ')';
+			log_email($to, $subject, $error);
+			db_execute_prepare('UPDATE `mail_queue` SET `last_attempt` = ?, `status` = 1, `attempts` = ?, `error` = ? WHERE `id` = ?', array(time(), $email['attempts'] + 1, $error, $email['id']));
+		}
 	}
 }
 

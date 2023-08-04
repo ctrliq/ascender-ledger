@@ -5,7 +5,7 @@
  * @package    SQL
  * @author     Jimmy Conner <jimmy@sqmail.org>
  */
-error_reporting(E_ALL);
+//error_reporting(E_ALL);
 
 global $totalqueries;
 $totalqueries = 0;
@@ -17,12 +17,10 @@ if (file_exists('includes/config.php')) {
 	exit;
 }
 
-
 try {
 	$db = new \PDO("mysql:host=$sql_server;port=$port;dbname=$mydb;charset=utf8", $sql_user, $sql_pass);
 } catch(PDOException $e) {
 	echo "Could not connect to the database\n";
-print_r($e);
 	exit;
 }
 
@@ -33,17 +31,6 @@ if (!$db) {
 
 include_once('includes/db_upgrade.php');
 
-/**
- * Replaces specific characters in a string
- *
- * This function is used to strip out unwanted and potentially dangerous characters
- * before using them in a SQL query.  This is to help protect against SQL injection
- * attacks.
- * 
- * @param string $text 
- * 
- * @return string Stripped text
- */
 function sql_clean($text) {
 	$text = str_replace(array("%", "\\", '/', "'", '"', '|'), '', $text);
 	return $text;
@@ -55,23 +42,69 @@ function sql_clean_ans($text) {
 	return $text;
 }
 
-/**
- * Replaces specific characters in a string (for usernames)
- *
- * This function is used to strip out unwanted and potentially dangerous characters
- * before using them in a SQL query.  This is to help protect against SQL injection
- * attacks.  We use this function on usernames to properly escape the slash character
- * used between domain names and the username
- * 
- * @param string $text
- * @return string Stripped text
- */
-function sql_clean_username($text) {
-	$text = str_replace(array("\\"), "\\\\", $text);
-
-	$text = str_replace(array("%", '/', "'", '"', '|'), '', $text);
+function sql_clean_url($text) {
+	$text = htmlspecialchars($text);
+	$text = preg_replace("/[^a-zA-Z0-9\-_\.\/:]/", "", $text);
 	return $text;
 }
+
+function sql_clean_name($text) {
+	return preg_replace('/[^A-Za-z\- ]/', '', $text);
+}
+
+function sql_clean_username($text) {
+	return preg_replace('/[^A-Za-z0-9\.@\-\+]/', '', $text);
+}
+
+function sql_clean_email($text) {
+	return preg_replace('/[^A-Za-z0-9\.@\-\+]/', '', $text);
+}
+
+function sql_clean_emails($text) {
+	return preg_replace('/[^A-Za-z0-9\.@\-\+, ]/', '', $text);
+}
+
+function sql_clean_fact($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\.]/', '', $text);
+}
+
+function sql_clean_hostname($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\.]/', '', $text);
+}
+
+function sql_clean_limit($text) {
+	return preg_replace('/[^A-Za-z0-9_\-: \|\[\],]/', '', $text);
+}
+
+
+function sql_clean_playbook($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\.\/]/', '', $text);
+}
+
+function sql_clean_play($text) {
+	$text = htmlspecialchars($text);
+	$text = preg_replace("/[^a-zA-Z0-9 \-_\.,@\|\[\]]/", "", $text);
+	return $text;
+}
+
+function sql_clean_csearch($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\. ]/', '', $text);
+}
+
+function sql_clean_code($text) {
+	return preg_replace('/[^A-Za-z0-9]/', '', $text);
+}
+
+function sql_clean_setting($text) {
+	return preg_replace('/[^A-Za-z0-9_\-]/', '', $text);
+}
+
+function sql_clean_timestamp($text) {
+	return preg_replace('/[^A-Za-z0-9_\-: ]/', '', $text);
+}
+
+
+
 
 /**
  * Executes a SQL query, return last insert id
@@ -232,6 +265,7 @@ function db_fetch_cell_prepare($query, $cell, $data) {
  * @return string or false if failed
  */
 function read_setting($name, $default = false) {
+	$name = sql_clean_setting($name);
 	$value = db_fetch_cell_prepare('SELECT `value` FROM `settings` WHERE `setting` = ?', 'value', array($name));
 	if ($value === false) {
 		if ($default !== false) {
@@ -242,9 +276,6 @@ function read_setting($name, $default = false) {
 	return $value;
 }
 
-/*
-	We encrypt most user data in the database in reversable encyption, since we have to retreive it to login
-*/
 function secured_encrypt($data) {
 	$first_key = base64_decode(FIRSTKEY);
 	$second_key = base64_decode(SECONDKEY);

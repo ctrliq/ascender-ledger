@@ -23,7 +23,7 @@ if (isset($_SESSION['imp']) && $_SESSION['imp'] && $_SESSION['imp'] != '' && iss
 		unset($_SESSION['imp']);
 		$_SESSION['username'] = $user->username;
 	}
-	Header("Location: index.php?reverted=1\n\n");
+	Header("Location: /?reverted=1\n\n");
 	exit;
 }
 
@@ -40,6 +40,15 @@ if (isset($_SERVER['PHP_SELF']) && $_SERVER['PHP_SELF'] == '/login.php' && isset
 	auth_check();
 }
 
+if (isset($_SERVER['PHP_SELF']) && $_SERVER['PHP_SELF'] == '/logout.php' && isset($_SESSION['code'])) {
+	unset($_SESSION['auth']);
+	unset($_SESSION['username']);
+	unset($_SESSION['auth']);
+	unset($_SESSION['code']);
+	session_destroy();
+}
+
+
 if ($account['code'] != '' && $_SERVER['PHP_SELF'] != '/profile.php') {
 	Header("Location: /profile/\n\n");
 	exit;
@@ -55,7 +64,7 @@ include_once('includes/templates.php');
 function op_check() {
 	global $account;
 	if ($account['super'] == 0) {
-		Header("Location: /index.php\n\n");
+		Header("Location: /\n\n");
 		exit;	
 	}
 	return true;
@@ -77,19 +86,19 @@ function auth_check() {
 		return true;
 	}
 	$_SESSION['auth'] = 0;
-	if (isset($_GET['code']) && sql_clean_ans($_GET['code']) != '') {
-		$code = sql_clean_ans($_GET['code']);
+	if (isset($_GET['code']) && sql_clean_code($_GET['code']) != '') {
+		$code = sql_clean_code($_GET['code']);
 		$user = new User();
 		$account = $user->retrieve_by_code($code);
 		if ($user->enabled) {
 			$_SESSION['auth'] = TRUE;	
 			$_SESSION['username'] = $account['username'];
-			$_SESSIOn['code'] == $code;
+			$_SESSION['code'] = $code;
 			return true;
 		} else {
 			sleep(5);
 			$account = null;
-			Header("Location: /index.php\n\n");
+			Header("Location: /\n\n");
 			exit;
 		}
 	}
@@ -100,7 +109,7 @@ function auth_check() {
 
 	if (!isset($_POST['username']) || !isset($_POST['password'])) {
 		$url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
-		$_SESSION['referrer'] = $url;
+		$_SESSION['referrer'] = sql_clean_url($url);
 		showloginbox(0);
 		return false;
 	}
@@ -111,6 +120,8 @@ function auth_check() {
 		$_SESSION['auth'] = TRUE;	
 		$_SESSION['username'] = $username;
 		$_SESSION['password'] = $_POST['password'];
+		$_SESSION['code'] = '';
+
 		$logged = true;
 		//db_execute_prepare('UPDATE users SET lastlogin = ? WHERE username = ?', array(time(), $username));
 		//$ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
@@ -137,7 +148,7 @@ function auth_check() {
 }
 
 function check_user_password($username, $pass) {
-	$username  = strtolower($username);
+	$username  = sql_clean_username(strtolower($username));
 	$user = new User();
 	$account = $user->retrieve_by_username($username);
 	if ($user->id && $user->enabled) {
@@ -150,6 +161,6 @@ function check_user_password($username, $pass) {
 }
 
 function showloginbox($error) {
-	Header("Location: /login.php\n\n");
+	Header("Location: /login/\n\n");
 	exit;
 }

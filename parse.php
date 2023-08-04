@@ -45,7 +45,8 @@ if (isset($d['logger_name'])) {
 						if ($h) {
 							$s = 'INSERT INTO `facts` (`host`, `fact`, `data`, `type`, `time`) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `data` = ?, `time` = ?';
 							foreach ($fs as $k => $v) {
-								db_execute_prepare($s, array($h, $k, $v, $t, $time, $v, $time));
+								$v = str_replace(array("'", '"'), '', $v);
+								db_execute_prepare($s, array($h, sql_clean_fact($k), $v, sql_clean_fact($t), $time, $v, $time));
 							}
 						}
 					}
@@ -96,7 +97,7 @@ if (isset($d['logger_name'])) {
 					$role = (isset($d['role']) ? $d['role'] : '');
 					$res = Yaml::dumper($d['event_data']['res']);
 					db_execute_prepare('INSERT INTO `changes` (`server`, `host`, `time`, `job`, `playbook`, `play`, `role`, `task`, `task_action`, `res`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-						array($server['name'], $h, time(), $d['job'], $d['playbook'], $d['play'], $role, $d['task'], $d['event_data']['task_action'], $res));
+						array($server['name'], $h, $time, intval($d['job']), sql_clean_playbook($d['playbook']), sql_clean_play($d['play']), sql_clean_playbook($role), sql_clean_play($d['task']), sql_clean_play($d['event_data']['task_action']), $res));
 				}
 			}
 			break;
@@ -116,10 +117,10 @@ if (isset($d['logger_name'])) {
 
 				db_execute_prepare('INSERT INTO `jobs` (`timestamp`, `job`, `job_template_id`, `host`, `name`, `job_type`, `inventory`, `project`, `scm_branch`, `execution_environment`, `actor`, `limit`) VALUES
 									(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
-									array($d['@timestamp'], $d['changes']['id'], $jtid,
-										  $d['host'], $d['changes']['name'], $d['changes']['job_type'], $d['changes']['inventory'],
-										  $d['changes']['project'], $d['changes']['scm_branch'], (isset($d['changes']['execution_environment']) ? $d['changes']['execution_environment'] : ''), 
-										  $d['actor'], $d['changes']['limit']
+									array(sql_clean_timestamp($d['@timestamp']), intval($d['changes']['id']), intval($jtid),
+										  sql_clean_hostname($d['host']), sql_clean_play($d['changes']['name']), sql_clean_name($d['changes']['job_type']), sql_clean_name($d['changes']['inventory']),
+										  sql_clean_name($d['changes']['project']), sql_clean_name($d['changes']['scm_branch']), (isset($d['changes']['execution_environment']) ? sql_clean_name($d['changes']['execution_environment']) : ''), 
+										  sql_clean_name($d['actor']), sql_clean_limit($d['changes']['limit'])
 										));
 			}
 			break;

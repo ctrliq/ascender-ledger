@@ -1,6 +1,10 @@
 <?php
 include_once('includes/global.php');
 
+if (!isset($account['id']) || !intval($account['id'])) {
+	exit;
+}
+
 $error = "";
 $user = new User($account['id']);
 $name = $user->name;
@@ -14,7 +18,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'save') {
 		}
 	}
 
-	$cpass = $_POST['cpass'];
+	$cpass = (isset($_POST['cpass']) ? $_POST['cpass'] : '');
 	if ($cpass != '' || $user->code != '') {
 		if (hash('sha256', $cpass) == $user->password || $user->code != '') {
 			$newpass = $_POST['newpass'];

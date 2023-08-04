@@ -132,6 +132,7 @@ function build_filter($filters) {
 }
 
 function build_report ($id) {
+	$id = intval($id);
 	$report = new Report($id);
 	if ($report->id) {
 		$w = build_filter($report->filters);

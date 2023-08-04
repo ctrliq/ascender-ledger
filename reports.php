@@ -6,7 +6,7 @@ $users = reindex_arr_by_id_col(db_fetch_assocs('SELECT `id`, `name` FROM `users`
 if (isset($_REQUEST['action'])) {
 	if (isset($_REQUEST['report']) && $_REQUEST['report'] == intval($_REQUEST['report']) && $_REQUEST['report']) {
 		$report = new Report(intval($_REQUEST['report']));
-		if ($report->id) {
+		if ($report->id && isset($_REQUEST['action'])) {
 			switch ($_REQUEST['action']) {
 				case 'delete':
 					if ($report->owner == $account['id'] || $account['super']) {
@@ -41,7 +41,7 @@ if (isset($_REQUEST['action'])) {
 					exit;
 				case 'savename':
 					if ($report->owner == $account['id'] || $account['super']) {
-						$name = sql_clean_ans($_POST['name']);
+						$name = $_POST['name'];
 						$report->set_name($name);
 						$report->save();
 					}
@@ -86,7 +86,7 @@ if (isset($_REQUEST['action'])) {
 					exit;
 				case 'addcolumn':
 					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
-						$display = sql_clean_ans($_POST['display']);
+						$display = $report->clean_column($_POST['display']);
 						if ($display != '') {
 							$facts = (isset($_POST['facts']) ? $_POST['facts'] : array());
 							$report->add_column($display, $facts);
@@ -115,7 +115,7 @@ if (isset($_REQUEST['action'])) {
 					} else {
 						$sid = 0;
 					}
-					$subject = sql_clean_ans($_POST['subject']);
+					$subject = sql_clean_username($_POST['subject']);
 					$start = strtotime($_POST['start']);
 					$enabled = (isset($_POST['enabled']) ? 1 : 0);
 					$repeat = (isset($reoccur[$_POST['repeat']]) ? intval($_POST['repeat']) : 86400);
@@ -123,7 +123,7 @@ if (isset($_REQUEST['action'])) {
 					while ($next < time()) {
 						$next += $repeat;
 					}
-					$emails = sql_clean_ans($_POST['emails']);
+					$emails = sql_clean_emails($_POST['emails']);
 					if ($sid == 0) {
 						db_execute_prepare('INSERT INTO `reports_schedules` (`report`, `start`, `enabled`, `repeat`, `next`, `emails`, `owner`, `subject`)
 												VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
@@ -185,6 +185,7 @@ if (isset($_REQUEST['action'])) {
 						echo $twig->render('report_edit.html', array_merge($twigarr, array('report' => $report, 'facts' => $facts, 'filters' => $report->filters, 
 								'columns' => $report->columns, 'compares' => $compares)));
 					}
+					Header("Location: /reports/\n\n");
 					exit;
 			}
 		} else {
@@ -198,6 +199,8 @@ if (isset($_REQUEST['action'])) {
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 			}
+			Header("Location: /reports/\n\n");
+			exit;
 		}
 	}
 }

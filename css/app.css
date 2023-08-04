@@ -6,7 +6,6 @@ body {
   background-color: rgba(21, 21, 21, 1) !important;
 }
 
-
 .navbar-brand {
   padding-top: .75rem;
   padding-bottom: .75rem;
@@ -120,5 +119,17 @@ body {
 
 .nav-link.active {
     font-weight: bold;
+}
+
+.tab-pane.active {
+  background-color: white !important;
+}
+
+#nav-tab.nav.nav-tabs .nav-link {
+  background-color: #aaa !important;
+}
+
+#nav-tab.nav.nav-tabs .nav-link.active {
+  background-color: #555 !important;
 }
 

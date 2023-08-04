@@ -5,10 +5,10 @@ include_once('includes/global.php');
 if (isset($_POST['email'])) {
 	sleep(1);
 	if (filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-	       $email = str_replace("\n", '', sql_clean_ans($_POST['email']));
+		$email = sql_clean_email($_POST['email']);
 		$user = db_fetch_assoc_prepare('SELECT * FROM `users` WHERE `email` = ?', array($email));
 		if (isset($user['id'])) {
-			$code     = md5(md5(mt_rand(100, 10000)));
+			$code     = md5(md5(mt_rand(100, 1000000)));
 
 			db_execute_prepare('UPDATE `users` SET `code` = ? WHERE `email` = ?', array($code, $email));
 
@@ -19,7 +19,7 @@ if (isset($_POST['email'])) {
 			send_email ($email, 'Request Tracker - Password Reset', $body);
 		}
 	}
-	Header("Location: forgot_password.php?recovered=1\n\n");
+	Header("Location: /forgot_password/?recovered=1\n\n");
 	exit;
 }
 

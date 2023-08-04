@@ -12,6 +12,7 @@
 						<th></th>
 						<th>Name</th>
 						<th>IP Address</th>
+						<th>URL</th>
 						<th>Trusted</th>
 						<th></th>
 					</tr>
@@ -19,15 +20,17 @@
 				<tbody>
 {% for u in servers %}
 					<tr>
-						<td width="30">
+						<td width="80">
+                            <a href='/servers/edit/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-edit"></i></a>
 	{% if u.trusted %}
                             <a href='/servers/trust/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-lock"></i></a>
 	{% else %}
-                            <a href='/servers/trust/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-lock-open"></i></a>
+                            <a href='/servers/trust/{{ u['id'] }}' class="btn btn-warning btn-xs"  type="button" name=edit id=edit><i class="fas fa-lock-open"></i></a>
 	{% endif %}
                         </td>
 						<td nowrap>{{ u.name }}</td>
 						<td nowrap>{{ u.ip }}</td>
+						<td nowrap>{{ u.url }}</td>
 						<td>{% if u.trusted %}Yes{% else %}No{% endif %}</td>
 						<td width="30">
                             <a href='/servers/delete/{{ u['id'] }}' class="btn btn-danger btn-xs dltlink"  type="button" name=delete id=delete><i class="fa fa-trash"></i></a>

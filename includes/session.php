@@ -32,7 +32,11 @@ class SessionSaveHandler {
 		$s = db_fetch_assoc_prepare('SELECT `data` FROM `sessions` WHERE `id` = ?', array($id));
 
 		if ($s) {
-			return secured_decrypt($s['data']);
+			try {
+				return secured_decrypt($s['data']);
+			} catch (Exception $e) {
+				return '';
+			}
 		}
 
 		return '';
@@ -41,7 +45,12 @@ class SessionSaveHandler {
 	public function write($id, $data) {
 		global $account;
 		$a = (isset($account['id']) ? $account['id'] : 0);
-		return db_execute_prepare('REPlACE INTO `sessions` (`id`, `access`, `user`, `data`) VALUES (?, ?, ?, ?)', array($id, time(), $a, secured_encrypt($data)));
+		try {
+			$data = secured_encrypt($data);
+		} catch (Exception $e) {
+			$data = '';
+		}
+		return db_execute_prepare('REPLACE INTO `sessions` (`id`, `access`, `user`, `data`) VALUES (?, ?, ?, ?)', array($id, time(), $a, $data));
 	}
 
 	public function destroy($id) {

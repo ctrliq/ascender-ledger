@@ -9,7 +9,8 @@ if( !isset($_SESSION)) {
 unset($_SESSION['auth']);
 unset($_SESSION['username']);
 unset($_SESSION['auth']);
-session_destroy();
+unset($_SESSION['code']);
+@session_destroy();
 
 Header("Location: /\n\n");
 exit;

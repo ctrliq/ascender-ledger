@@ -2,6 +2,10 @@
 
 include_once('includes/global.php');
 
+if (!$account['view_facts'] && !$account['super']) {
+    header("Location: /\n\n");
+    exit;
+}
 
 $hosts = reindex_arr_by_id(db_fetch_assocs("SELECT * FROM `hosts` ORDER BY `hostname`"));
 $ufacts = reindex_col(db_fetch_assocs("SELECT DISTINCT `fact` FROM `facts` ORDER BY `fact` ASC"), 'fact');
@@ -32,7 +36,7 @@ if (isset($_GET['host'])) {
 
 if (isset($_GET['fact'])) {
 	if (in_array($_GET['fact'], $ufacts)) {
-		$_SESSION['facts_fact'] = $_GET['fact'];
+		$_SESSION['facts_fact'] = sql_clean_fact($_GET['fact']);
 	} else {
 		unset($_SESSION['facts_fact']);
 	}
@@ -42,7 +46,7 @@ if (isset($_GET['fact'])) {
 
 if (isset($_GET['type'])) {
 	if (in_array($_GET['type'], $types)) {
-		$_SESSION['facts_type'] = $_GET['type'];
+		$_SESSION['facts_type'] = sql_clean_fact($_GET['type']);
 	} else {
 		unset($_SESSION['facts_type']);
 	}
@@ -52,19 +56,18 @@ if (isset($_GET['type'])) {
 
 // Create filters
 if (isset($_SESSION['facts_host']) && $_SESSION['facts_host'] != '') {
-	$filters[] = " `host` = " . $_SESSION['facts_host'];
-	$host = $_SESSION['facts_host'];
+	$filters[] = " `host` = " . intval($_SESSION['facts_host']);
+	$host = intval($_SESSION['facts_host']);
 }
 
 if (isset($_SESSION['facts_fact']) && $_SESSION['facts_fact'] != '') {
-	$filters[] = " `fact` = '" . $_SESSION['facts_fact'] . "'";
-	$fact = $_SESSION['facts_fact'];
+	$filters[] = " `fact` = '" . sql_clean_fact($_SESSION['facts_fact']) . "'";
+	$fact = sql_clean_fact($_SESSION['facts_fact']);
 }
 
-
 if (isset($_SESSION['facts_type']) && $_SESSION['facts_type'] != '') {
-	$filters[] = " `type` = '" . $_SESSION['facts_type'] . "'";
-	$type = $_SESSION['facts_type'];
+	$filters[] = " `type` = '" . sql_clean_fact($_SESSION['facts_type']) . "'";
+	$type = sql_clean_fact($_SESSION['facts_type']);
 }
 
 $h = array();

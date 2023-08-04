@@ -33,23 +33,23 @@ class Report {
 	}
 
 	function set_owner($owner) {
-		$this->owner = $owner;
+		$this->owner = intval($owner);
 	}
 
 	function set_name($name) {
-		$this->name = sql_clean_ans($name);
+		$this->name = $this->clean_name($name);
 	}
 
 	function set_created($created) {
-		$this->created = $created;
-	}
-
-	function set_filters($password) {
-		$this->filters = $filters;
+		$this->created = intval($created);
 	}
 
 	function set_columns($columns) {
 		$this->columns = $columns;
+	}
+
+	function set_filters($filters) {
+		$this->filters = $filters;
 	}
 
 	function set_sortc($sortc) {
@@ -79,7 +79,9 @@ class Report {
 	}
 
 	function add_filter($fact, $compare, $value) {
-		$value = sql_clean_ans($value);
+		global $compares;
+
+		$value = $this->clean_filter($value);
 
 		$allfacts = db_fetch_assocs('SELECT DISTINCT `fact` FROM facts');
 		$afs = array();
@@ -88,6 +90,10 @@ class Report {
 		}
 
 		if (!in_array($fact, $afs)) {
+			return false;
+		}
+
+		if (!isset($compares[$compare])) {
 			return false;
 		}
 
@@ -101,7 +107,7 @@ class Report {
 	}
 
 	function add_column($display, $facts) {
-		$display = sql_clean_ans($display);
+		$display = $this->clean_column($display);
 		$allfacts = db_fetch_assocs('SELECT DISTINCT `fact` FROM facts');
 		$afs = array();
 		foreach ($allfacts as $f) {
@@ -176,21 +182,32 @@ class Report {
 	}
 
 	function remove_user($user) {
-		if ($this->id) {
+		$user = intval($user);
+		if ($this->id && $user > 0) {
 			db_execute_prepare('DELETE FROM `reports_perms` WHERE `report` = ? AND `user` = ?', array($this->id, $user));
 		}
 	}
 
 	function add_user($user, $role) {
+		$user = intval($user);
 		$roles = array('owner', 'edit', 'view');
-		if ($this->id && intval($user) && in_array($role, $roles)) {
-			db_execute_prepare('INSERT INTO `reports_perms` (`report`, `user`, `role`) VALUES (?, ?, ?)', array($this->id, intval($user), $role));
+		if ($this->id && $user > 0 && in_array($role, $roles)) {
+			db_execute_prepare('INSERT INTO `reports_perms` (`report`, `user`, `role`) VALUES (?, ?, ?)', array($this->id, $user, $role));
 		}
 	}
 
 	function clean_name($text) {
-		return preg_replace('/[^A-Za-z0-9 ]/', '', $text);
+		return preg_replace('/[^A-Za-z0-9 \-_\.:]/', '', $text);
 	}
+
+	function clean_filter($text) {
+		return preg_replace('/[^A-Za-z0-9 \-_\.:]/', '', $text);
+	}
+
+	function clean_column($text) {
+		return preg_replace('/[^A-Za-z0-9\-_\.:]/', '', $text);
+	}
+
 
 	function delete() {
 		if ($role == "owner" || $role == "admin") {

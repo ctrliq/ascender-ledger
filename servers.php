@@ -7,31 +7,47 @@ if (!$account['super']) {
     exit;
 }
 
-if (isset($_GET['action']) && $_GET['action'] == 'trust' && isset($_GET['id'])) {
+if (isset($_GET['action']) && isset($_GET['id']) && intval($_GET['id']) == $_GET['id']) {
+	switch ($_GET['action']) {
+		case 'trust':
+			$id = intval($_GET['id']);
+			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
+			if (isset($server['id'])) {
+				$trust = ($server['trusted'] ? 0 : 1);
+				db_execute_prepare('UPDATE `servers` SET `trusted` = ? WHERE `id` = ?', array($trust, $id));
+			}
+			break;
 
-	$id = intval($_GET['id']);
-	$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
-	if (isset($server['id'])) {
-		$trust = ($server['trusted'] ? 0 : 1);
-		db_execute_prepare('UPDATE `servers` SET `trusted` = ? WHERE `id` = ?', array($trust, $id));
+		case 'edit':
+			$id = intval($_GET['id']);
+			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
+			if (isset($server['id'])) {
+				echo $twig->render('server_edit.html', array_merge($twigarr, array('server' => $server)));
+				exit;
+			}
+			break;
+
+		case 'save':
+			$id = intval($_GET['id']);
+			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
+			if (isset($server['id'])) {
+				$url = sql_clean_url($_POST['url']);
+				db_execute_prepare('UPDATE `servers` SET `url` = ? WHERE `id` = ?', array($url, $id));
+			}
+			break;
+		case 'delete':
+			$id = intval($_GET['id']);
+			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
+			if (isset($server['id'])) {
+				db_execute_prepare('DELETE FROM `servers` WHERE `id` = ?', array($id));
+			}
+			break;
+
 	}
-
 	Header("Location: /servers/\n\n");
 	exit;
 }
 
-
-if (isset($_GET['action']) && $_GET['action'] == 'delete') {
-
-	$id = intval($_GET['id']);
-	$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
-	if (isset($server['id'])) {
-		db_execute_prepare('DELETE FROM `servers` WHERE `id` = ?', array($id));
-	}
-
-	Header("Location: /servers/\n\n");
-	exit;
-}
 
 $msg = '';
 if (isset($_GET['msg'])) {

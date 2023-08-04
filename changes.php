@@ -1,6 +1,11 @@
 <?php
 include_once('includes/global.php');
 
+if (!$account['view_changes'] && !$account['super']) {
+    header("Location: /\n\n");
+    exit;
+}
+
 $hosts = reindex_arr_by_id(db_fetch_assocs("SELECT * FROM `hosts` ORDER BY `hostname`"));
 $h = array();
 foreach ($hosts as $host) {
@@ -11,12 +16,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'view' && $_GET['change'] == in
 	$change = db_fetch_assoc_prepare('SELECT * FROM `changes` WHERE `id` = ?', array(intval($_GET['change'])));
 	if (isset($change['id']) && $change['id']) {
 #		$change['res'] = unserialize(base64_decode($change['res']));
+		$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($change['host']));
 		$job = db_fetch_assoc_prepare('SELECT * FROM `jobs` WHERE `job` = ? AND `host` = ?', array($change['job'], $change['server']));
 		//$res = parse_res($change['task_action'], $change['res']);
 		$res = $change['res'];
-		echo $twig->render('change.html', array_merge($twigarr, array('change' => $change, 'hosts' => $h, 'res' => $res, 'job' => $job)));
+		echo $twig->render('change.html', array_merge($twigarr, array('change' => $change, 'server' => $server, 'hosts' => $h, 'res' => $res, 'job' => $job)));
 		exit;
-
 	}
 }
 
@@ -46,7 +51,7 @@ if (isset($_GET['host'])) {
 
 if (isset($_GET['playbook'])) {
 	if (in_array($_GET['playbook'], $playbooks)) {
-		$_SESSION['changes_playbook'] = $_GET['playbook'];
+		$_SESSION['changes_playbook'] = sql_clean_playbook($_GET['playbook']);
 	} else {
 		unset($_SESSION['changes_playbook']);
 	}
@@ -58,7 +63,7 @@ if (isset($_GET['csearch'])) {
 	if ($_GET['csearch'] == '') {
 		unset($_SESSION['changes_csearch']);
 	} else {
-		$_SESSION['changes_csearch'] = sql_clean_ans($_GET['csearch']);
+		$_SESSION['changes_csearch'] = sql_clean_csearch($_GET['csearch']);
 	}
 	header("Location: /changes/");
 	exit;
@@ -66,17 +71,17 @@ if (isset($_GET['csearch'])) {
 
 // Create filters
 if (isset($_SESSION['changes_host']) && $_SESSION['changes_host'] != '') {
-	$filters[] = " `host` = " . $_SESSION['changes_host'];
+	$filters[] = " `host` = " . intval($_SESSION['changes_host']);
 	$host = $_SESSION['changes_host'];
 }
 
 if (isset($_SESSION['changes_playbook']) && $_SESSION['changes_playbook'] != '') {
-	$filters[] = " `playbook` = '" . $_SESSION['changes_playbook'] . "'";
+	$filters[] = " `playbook` = '" . sql_clean_playbook($_SESSION['changes_playbook']) . "'";
 	$playbook = $_SESSION['changes_playbook'];
 }
 
 if (isset($_SESSION['changes_csearch']) && $_SESSION['changes_csearch'] != '') {
-	$s = $_SESSION['changes_csearch'];
+	$s = sql_clean_csearch($_SESSION['changes_csearch']);
 	$filters[] = " `res` LIKE '%$s%' OR `task_action` LIKE '%$s%' OR `task` LIKE '%$s%' OR `role` LIKE '%$s%' OR `play` LIKE '%$s%'";
 	$csearch = $_SESSION['changes_csearch'];
 }
@@ -89,11 +94,7 @@ if (!empty($filters)) {
 
 $changes = db_fetch_assocs("SELECT * FROM `changes` $filters ORDER BY `time` DESC LIMIT 0,100");
 
-
-
-
 echo $twig->render('changes.html', array_merge($twigarr, array('changes' => $changes, 'hosts' => $h, 'playbooks' => $playbooks, 'host' => $host, 'playbook' => $playbook, 'csearch' => $csearch)));
-
 
 
 

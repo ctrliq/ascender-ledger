@@ -7,41 +7,62 @@
 			<form method="post" action=/users/save/{{ user.id }} id=saform class="form-horizontal" enctype="multipart/form-data">
 				<input type=hidden name=action value=save>
 				<div class="mb-3">
-                    <label for="name" class="col-sm-3 form-label">Name</label>
+	                    <label for="name" class="col-sm-3 form-label">Name</label>
 					<div class="col">
-                        <input type="text" class="form-control" name=name id=name value='{{ user.name }}'>
-                    </div>
+     	                   <input type="text" class="form-control" name=name id=name value='{{ user.name }}'>
+          	          </div>
 				</div>
 				<div class="mb-3">
-                    <label for="username" class="col-sm-3 form-label">Username</label>
+               	     <label for="username" class="col-sm-3 form-label">Username</label>
 					<div class="col">
-                        <input type="text" class="form-control" name=username id=username value='{{ user.username }}'>
-                    </div>
+                    	    <input type="text" class="form-control" name=username id=username value='{{ user.username }}'>
+	                    </div>
 				</div>
 				<div class="mb-3">
-                    <label for="email" class="col-sm-3 form-label">Email</label>
+     	               <label for="email" class="col-sm-3 form-label">Email</label>
 					<div class="col">
-                        <input type="text" class="form-control" name=email id=email value='{{ user.email }}'>
-                    </div>
+               	         <input type="text" class="form-control" name=email id=email value='{{ user.email }}'>
+                    	</div>
 				</div>
 				<div class="mb-3">
-                    <label for="type" class="col-sm-3 form-label">Enabled</label>
+	                    <label for="enabled" class="col-sm-3 form-label">Enabled</label>
 					<div class="col">
-                        <select class="form-control" name=enabled id=enabled>
+						<select class="form-control" name=enabled id=enabled>
 							<option value="1">Yes</option>
 							<option value="0"{% if not user.enabled %} selected{% endif %}>No</option>
 						</select>
-                    </div>
+     	               </div>
 				</div>
+
 				<div class="mb-3">
-                    <label for="type" class="col-sm-3 form-label">Type</label>
+	                    <label for="type" class="col-sm-3 form-label">Type</label>
 					<div class="col">
-                        <select class="form-control" name=super id=super>
+						<select class="form-control" name=super id=super>
 							<option value="0">Standard</option>
 							<option value="1"{% if user.super %} selected{% endif %}>Admin</option>
 						</select>
-                    </div>
+	                    </div>
 				</div>
+				<div class="mb-3">
+	                    <label for="view_changes" class="col-sm-3 form-label">View Changes</label>
+					<div class="col">
+						<select class="form-control" name=view_changes id=view_changes>
+							<option value="1">Yes</option>
+							<option value="0"{% if not user.view_changes %} selected{% endif %}>No</option>
+						</select>
+     	               </div>
+				</div>
+
+				<div class="mb-3">
+	                    <label for="view_facts" class="col-sm-3 form-label">View Facts</label>
+					<div class="col">
+						<select class="form-control" name=view_facts id=view_facts>
+							<option value="1">Yes</option>
+							<option value="0"{% if not user.view_facts %} selected{% endif %}>No</option>
+						</select>
+     	               </div>
+				</div>
+
 {% if account.code %}
 				<div class="mb-3">
                     <label class="col-sm-3 form-label"></label>

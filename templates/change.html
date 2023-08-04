@@ -31,7 +31,7 @@
 						{% endif %}
 						<tr><td>Host</td><td>{{ hosts[change.host] }}</td></tr>
 						{% if job.name %}
-						<tr><td>Job Template</td><td><a href='https://{{ job.host }}/#/jobs/playbook/{{ change.job }}' target=_new{{ change.job }}>{{ job.name }}</a></td></tr>
+						<tr><td>Job Template</td><td><a href='{% if server.url %}{{ server.url }}{% else %}https://{{ job.host }}{% endif %}/#/jobs/playbook/{{ change.job }}' target=_new{{ change.job }}>{{ job.name }}</a></td></tr>
 						{% endif %}
 						{% if job.execution_environment %}
 						<tr><td>Execution Environment</td><td>{{ (job.execution_environment | split('-'))[0] }}</td></tr>
