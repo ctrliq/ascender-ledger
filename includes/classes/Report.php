@@ -210,7 +210,7 @@ class Report {
 
 
 	function delete() {
-		if ($role == "owner" || $role == "admin") {
+		if ($this->role == "owner" || $this->role == "admin") {
 			db_execute_prepare('DELETE FROM `reports_perms` WHERE `report` = ?', array($this->id));
 			db_execute_prepare('DELETE FROM `reports` WHERE `id` = ?', array($this->id));
 			return true;
