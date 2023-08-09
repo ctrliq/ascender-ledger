@@ -32,6 +32,9 @@ if (isset($_GET['action']) && isset($_GET['id']) && intval($_GET['id']) == $_GET
 			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
 			if (isset($server['id'])) {
 				$url = sql_clean_url($_POST['url']);
+				if ($url != '' && $url[-1] == '/') {
+					$url = sql_clean_url(substr($url, 0, -1));
+				}
 				db_execute_prepare('UPDATE `servers` SET `url` = ? WHERE `id` = ?', array($url, $id));
 			}
 			break;
