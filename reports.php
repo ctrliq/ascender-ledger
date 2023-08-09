@@ -30,7 +30,7 @@ if (isset($_REQUEST['action'])) {
 					Header("Location: /reports/perms/" . $report->id . "\n\n");
 					exit;
 				case 'savesort':
-					if ($report->owner == $account['id'] || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$sortc = intval($_POST['sortc']);
 						$sortd = $_POST['sortd'];
 						$report->set_sortc($sortc);
@@ -40,7 +40,7 @@ if (isset($_REQUEST['action'])) {
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'savename':
-					if ($report->owner == $account['id'] || $account['super']) {
+					if ($report->owner == $account['id']  || $report->role == 'edit'|| $account['super']) {
 						$name = $_POST['name'];
 						$report->set_name($name);
 						$report->save();
@@ -48,14 +48,14 @@ if (isset($_REQUEST['action'])) {
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'deletefilter':
-					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$filter = intval($_GET['filter']);
 						$report->remove_filter($filter);
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'addfilter':
-					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$value = $_POST['value'];
 						$compare = $_POST['compare'];
 						$fact = $_POST['fact'];
@@ -64,28 +64,28 @@ if (isset($_REQUEST['action'])) {
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'moveup':
-					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$fact = intval($_GET['fact']);
 						$report->move_column_up($fact);
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'movedown':
-					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$fact = intval($_GET['fact']);
 						$report->move_column_down($fact);
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'deletefact':
-					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$fact = intval($_GET['fact']);
 						$report->remove_column($fact);
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'addcolumn':
-					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$display = $report->clean_column($_POST['display']);
 						if ($display != '') {
 							$facts = (isset($_POST['facts']) ? $_POST['facts'] : array());
@@ -176,7 +176,7 @@ if (isset($_REQUEST['action'])) {
 					echo $twig->render('report.html', array_merge($twigarr, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
 					exit;
 				case 'edit':
-					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$allfacts = db_fetch_assocs('SELECT DISTINCT `fact` FROM facts');
 						$facts = array();
 						foreach ($allfacts as $f) {
@@ -184,6 +184,7 @@ if (isset($_REQUEST['action'])) {
 						}
 						echo $twig->render('report_edit.html', array_merge($twigarr, array('report' => $report, 'facts' => $facts, 'filters' => $report->filters, 
 								'columns' => $report->columns, 'compares' => $compares)));
+						exit;
 					}
 					Header("Location: /reports/\n\n");
 					exit;

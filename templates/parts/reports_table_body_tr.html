@@ -3,7 +3,7 @@
 		{% if r.role == "owner" or r.role == "admin" or r.role == "edit" %}
 			<a href="/reports/edit/{{ r['id'] }}" class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-edit"></i></a>
 		{% endif %}
-		{% if r.role == "owner" or r.role == "admin" or r.role == "edit" %}
+		{% if r.role == "owner" or r.role == "admin" %}
 			<a href="/reports/perms/{{ r['id'] }}" class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-users"></i></a>
 		{% endif %}
 		{% if r.role == "owner" or r.role == "admin" or r.role == "edit" %}
