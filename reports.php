@@ -166,7 +166,7 @@ if (isset($_REQUEST['action'])) {
 					}
 					exit;
 				case 'schedulenew':
-					if ($report->owner == $account['id'] || $report->role == 'editor' || $account['super']) {
+					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
 						$schedule = array('id' => 0, 'subject' => 'New Report', 'enabled' => 1, 'start' => time(), 'repeat' => 86400, 'emails' => $account['email']);
 						echo $twig->render('report_schedule_edit.html', array_merge($twigarr, array('report' => $report, 'schedule' => $schedule, 'reoccur' => $reoccur, 'users' => $users)));
 					}
