@@ -189,20 +189,20 @@ if (isset($_REQUEST['action'])) {
 					Header("Location: /reports/\n\n");
 					exit;
 			}
-		} else {
-			switch ($_REQUEST['action']) {
-				case 'new':
-					$report = new Report();
-					$report->set_owner($account['id']);
-					$report->set_created(time());
-					$report->set_name('New Report - ' . $account['name']);
-					$report->save();
-					Header("Location: /reports/edit/" . $report->id . "\n\n");
-					exit;
-			}
-			Header("Location: /reports/\n\n");
-			exit;
 		}
+	} else {
+		switch ($_REQUEST['action']) {
+			case 'new':
+				$report = new Report();
+				$report->set_owner($account['id']);
+				$report->set_created(time());
+				$report->set_name('New Report - ' . $account['name']);
+				$report->save();
+				Header("Location: /reports/edit/" . $report->id . "\n\n");
+				exit;
+		}
+		Header("Location: /reports/\n\n");
+		exit;
 	}
 }
 
