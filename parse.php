@@ -94,7 +94,7 @@ if (isset($d['logger_name'])) {
 
 				$h = check_host($d['host_name']);
 				if ($h) {
-					$role = (isset($d['role']) ? $d['role'] : '');
+					$role = (isset($d['role']) ? ($d['role'] != '/runner/project' ? $d['role'] : '') : '');
 					$res = Yaml::dumper($d['event_data']['res']);
 					db_execute_prepare('INSERT INTO `changes` (`server`, `host`, `time`, `job`, `playbook`, `play`, `role`, `task`, `task_action`, `res`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
 						array($server['name'], $h, $time, intval($d['job']), sql_clean_playbook($d['playbook']), sql_clean_play($d['play']), sql_clean_playbook($role), sql_clean_play($d['task']), sql_clean_play($d['event_data']['task_action']), $res));
