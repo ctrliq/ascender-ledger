@@ -13,7 +13,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr><td>Date</td><td>{{ (change.time - 21600)|date("m/d/Y G:i")  }}</td></tr>
+						<tr><td>Date</td><td>{{ (change.time - 21600)|date("m/d/Y H:i")  }}</td></tr>
 						{% if job.actor %}
 						<tr><td>User</td><td>{{ job.actor }}</td></tr>
 						{% endif %}

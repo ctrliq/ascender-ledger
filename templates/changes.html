@@ -58,7 +58,7 @@
 	{% for r in changes %}
 					<tr>
 						<td width=30><a href='/changes/view/{{ r['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-eye"></i></a></td>
-						<td nowrap>{{ (r['time'] - 21600)|date("m/d/Y G:i") }}</td>
+						<td nowrap>{{ (r['time'] - 21600)|date("m/d/Y H:i") }}</td>
 						<td nowrap>{{ hosts[r['host']] }}</td>
 						<td>{{ r['playbook'] }}</td>
 						<td>{{ r['role'] }}</td>
