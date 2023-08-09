@@ -120,7 +120,7 @@ if (isset($d['logger_name'])) {
 									array(sql_clean_timestamp($d['@timestamp']), intval($d['changes']['id']), intval($jtid),
 										  sql_clean_hostname($d['host']), sql_clean_play($d['changes']['name']), sql_clean_name($d['changes']['job_type']), sql_clean_name($d['changes']['inventory']),
 										  sql_clean_name($d['changes']['project']), sql_clean_name($d['changes']['scm_branch']), (isset($d['changes']['execution_environment']) ? sql_clean_name($d['changes']['execution_environment']) : ''), 
-										  sql_clean_name($d['actor']), sql_clean_limit($d['changes']['limit'])
+										  sql_clean_email($d['actor']), sql_clean_limit($d['changes']['limit'])
 										));
 			}
 			break;
