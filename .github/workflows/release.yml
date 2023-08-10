@@ -68,5 +68,5 @@ jobs:
         working-directory: ascender-ledger
         run: |
           docker image push ${{ github.repository }}/ledger-web:latest
-		docker image push ${{ github.repository }}/ledger-parser:latest
-		docker image push ${{ github.repository }}/ledger-db:latest
+          docker image push ${{ github.repository }}/ledger-parser:latest
+          docker image push ${{ github.repository }}/ledger-db:latest
