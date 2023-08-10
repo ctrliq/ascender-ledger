@@ -62,7 +62,7 @@ jobs:
       - name: Build Ascender Ledger
         working-directory: ascender-ledger
         run: |
-         docker-compose build
+          docker-compose build
 
       - name: Push Ascender Ledger
         working-directory: ascender-ledger
