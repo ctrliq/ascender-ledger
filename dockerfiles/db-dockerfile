@@ -1,0 +1,26 @@
+FROM rockylinux/rockylinux:9
+
+# Add our mysql user and groups
+RUN groupadd -r mysql && useradd -r -g mysql mysql
+
+# Installing dependencies for the PHP modules
+RUN dnf -y install epel-release
+RUN dnf -y update
+RUN dnf install -y mariadb-server supervisor
+
+COPY ./files/supervisor-db.conf /etc/supervisord.conf
+COPY ./src/includes/ledger.sql /root/ledger.sql
+
+VOLUME /var/lib/mysql
+
+RUN mkdir -p /var/lib/mysql/
+RUN chmod -R 777 /var/lib/mysql/
+RUN mkdir -p /var/run/mysqld
+RUN chmod -R 777 /var/run/mysqld
+
+RUN dnf clean all
+
+COPY files/mysql_first.sh /root/mysql_first.sh
+RUN chmod +x /root/mysql_first.sh
+CMD /root/mysql_first.sh
+

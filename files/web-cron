@@ -1,0 +1,2 @@
+* * * * * /usr/bin/php /var/www/html/utility/minute_cron.php > /dev/null 2>&1
+0 0 * * * /usr/bin/php /var/www/html/utility/nightly_cron.php > /dev/null 2>&1

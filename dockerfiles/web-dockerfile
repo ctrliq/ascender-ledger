@@ -1,0 +1,51 @@
+FROM rockylinux/rockylinux:9
+
+# Installing dependencies for the PHP modules
+RUN dnf -y install epel-release
+RUN dnf -y update
+RUN dnf install -y zip php php-fpm nginx supervisor git
+
+# Installing additional PHP modules
+RUN dnf install -y php-gd php-mbstring php-mysqli php-pdo php-mysqlnd php-xml php-json php-pecl-apcu
+
+# Install Composer so it's available
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+RUN mkdir -p /var/run/php-fpm/
+RUN rm -fr /etc/nginx/conf.d/php-fpm.conf
+
+COPY ./files/web.conf /etc/nginx/conf.d/default.conf
+COPY ./files/nginx.conf /etc/nginx/nginx.conf
+COPY ./files/supervisor-web.conf /etc/supervisord.conf
+COPY ./files/php-fpm.conf /etc/php-fpm.d/www.conf
+
+# Add this back in later
+#RUN git clone --depth=1 --branch=ascender https://github.com/cigamit/ansible-ledger.git /var/www/html && rm -rf /var/www/html/.git
+#COPY src/includes/config.php /var/www/html/includes/config.php
+
+# Remove this
+COPY ./src /var/www/html
+
+
+RUN cd /var/www/html; /usr/local/bin/composer install
+
+RUN mkdir -p /var/www/cache/ && chown nginx:nginx -R /var/www/cache/
+
+# TESTING
+#RUN dnf install -y procps-ng net-tools which
+
+# Install our Crontab
+RUN dnf -y install cronie
+
+COPY files/web-cron /etc/cron.d/web-cron
+ 
+# Give execution rights on the cron job
+RUN chmod 0644 /etc/cron.d/web-cron
+
+# Apply cron job
+RUN crontab /etc/cron.d/web-cron
+
+RUN dnf clean all
+
+CMD ["/usr/bin/supervisord","-c","/etc/supervisord.conf","-n","-s","-k"]
+

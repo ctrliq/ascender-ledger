@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+  web:
+    container_name: web
+    build:
+      dockerfile: dockerfiles/web-dockerfile
+      context: .
+    image: registry.mnslab.io:5000/ciq/ledger-web
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      MYSQL_LEDGER_PASSWORD: /run/secrets/db-ledger-password
+    secrets:
+      - db-ledger-password
+      - firstkey
+      - secondkey
+    volumes:
+      - ./src/:/var/www/html
+    depends_on:
+      - db
+  parser:
+    container_name: parser
+    build:
+      dockerfile: dockerfiles/parser-dockerfile
+      context: .
+    image: registry.mnslab.io:5000/ciq/ledger-parser
+    ports:
+      - '5000:5000'
+    environment:
+      MYSQL_LEDGER_PASSWORD: /run/secrets/db-ledger-password
+    secrets:
+      - db-ledger-password
+    volumes:
+      - ./src/:/var/www/html
+
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    build:
+      dockerfile: dockerfiles/db-dockerfile
+      context: .
+    image: registry.mnslab.io:5000/ciq/ledger-db
+    environment:
+      MYSQL_LEDGER_PASSWORD: /run/secrets/db-ledger-password
+      ADMIN_USER: admin
+      admin-password: /run/secrets/admin-password
+    secrets:
+      - db-ledger-password
+      - admin-password
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+
+secrets:
+   admin-password:
+     file: ./secrets/admin_password.txt
+   db-ledger-password:
+     file: ./secrets/db_ledger_password.txt
+   firstkey:
+     file: ./secrets/firstkey.txt
+   secondkey:
+     file: ./secrets/secondkey.txt
+
