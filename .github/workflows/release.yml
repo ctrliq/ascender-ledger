@@ -1,0 +1,66 @@
+---
+name: Stage Release
+
+env:
+  LC_ALL: "C.UTF-8" # prevent ERROR: Ansible could not initialize the preferred locale: unsupported locale setting
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Ascender Ledger version.'
+        required: true
+        default: ''
+      confirm:
+        description: 'Are you sure? Set this to yes.'
+        required: true
+        default: 'no'
+
+jobs:
+  stage:
+    if: endsWith(github.repository, '/ascender-ledger')
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: write
+    steps:
+      - name: Verify inputs
+        run: |
+          set -e
+
+          if [[ ${{ github.event.inputs.confirm }} != "yes" ]]; then
+            >&2 echo "Confirm must be 'yes'"
+            exit 1
+          fi
+
+          if [[ ${{ github.event.inputs.version }} == "" ]]; then
+            >&2 echo "Set version to continue."
+            exit 1
+          fi
+
+          exit 0
+
+      - name: Install python ${{ env.py_version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.py_version }}
+
+      - name: Checkout ascender ledger
+        uses: actions/checkout@v2
+        with:
+          path: ascender-ledger
+
+      - name: Get python version from Makefile
+        run: echo py_version=`make PYTHON_VERSION` >> $GITHUB_ENV
+
+      - name: Install playbook dependencies
+        run: |
+          python3 -m pip install docker
+
+      - name: publish
+        uses: pennsignals/publish_docker-compose@v0.1.0
+        with:
+          version: "${{ github.event.inputs.version }}"
+          docker_compose: 'docker-compose.yml'
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+

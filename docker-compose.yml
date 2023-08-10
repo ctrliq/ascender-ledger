@@ -1,8 +1,8 @@
 version: '3.9'
 
 services:
-  web:
-    container_name: web
+  ledger-web:
+    container_name: ledger-web
     build:
       dockerfile: dockerfiles/web-dockerfile
       context: .
@@ -19,9 +19,9 @@ services:
     volumes:
       - ./src/:/var/www/html
     depends_on:
-      - db
-  parser:
-    container_name: parser
+      - ledger-db
+  ledger-parser:
+    container_name: ledger-parser
     build:
       dockerfile: dockerfiles/parser-dockerfile
       context: .
@@ -36,10 +36,10 @@ services:
       - ./src/:/var/www/html
 
     depends_on:
-      - db
+      - ledger-db
 
-  db:
-    container_name: db
+  ledger-db:
+    container_name: ledger-db
     build:
       dockerfile: dockerfiles/db-dockerfile
       context: .
