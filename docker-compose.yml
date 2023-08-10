@@ -6,7 +6,7 @@ services:
     build:
       dockerfile: dockerfiles/web-dockerfile
       context: .
-    image: registry.mnslab.io:5000/ciq/ledger-web
+    image: ghcr.io/ctrliq/ascender-ledger/ledger-web
     ports:
       - '80:80'
       - '443:443'
@@ -25,7 +25,7 @@ services:
     build:
       dockerfile: dockerfiles/parser-dockerfile
       context: .
-    image: registry.mnslab.io:5000/ciq/ledger-parser
+    image: ghcr.io/ctrliq/ascender-ledger/ledger-parser
     ports:
       - '5000:5000'
     environment:
@@ -43,7 +43,7 @@ services:
     build:
       dockerfile: dockerfiles/db-dockerfile
       context: .
-    image: registry.mnslab.io:5000/ciq/ledger-db
+    image: ghcr.io/ctrliq/ascender-ledger/ledger-db
     environment:
       MYSQL_LEDGER_PASSWORD: /run/secrets/db-ledger-password
       ADMIN_USER: admin
