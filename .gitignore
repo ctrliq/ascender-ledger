@@ -1,6 +1,6 @@
-includes/config.php
-twig/cache/*
-*.txt
-composer.lock
-myadmin*
-vendor/*
+src/includes/config.php
+src/twig/cache/*
+src/*.txt
+src/composer.lock
+src/myadmin*
+src/vendor/*
