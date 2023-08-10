@@ -59,6 +59,10 @@ jobs:
           python3 -m pip install docker
           python3 -m pip install docker-compose
 
+      - name: Log in to GHCR
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Build Ascender Ledger
         working-directory: ascender-ledger
         run: |
@@ -67,6 +71,6 @@ jobs:
       - name: Push Ascender Ledger
         working-directory: ascender-ledger
         run: |
-          docker image push ${{ github.repository }}/ledger-web:latest
-          docker image push ${{ github.repository }}/ledger-parser:latest
-          docker image push ${{ github.repository }}/ledger-db:latest
+          docker image push ghcr.io/${{ github.repository }}/ledger-web:latest
+          docker image push ghcr.io/${{ github.repository }}/ledger-parser:latest
+          docker image push ghcr.io/${{ github.repository }}/ledger-db:latest
