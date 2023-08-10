@@ -1,9 +1,5 @@
 <?php
 
-// We don't include sql.php at the top, so that we don't create a DB connection when receiving data
-// that we don't need
-
-include_once('includes/sql.php');
 include_once('includes/classes/Spyc.php');
 
 use Async\Yaml;
@@ -14,9 +10,15 @@ use SebastianBergmann\Diff\Output\StrictUnifiedDiffOutputBuilder;
 
 $d = file_get_contents('php://input');
 if ($d != '') {
-	$d = json_decode($d, true);
+	try {
+		$d = json_decode($d, true);
+	} catch (Exception $e) {
+		exit;
+	}
 }
 
+
+include_once('includes/sql.php');
 
 $server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `ip` = ?', array($_SERVER['REMOTE_ADDR']));
 if (!isset($server['id']) && $d['logger_name'] == 'awx.analytics.activity_stream') {
@@ -29,7 +31,7 @@ if (!isset($server['trusted']) || !$server['trusted']) {
 	exit;
 }
 
-//file_put_contents('data-all.txt', print_r($d, true), FILE_APPEND);
+// file_put_contents('data-all.txt', print_r($d, true), FILE_APPEND);
 $time = time();
 if (isset($d['logger_name'])) {
 	switch ($d['logger_name']) {
@@ -56,7 +58,7 @@ if (isset($d['logger_name'])) {
 			if (isset($d['changed']) && $d['changed'] && isset($d['event']) && $d['event'] == 'runner_on_ok' && isset($d['job']) && $d['job'] && isset($d['event_data']['task_action']) && $d['event_data']['task_action'] != '') {
 				$remove_invocation = read_setting('remove_invocation', 0);
 
-		//file_put_contents('events.txt', print_r($d, true), FILE_APPEND);
+				// file_put_contents('events.txt', print_r($d, true), FILE_APPEND);
 
 				// Results are in an array (this task had a loop)
 				if (isset($d['event_data']['res']['results'])) {
@@ -105,7 +107,7 @@ if (isset($d['logger_name'])) {
 			// JOB DATA
 			if (isset($d['operation']) && $d['operation'] == 'create' && isset($d['object1']) && $d['object1'] == 'job' && strtolower($d['host']) != 'localhost') {
 
-//file_put_contents('jobs.txt', print_r($d, true), FILE_APPEND);
+				// file_put_contents('jobs.txt', print_r($d, true), FILE_APPEND);
 
 				if (!isset($d['summary_fields']['job_template'][0]['id'])) {
 					// Older versions of Tower don't specify the job_template_id
@@ -115,13 +117,22 @@ if (isset($d['logger_name'])) {
 					$jtid = $d['summary_fields']['job_template'][0]['id'];
 				}
 
-				db_execute_prepare('INSERT INTO `jobs` (`timestamp`, `job`, `job_template_id`, `host`, `name`, `job_type`, `inventory`, `project`, `scm_branch`, `execution_environment`, `actor`, `limit`) VALUES
-									(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
-									array(sql_clean_timestamp($d['@timestamp']), intval($d['changes']['id']), intval($jtid),
-										  sql_clean_hostname($d['host']), sql_clean_play($d['changes']['name']), sql_clean_name($d['changes']['job_type']), sql_clean_name($d['changes']['inventory']),
-										  sql_clean_name($d['changes']['project']), sql_clean_name($d['changes']['scm_branch']), (isset($d['changes']['execution_environment']) ? sql_clean_name($d['changes']['execution_environment']) : ''), 
-										  sql_clean_email($d['actor']), sql_clean_limit($d['changes']['limit'])
-										));
+				db_execute_prepare('INSERT INTO `jobs` (`timestamp`, `job`, `job_template_id`, `host`, `name`, `job_type`, `inventory`, `project`, `scm_branch`, `execution_environment`, `actor`, `limit`)
+									VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+									array(
+										sql_clean_timestamp($d['@timestamp']),
+										intval($d['changes']['id']),
+										intval($jtid),
+										sql_clean_hostname($d['host']), 
+										sql_clean_play($d['changes']['name']),
+										sql_clean_name($d['changes']['job_type']),
+										sql_clean_name($d['changes']['inventory']),
+										sql_clean_name($d['changes']['project']),
+										sql_clean_name($d['changes']['scm_branch']),
+										(isset($d['changes']['execution_environment']) ? sql_clean_name($d['changes']['execution_environment']) : ''), 
+										sql_clean_email($d['actor']),
+										sql_clean_limit($d['changes']['limit'])
+									));
 			}
 			break;
 	}
