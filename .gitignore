@@ -1,4 +1,3 @@
-src/includes/config.php
 src/twig/cache/*
 src/*.txt
 src/composer.lock
