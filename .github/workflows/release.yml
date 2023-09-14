@@ -71,6 +71,9 @@ jobs:
       - name: Push Ascender Ledger
         working-directory: ascender-ledger
         run: |
+          docker image push ghcr.io/${{ github.repository }}/ledger-web:${{ github.event.inputs.version }}
+          docker image push ghcr.io/${{ github.repository }}/ledger-parser:${{ github.event.inputs.version }}
+          docker image push ghcr.io/${{ github.repository }}/ledger-db:${{ github.event.inputs.version }}
           docker image push ghcr.io/${{ github.repository }}/ledger-web:latest
           docker image push ghcr.io/${{ github.repository }}/ledger-parser:latest
           docker image push ghcr.io/${{ github.repository }}/ledger-db:latest
