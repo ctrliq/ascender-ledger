@@ -21,7 +21,7 @@ if ($d != '') {
 include_once('includes/sql.php');
 
 $server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `ip` = ?', array($_SERVER['REMOTE_ADDR']));
-if (!isset($server['id']) && $d['logger_name'] == 'awx.analytics.activity_stream') {
+if (!isset($server['id']) && $d['host'] != '' && intval($d['host']) != $d['host']) {
 	$host = (isset($d['host']) && $d['host'] != '' ? $d['host'] : '');
 	db_execute_prepare('INSERT INTO `servers` (`name`, `ip`) VALUES (?, ?)', array($host, $_SERVER['REMOTE_ADDR']));
 	exit;
