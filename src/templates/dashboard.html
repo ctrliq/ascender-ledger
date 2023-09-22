@@ -3,7 +3,7 @@
 <div class="wrapper text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
 {% if account.super and untrusted %}
-		<div class="bd-example d-flex justify-content-center" style="margin-bottom: 10px">
+		<div class="bd-example d-flex justify-content-center" style="margin-bottom: 10px; background-color: rgb(255,255,233)">
 			<h4><a href='/servers/' style="text-decoration: none">There {{  untrusted > 1 ? 'are' : 'is' }} {{ untrusted }} untrusted Server{{  untrusted > 1 ? 's' : '' }}</a></h4>
 		</div>
 {% endif %}
