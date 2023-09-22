@@ -2,7 +2,12 @@
 {% block body %}
 <div class="wrapper text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="bd-example d-flex flex-row justify-content-center">
+{% if account.super and untrusted %}
+		<div class="bd-example d-flex justify-content-center" style="margin-bottom: 10px">
+			<h4><a href='/servers/' style="text-decoration: none">There {{  untrusted > 1 ? 'are' : 'is' }} {{ untrusted }} untrusted Server{{  untrusted > 1 ? 's' : '' }}</a></h4>
+		</div>
+{% endif %}
+		<div class="bd-example d-flex flex-row justify-content-center" style="margin-bottom: 10px">
 			<div class="bd-example" style="width: 210px; height: 140px; margin-right: 50px; background-color: #fbfbfb;">
 				<center><h1>Hosts</h1><h3>{{ counts.hosts }}</h3></center>
 			</div>
@@ -12,9 +17,8 @@
 			<div class="bd-example" style="width: 210px; height: 140px; background-color: #fbfbfb;">
 				<center><h1>Changes</h1><h3>{{ counts.changes }}</h3></center>
 			</div>
-
 		</div>
-		<div class="bd-example mh-50" style="margin-top: 10px">
+		<div class="bd-example mh-50">
 	   		 <canvas id="changes" height="300"></canvas>
 		</div>
 	</div>
@@ -42,7 +46,9 @@
 				{
 					label: 'Changes per day',
 					data: data.map(row => row.count),
-					backgroundColor: '#024462'
+					backgroundColor: 'rgba(2, 68, 98, 0.5)',
+					borderColor: 'rgba(2, 68, 98)',
+                         borderWidth: 1
 				}
 				]
 			},
