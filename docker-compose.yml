@@ -12,6 +12,8 @@ services:
       - '443:443'
     environment:
       MYSQL_LEDGER_PASSWORD: /run/secrets/db-ledger-password
+    networks:
+      ledger:
     secrets:
       - db-ledger-password
       - firstkey
@@ -30,6 +32,8 @@ services:
       - '5000:5000'
     environment:
       MYSQL_LEDGER_PASSWORD: /run/secrets/db-ledger-password
+    networks:
+      ledger:
     secrets:
       - db-ledger-password
     volumes:
@@ -48,6 +52,10 @@ services:
       MYSQL_LEDGER_PASSWORD: /run/secrets/db-ledger-password
       ADMIN_USER: admin
       admin-password: /run/secrets/admin-password
+    networks:
+      ledger:
+        aliases:
+          - db
     secrets:
       - db-ledger-password
       - admin-password
@@ -69,3 +77,5 @@ secrets:
    secondkey:
      file: ./secrets/secondkey.txt
 
+networks:
+  ledger:
