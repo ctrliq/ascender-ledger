@@ -36,6 +36,9 @@ COPY files/web-cron /etc/cron.d/web-cron
 # Give execution rights on the cron job
 RUN chmod 0644 /etc/cron.d/web-cron
 
+# Fix php session permissions
+RUN chown -R nginx:nginx /var/lib/php
+
 # Apply cron job
 RUN crontab /etc/cron.d/web-cron
 

@@ -2,7 +2,7 @@
 
 global $mydb;
 
-$sql_server = 'ledger-db';
+$sql_server = 'db';
 $port = '3306';
 $mydb = 'ledger';
 $sql_user = 'ledger';

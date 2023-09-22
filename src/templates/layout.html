@@ -15,8 +15,8 @@
 	{% block css %}{% endblock %}
 	</style>
 
-	<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
@@ -57,6 +57,10 @@
 			<br><br><br>
 				<br><br>
 				<ul class="nav flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+					<li class="pf-c-nav__link">
+						<a href="/dashboard/" class="nav-link px-0 align-middle{% if server == '/dashboard.php' or server == '/index.php' %} active{%endif %}">
+							<i class="fas fa-chart-line"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span> </a>
+					</li>
 					<li class="pf-c-nav__link">
 						<a href="/reports/" class="nav-link px-0 align-middle{% if server == '/reports.php' %} active{%endif %}">
 							<i class="navicon fa fa-table"></i> <span class="ms-1 d-none d-sm-inline">Reports</span> </a>
@@ -109,7 +113,6 @@
 
 
 <!-- Custom and plugin javascript -->
-</script src="/js/app.min.js"></script>
 {% block javascriptinc %}{% endblock %}
 <script>
   $(document).ready(function(){

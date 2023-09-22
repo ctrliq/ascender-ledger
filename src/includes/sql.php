@@ -76,6 +76,9 @@ function sql_clean_limit($text) {
 	return preg_replace('/[^A-Za-z0-9_\-: \|\[\],]/', '', $text);
 }
 
+function sql_clean_project($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\. ]/', '', $text);
+}
 
 function sql_clean_playbook($text) {
 	return preg_replace('/[^A-Za-z0-9\-_\.\/]/', '', $text);
