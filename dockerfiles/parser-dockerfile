@@ -19,11 +19,6 @@ COPY ./files/nginx.conf /etc/nginx/nginx.conf
 COPY ./files/supervisor-web.conf /etc/supervisord.conf
 COPY ./files/php-fpm.conf /etc/php-fpm.d/www.conf
 
-# Add this back in later
-#RUN git clone --depth=1 --branch=ascender https://github.com/cigamit/ansible-ledger.git /var/www/html && rm -rf /var/www/html/.git
-#COPY src/includes/config.php /var/www/html/includes/config.php
-
-# Remove this
 COPY ./src /var/www/html
 
 RUN cd /var/www/html; /usr/local/bin/composer install
@@ -31,7 +26,7 @@ RUN cd /var/www/html; /usr/local/bin/composer install
 RUN mkdir -p /var/www/cache/ && chown nginx:nginx -R /var/www/cache/
 
 # TESTING
-RUN dnf install -y procps-ng net-tools which
+#RUN dnf install -y procps-ng net-tools which
 
 RUN dnf clean all
 
