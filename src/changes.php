@@ -82,7 +82,10 @@ if (isset($_SESSION['changes_playbook']) && $_SESSION['changes_playbook'] != '')
 
 if (isset($_SESSION['changes_csearch']) && $_SESSION['changes_csearch'] != '') {
 	$s = sql_clean_csearch($_SESSION['changes_csearch']);
-	$filters[] = " `res` LIKE '%$s%' OR `task_action` LIKE '%$s%' OR `task` LIKE '%$s%' OR `role` LIKE '%$s%' OR `play` LIKE '%$s%'";
+	$c = explode(' ', $s);
+	foreach ($c as $s) {
+		$filters[] = " (`res` LIKE '%$s%' OR `task_action` LIKE '%$s%' OR `task` LIKE '%$s%' OR `role` LIKE '%$s%' OR `play` LIKE '%$s%')";
+	}
 	$csearch = $_SESSION['changes_csearch'];
 }
 
