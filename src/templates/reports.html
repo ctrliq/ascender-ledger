@@ -4,15 +4,17 @@
 
 <div class="wrapper  text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="bd-example">
-			<table class="table table-striped datatable-reports border-secondary">
+		<div class="border p-4">
+			<div class="table-responsive">
+				<table class="table table-striped datatable-reports border-secondary">
 		{% include 'parts/reports_table_thead.html' %}
-				<tbody>
+					<tbody>
 		{% for r in reports %}
-				{% include 'parts/reports_table_body_tr.html' %}
+					{% include 'parts/reports_table_body_tr.html' %}
 		{% endfor %}
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
 		</div>
 		<br><a href=/reports/new/><button type="button" class="btn btn-primary btn-s">Create New Report</button></a>
 	</div>

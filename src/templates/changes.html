@@ -3,11 +3,10 @@
 {% block body %}
 <div class="wrapper text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="bd-example">
-			<div class="bd-example" style="padding: 9px">
+		<div class="border p-4">
+			<div class="border p-2">
 				<form action="/changes/">
 					<div class="row filters">
-
 						<label for="hosts" class="col-sm-1 col-form-label text-end">Hosts</label>
 						<div class="col">
 							<select class="form-control form-select-sm chosen-select" name=hosts id=hosts>
@@ -41,35 +40,36 @@
 
 			</div>
 			<br><br>
-			<table class="table table-striped datatable-facts">
-				<thead>
-					<tr>
-						<th></th>
-						<th>Date</th>
-						<th>Host</th>
-						<th>Playbook</th>
-						<th>Role</th>
-						<th>Task</th>
-						<th>Module</th>
-						<th style="display:none;">Changes</th>
-					</tr>
-					</thead>
-					<tbody>
+			<div class="table-responsive">
+				<table class="table table-striped datatable-facts w-100">
+					<thead>
+						<tr>
+							<th></th>
+							<th>Date</th>
+							<th>Host</th>
+							<th>Playbook</th>
+							<th>Role</th>
+							<th>Task</th>
+							<th>Module</th>
+								<th style="display:none;">Changes</th>
+						</tr>
+						</thead>
+						<tbody>
 	{% for r in changes %}
-					<tr>
-						<td width=30><a href='/changes/view/{{ r['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-eye"></i></a></td>
-						<td nowrap>{{ (r['time'] - 21600)|date("m/d/Y H:i") }}</td>
-						<td nowrap>{{ hosts[r['host']] }}</td>
-						<td>{{ r['playbook'] }}</td>
-						<td>{{ r['role'] }}</td>
-						<td>{{ r['task'] }}</td>
-						<td>{{ r['task_action'] }}</td>
-						<td style="display:none;">{{ r['res'] }}</td>
-					</tr>
+						<tr>
+							<td width=30><a href='/changes/view/{{ r['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-eye"></i></a></td>
+							<td nowrap>{{ (r['time'] - 21600)|date("m/d/Y H:i") }}</td>
+							<td nowrap>{{ hosts[r['host']] }}</td>
+							<td>{{ r['playbook'] }}</td>
+							<td>{{ r['role'] }}</td>
+							<td>{{ r['task'] }}</td>
+							<td>{{ r['task_action'] }}</td>
+							<td style="display:none;">{{ r['res'] }}</td>
+						</tr>
 	{% endfor %}
-				</tbody>
-			</table>
-
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>

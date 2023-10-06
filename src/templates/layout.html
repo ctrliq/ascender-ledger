@@ -28,94 +28,97 @@
 	<script type="text/javascript" src="https://cdn.datatables.net/buttons/2.2.3/js/buttons.print.min.js"></script>
 
 </head>
-<body>
+<body class="d-flex flex-column vh-100 overflow-hidden">
 	<header class="navbar navbar-expand-lg navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-				<a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3 text-white text-decoration-none">
-					<span class="fs-4 d-none d-sm-inline"><img src="/img/AscenderLedger_logo_rev.svg" style="height: 60px"></span>
-				</a>
-<div class="topnav navbar-nav justify-content-end ms-auto">
-	<div class="nav-item text-nowrap">
-
-		 <li class="nav-item dropdown ms-auto">
-		  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-			<i class="navicon fa fa-user"></i> {{ account.name }}
-		  </a>
-		  <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-			<li><a class="dropdown-item" href="/profile/">Profile</a></li>
-			<li><a class="dropdown-item" href="/logout/">Logout</a></li>
-		  </ul>
-		</li>
-	</div>
-  </div>
-	</header>
-
-<div class="container-fluid">
-
-	<div class="row flex-nowrap">
-		<div class="col-auto px-0 page-sidebar">
-			<div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-				<ul class="nav flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
-					<li class="pf-c-nav__link">
-						<a href="/dashboard/" class="nav-link px-0 align-middle{% if server == '/dashboard.php' or server == '/index.php' %} active{%endif %}">
-							<i class="fas fa-chart-line"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span> </a>
-					</li>
-					<li class="pf-c-nav__link">
-						<a href="/reports/" class="nav-link px-0 align-middle{% if server == '/reports.php' %} active{%endif %}">
-							<i class="navicon fa fa-table"></i> <span class="ms-1 d-none d-sm-inline">Reports</span> </a>
-					</li>
-{% if account.view_changes %}
-					<li class="pf-c-nav__link">
-						<a href="/changes/" class="nav-link px-0 align-middle{% if server == '/changes.php' %} active{%endif %}">
-							<i class="navicon fa fa-file" style="width: 20px"></i> <span class="ms-1 d-none d-sm-inline">Changes</span></a>
-					</li>
-{% endif %}
-{% if account.view_facts %}
-					<li class="pf-c-nav__link">
-						<a href="/facts/" class="nav-link px-0 align-middle{% if server == '/facts.php' %} active{%endif %}">
-							<i class="navicon fa fa-puzzle-piece" style="width: 20px"></i> <span class="ms-1 d-none d-sm-inline">Facts</span></a>
-					</li>
-{% endif %}
-{% if account.super %}
-					<li>
-						<a href="#submenu3" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-0 align-middle" aria-expanded="true">
-							<i class="navicon fa fa-cog"></i> <span class="ms-1 d-none d-sm-inline">Admin</span> </a>
-							<ul class="{% if server != '/users.php' and server != '/settings.php' and server != '/servers.php' %}collapse {%endif %} nav flex-column ms-4" id="submenu3" data-bs-parent="#menu">
-							<li class="w-100">
-								<a href="/users/" class="nav-link px-0{% if server == '/users.php' %} active{%endif %}"> <i class="navicon fa fa-users"></i> <span class="d-none d-sm-inline">Users</span> </a>
-							</li>
-							<li class="w-100">
-								<a href="/servers/" class="nav-link px-0{% if server == '/servers.php' %} active{%endif %}"> <i class="navicon fas fa-network-wired"></i> <span class="d-none d-sm-inline">Servers</span> </a>
-							</li>
-
-								<li class="w-100">
-									<a href="/settings/" class="nav-link px-0{% if server == '/settings.php' %} active{%endif %}"> <i class="navicon fas fa-wrench"></i> <span class="d-none d-sm-inline">Settings</span> </a>
-								</li>
-						</ul>
-					</li>
-{% endif %}
-{% if is_dev %}
-					<br><center><font color=red><strong>*** DEV SITE ***</strong></font></center>
-{% endif %}
-				</ul>
+		<a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3 text-white text-decoration-none">
+			<span class="fs-4 d-sm-inline"><img src="/img/AscenderLedger_logo_rev.svg" class="img-fluid" style="min-height: 30px; height: auto"></span>
+		</a>
+		<div class="topnav navbar-nav justify-content-end ms-auto" tole="navigation">
+			<div class="nav-item text-nowrap">
+				<li class="nav-item dropdown ms-auto">
+					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						<i class="navicon fa fa-user"></i> {{ account.name }}
+					</a>
+					<ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+						<li>
+							<a class="dropdown-item" href="/profile/">Profile</a>
+						</li>
+						<li>
+							<a class="dropdown-item" href="/logout/">Logout</a>
+						</li>
+					</ul>
+				</li>
 			</div>
 		</div>
-		<main class="col-md-9 ms-sm-auto col-lg-10 px-md-0 py-4">
+	</header>
+
+	<div class="container-fluid flex-grow-1 d-flex flex-column flex-sm-row overflow-auto w-100 px-0">
+		<div class="row flex-grow-sm-1 flex-grow-sm-0 w-100 mx-0">
+			<aside class="col-sm-2 flex-grow-sm-1 flex-shrink-sm-1 flex-grow-sm-0 page-sidebar">
+				<div class="p-1 pt-3 h-100 sticky-top">
+					<ul class="nav nav-pills flex-sm-column flex-row mb-auto justify-content-between text-truncate">
+						<li class="nav-item pf-c-nav__link mb-1">
+							<a href="/dashboard/" class="nav-link px-2 text-truncate align-middle{% if server == '/dashboard.php' or server == '/index.php' %} active{%endif %}">
+								<i class="fas fa-chart-line"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span> </a>
+						</li>
+						<li class="nav-item pf-c-nav__link mb-1">
+							<a href="/reports/" class="nav-link px-2 text-truncate align-middle{% if server == '/reports.php' %} active{%endif %}">
+								<i class="navicon fa fa-table"></i> <span class="ms-1 d-none d-sm-inline">Reports</span>
+							</a>
+						</li>
+{% if account.view_changes %}
+						<li class="nav-item pf-c-nav__link mb-1">
+							<a href="/changes/" class="nav-link px-2 text-truncate align-middle{% if server == '/changes.php' %} active{%endif %}">
+								<i class="navicon fa fa-file"></i> <span class="ms-1 d-none d-sm-inline">Changes</span>
+							</a>
+						</li>
+{% endif %}
+{% if account.view_facts %}
+						<li class="nav-item pf-c-nav__link mb-1">
+							<a href="/facts/" class="nav-link px-2 text-truncate align-middle{% if server == '/facts.php' %} active{%endif %}">
+								<i class="navicon fa fa-puzzle-piece"></i> <span class="ms-1 d-none d-sm-inline">Facts</span>
+							</a>
+						</li>
+{% endif %}
+{% if account.super %}
+						<li>
+							<a href="#submenu3" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-2 text-truncate align-middle mb-1" aria-expanded="true">
+								<i class="navicon fa fa-cog"></i> <span class="ms-1 d-none d-sm-inline">Admin</span>
+							</a>
+							<ul class="{% if server != '/users.php' and server != '/settings.php' and server != '/servers.php' %}collapse {%endif %} nav flex-column ms-4" id="submenu3" data-bs-parent="#menu">
+								<li class="pf-c-nav__link w-100 mb-1">
+									<a href="/users/" class="nav-link px-0{% if server == '/users.php' %} active{%endif %}"> <i class="navicon fa fa-users"></i> <span class="d-none d-sm-inline">Users</span></a>
+								</li>
+								<li class="pf-c-nav__link w-100 mb-1">
+									<a href="/servers/" class="nav-link px-0{% if server == '/servers.php' %} active{%endif %}"> <i class="navicon fas fa-network-wired"></i> <span class="d-none d-sm-inline">Servers</span></a>
+								</li>
+								<li class="pf-c-nav__link w-100 mb-1">
+									<a href="/settings/" class="nav-link px-0{% if server == '/settings.php' %} active{%endif %}"> <i class="navicon fas fa-wrench"></i> <span class="d-none d-sm-inline">Settings</span></a>
+								</li>
+							</ul>
+						</li>
+{% endif %}
+{% if is_dev %}
+						<br><center><font color=red><strong>*** DEV SITE ***</strong></font></center>
+{% endif %}
+					</ul>
+				</div>
+			</aside>
+			<main class="col overflow-auto h-100 pt-3">
 {% block body %}{% endblock %}
+			</main>
 		</div>
 	</div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js" integrity="sha512-rMGGF4wg1R73ehtnxXBt5mbUfN9JUJwbk21KMlnLZDJh7BkPmeovBuddZCENJddHYYMkCh9hPFnPmS9sspki8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js" integrity="sha512-rMGGF4wg1R73ehtnxXBt5mbUfN9JUJwbk21KMlnLZDJh7BkPmeovBuddZCENJddHYYMkCh9hPFnPmS9sspki8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <!-- Custom and plugin javascript -->
 {% block javascriptinc %}{% endblock %}
-<script>
-  $(document).ready(function(){
+	<script>
+		$(document).ready(function(){
 {% block javascript %}{% endblock %}
-  });
-</script>
+		});
+	</script>
 </body>
 </html>
