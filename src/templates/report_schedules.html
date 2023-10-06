@@ -3,8 +3,8 @@
 {% block body %}
 <div class="wrapper  text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="bd-example">
-			<table class="table table-striped datatable-users">
+		<div class="border p-4 table-responsive">
+			<table class="table table-striped datatable-schedules">
 				<thead>
 					<tr>
 						<th></th>
@@ -45,9 +45,9 @@
 {% block javascriptinc %}
 {% endblock %}
 {% block javascript %}
-	$('.datatable-users').DataTable({
+	$('.datatable-schedules').DataTable({
 		order: [[1, 'asc']],
-		pageLength: 25,
+		pageLength: 10,
 		responsive: true,
 		buttons: []
 	});

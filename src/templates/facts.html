@@ -3,8 +3,8 @@
 {% block body %}
 <div class="wrapper  text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="bd-example">
-			<div class="bd-example" style="padding: 9px">
+		<div class="border p-4">
+			<div class="border p-2">
 				<div class="row filters">
 					<label for="hosts" class="col-sm-1 col-form-label text-end">Hosts</label>
 					<div class="col">
@@ -39,26 +39,28 @@
 				</div>
 			</div>
 			<br><br>
-			<table class="table table-striped datatable-changes">
-				<thead>
-					<tr>
-						<th>Host</th>
-						<th>Fact</th>
-						<th>Value</th>
-						<th>Type</th>
-					</tr>
-				</thead>
-				<tbody>
+			<div class="table-responsive">
+				<table class="table table-striped datatable-changes w-100">
+					<thead>
+						<tr>
+							<th>Host</th>
+							<th>Fact</th>
+							<th>Value</th>
+							<th>Type</th>
+						</tr>
+					</thead>
+					<tbody>
 {% for r in facts %}
-					<tr>
-						<td width=200 nowrap>{{ hosts[r['host']] }}</td>
-						<td nowrap>{{ r['fact'] }}</td>
-						<td>{{ r['data'] }}</td>
-						<td>{{ r['type'] }}</td>
-					</tr>
+						<tr>
+							<td width=200 nowrap>{{ hosts[r['host']] }}</td>
+							<td nowrap>{{ r['fact'] }}</td>
+							<td>{{ r['data'] }}</td>
+							<td>{{ r['type'] }}</td>
+						</tr>
 {% endfor %}
-				</tbody>
-			</table>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>

@@ -1,12 +1,12 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper  text-bg-light">
+<div class="wrapper text-bg-light">
 {% if msg %}<font color=green><center>{{ msg }}</center></font><br>{% endif %}
 {% if error %}<font color=red><center>{{ error }}</center></font><br>{% endif %}
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="bd-example">
-			<table class="table table-striped datatable-users">
+		<div class="border table-responsive p-4">
+			<table class="table table-striped datatable-users w-100">
 				<thead>
 					<tr>
 						<th></th>
@@ -20,7 +20,7 @@
 				<tbody>
 {% for u in servers %}
 					<tr>
-						<td width="80">
+						<td width="80" nowrap>
                             <a href='/servers/edit/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-edit"></i></a>
 	{% if u.trusted %}
                             <a href='/servers/trust/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-lock"></i></a>

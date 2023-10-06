@@ -7,24 +7,22 @@
 			<h4><a href='/servers/' style="text-decoration: none">There {{  untrusted > 1 ? 'are' : 'is' }} {{ untrusted }} untrusted Server{{  untrusted > 1 ? 's' : '' }}</a></h4>
 		</div>
 {% endif %}
-		<div class="bd-example d-flex flex-row justify-content-center" style="margin-bottom: 10px">
-			<div class="bd-example" style="width: 210px; height: 140px; margin-right: 50px; background-color: #fbfbfb;">
+		<div class=" border row justify-content-center p-3 mx-0 mb-3">
+			<div class="border col col-lg-2 p-1 me-4" style="background-color: #fbfbfb;">
 				<center><h1>Hosts</h1><h3>{{ counts.hosts }}</h3></center>
 			</div>
-			<div class="bd-example" style="width: 210px; height: 140px; margin-right: 50px; background-color: #fbfbfb;">
+			<div class="border col col-lg-2 p-1 me-4" style="background-color: #fbfbfb;">
 				<center><h1>Facts</h1><h3>{{ counts.facts }}</h3></center>
 			</div>
-			<div class="bd-example" style="width: 210px; height: 140px; background-color: #fbfbfb;">
+			<div class="border col col-lg-2 p-1" style="background-color: #fbfbfb;">
 				<center><h1>Changes</h1><h3>{{ counts.changes }}</h3></center>
 			</div>
 		</div>
-		<div class="bd-example mh-50">
+		<div class="border mh-50">
 	   		 <canvas id="changes" height="300"></canvas>
 		</div>
 	</div>
 </div>
-
-
 
 
 {% endblock %}

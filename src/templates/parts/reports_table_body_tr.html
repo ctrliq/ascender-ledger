@@ -1,5 +1,5 @@
 <tr>
-	<td width=90>
+	<td width=90 nowrap>
 		{% if r.role == "owner" or r.role == "admin" or r.role == "edit" %}
 			<a href="/reports/edit/{{ r['id'] }}" class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-edit"></i></a>
 		{% endif %}
