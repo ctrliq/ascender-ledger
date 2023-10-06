@@ -15,7 +15,7 @@ body {
 
 .page-sidebar {
   position: fixed;
-  top: 0;
+  top: 50px;
   /* rtl:raw:
   right: 0;
   */
