@@ -6,35 +6,41 @@
 		<div class="border p-4">
 			<div class="border p-2">
 				<div class="row filters">
-					<label for="hosts" class="col-sm-1 col-form-label text-end">Hosts</label>
 					<div class="col">
-						<select class="form-select form-select-sm chosen-select" name=hosts id=hosts>
-							<option></option>
+						<label for="hosts" class="col-sm-1 col-form-label text-end pe-3">Hosts</label>
+						<div>
+							<select class="form-select form-select-sm chosen-select" name=hosts id=hosts data-placeholder="Choose a host...">
+								<option></option>
 		{% for i,h in hosts %}
-							<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
+								<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
 		{% endfor %}
-						</select>
+							</select>
+						</div>
 					</div>
-					<label for="facts" class="col-sm-1 col-form-label text-end">Fact</label>
 					<div class="col">
-						<select class="form-select form-select-sm chosen-select" name=facts id=facts>
-							<option></option>
+						<label for="facts" class="col-sm-1 col-form-label text-end pe-3">Facts</label>
+						<div>
+							<select class="form-select form-select-sm chosen-select" name=facts id=facts data-placeholder="Choose a fact...">
+								<option></option>
 		{% for f in ufacts %}
-							<option{% if fact == f %} selected{% endif %}>{{ f }}</option>
+								<option{% if fact == f %} selected{% endif %}>{{ f }}</option>
 		{% endfor %}
-						</select>
+							</select>
+						</div>
 					</div>
-					<label for="type" class="col-sm-1 col-form-label text-end">Type</label>
 					<div class="col">
-						<select class="form-select form-select-sm chosen-select" name=type id=type>
-							<option></option>
+						<label for="type" class="col-sm-1 col-form-label text-end pe-3">Types</label>
+						<div>
+							<select class="form-select form-select-sm chosen-select" name=type id=type data-placeholder="Choose a type...">
+								<option></option>
 		{% for t in types %}
-							<option{% if type == t %} selected{% endif %}>{{ t }}</option>
+								<option{% if type == t %} selected{% endif %}>{{ t }}</option>
 		{% endfor %}
-						</select>
+							</select>
+						</div>
 					</div>
-					<div class="col">
-						<a href=/facts/?clear=1><button type="button" class="btn btn-primary btn-s">Clear</button></a>
+					<div class="col col-1 mt-auto">
+						<a href=/facts/?clear=1><button type="button" class="btn btn-primary btn-xs">Clear</button></a>
 					</div>
 				</div>
 			</div>
@@ -52,7 +58,7 @@
 					<tbody>
 {% for r in facts %}
 						<tr>
-							<td width=200 nowrap>{{ hosts[r['host']] }}</td>
+							<td nowrap>{{ hosts[r['host']] }}</td>
 							<td nowrap>{{ r['fact'] }}</td>
 							<td>{{ r['data'] }}</td>
 							<td>{{ r['type'] }}</td>
@@ -72,7 +78,7 @@
 {% endblock %}
 {% block javascript %}
 
-	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true });
+	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true, width: '100%' });
 
 	function change_host_filter () {
 		var host = $("#hosts").find(":selected").attr("id");
