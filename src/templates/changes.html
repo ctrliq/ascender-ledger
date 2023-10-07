@@ -29,7 +29,7 @@
 
 						<label for="csearch" class="col-sm-1 col-form-label text-end">Search</label>
 						<div class="col">
-							<input type="text" class="form-control form-control-sm" name=csearch id=csearch value="{{ csearch }}">
+							<input type="text" class="form-control form-control-sm" name=csearch id=csearch value="{{ csearch }}" placeholder="Search all Changes">
 						</div>
 						<div class="col">
 							<a href=/changes/?clear=1><button type="button" class="btn btn-primary btn-s">Clear</button></a>
@@ -108,6 +108,9 @@
 		pageLength: 25,
 		responsive: true,
 		"columnDefs" : [{"targets":1, "type":"date-us"}],
-		buttons: []
+		buttons: [],
+		language: {
+			searchPlaceholder: "Search in table"
+		}
 	});
 {% endblock %}

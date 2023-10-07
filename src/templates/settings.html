@@ -53,6 +53,22 @@
 								</select>
 							</div>
 						</div>
+
+						<div class="form-outline mb-3">
+							<label class="form-label" for="author">Allowed Fact Modules</label>
+							<div>
+								<select id="allowed_modules" name=allowed_modules[] class="chosen-select form-control" multiple/>
+{% for a in settings.allowed_modules|split(",") %}
+									<option value="{{ a }}" selected>{{ a }}</option>
+{% endfor %}
+{% for d in default_modules %}
+	{%- if d not in settings.allowed_modules|split(",") -%}
+									<option value="{{ d }}">{{ d }}</option>
+	{%- endif -%}
+{% endfor %}
+								</select><br>
+							</div>
+						</div>
 					</div>
 
 					<div class="tab-pane fade" id="nav-email" role="tabpanel" aria-labelledby="nav-email-tab" tabindex="0">
@@ -144,5 +160,24 @@
 		</form>
 	</div>
 </div>
+
+{% endblock %}
+{% block javascript %}
+$(function() {
+	var select = [], chosen = [];
+	$(".chosen-select").each(function(index) {
+		select[index] = $(this);
+		select[index].chosen({ no_results_text: 'Press Enter to add new entry:' });
+		chosen[index] = select[index].data('chosen');
+		chosen[index].search_field.on('keyup', function(e) {
+			if (e.which === 13 && chosen[index].dropdown.find('li.no-results').length > 0) {
+				var option = $("<option>").val(this.value).text(this.value);
+				select[index].prepend(option);
+				select[index].find(option).prop('selected', true);
+				select[index].trigger("chosen:updated");
+			}
+		});
+	});
+});
 
 {% endblock %}

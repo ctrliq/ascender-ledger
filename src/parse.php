@@ -20,6 +20,8 @@ if ($d != '') {
 
 include_once('includes/sql.php');
 
+if (!isset($_SERVER['REMOTE_ADDR'])) exit;
+
 $server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `ip` = ?', array($_SERVER['REMOTE_ADDR']));
 if (!isset($server['id']) && $d['host'] != '' && intval($d['host']) != $d['host']) {
 	$host = (isset($d['host']) && $d['host'] != '' ? $d['host'] : '');
@@ -45,10 +47,13 @@ if (isset($d['logger_name'])) {
 					if (count($fs)) {
 						$h = check_host($d['host_name']);
 						if ($h) {
+							$allowed_modules = explode(',', db_fetch_cell("SELECT `value` FROM `settings` WHERE `setting` = 'allowed_modules'", 'value'));
 							$s = 'INSERT INTO `facts` (`host`, `fact`, `data`, `type`, `time`) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `data` = ?, `time` = ?';
 							foreach ($fs as $k => $v) {
-								$v = str_replace(array("'", '"'), '', $v);
-								db_execute_prepare($s, array($h, sql_clean_fact($k), $v, sql_clean_fact($t), $time, $v, $time));
+								if (in_array(strtolower($t), $allowed_modules)) {
+									$v = str_replace(array("'", '"'), '', $v);
+									db_execute_prepare($s, array($h, sql_clean_fact($k), $v, sql_clean_fact($t), $time, $v, $time));
+								}
 							}
 						}
 					}
