@@ -27,6 +27,16 @@ if (isset($_GET['action']) && $_GET['action'] == 'save') {
 	$hosts_retention = intval($_POST['hosts_retention']);
 	$remove_invocation = (isset($_POST['remove_invocation']) ? 1 : 0);
 
+	if (isset($_POST['allowed_modules']) && is_array($_POST['allowed_modules'])) {
+		$allowed_modules = array();
+		foreach ($_POST['allowed_modules'] as $a) {
+			$allowed_modules[] = strtolower(sql_clean_fact($a));
+		}
+		$allowed_modules = implode(',', $allowed_modules);
+	} else {
+		$allowed_modules = '';
+	}
+	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($allowed_modules, 'allowed_modules'));
 	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($changes_retention, 'changes_retention'));
 	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($facts_retention, 'facts_retention'));
 	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($hosts_retention, 'hosts_retention'));
@@ -68,4 +78,6 @@ foreach ($set as $s) {
 	$settings[$s['setting']] = $s['value'];
 }
 
-echo $twig->render('settings.html', array_merge($twigarr, array('settings' => $settings)));
+$default_modules = array('gather_facts', 'ansible.builtin.package_facts', 'ansible.builtin.service_facts');
+
+echo $twig->render('settings.html', array_merge($twigarr, array('settings' => $settings, 'default_modules' => $default_modules)));

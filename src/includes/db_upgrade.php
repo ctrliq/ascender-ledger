@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 8;
+$new_db_version = 9;
 
 $db_version = read_setting('db_version', 1);
 
@@ -27,6 +27,8 @@ if ($new_db_version != $db_version) {
 			case 7:
 				db_execute("ALTER TABLE `users` ADD `view_changes` tinyint(1) NOT NULL DEFAULT '1' AFTER `super`");
 				db_execute("ALTER TABLE `users` ADD `view_facts` tinyint(1) NOT NULL DEFAULT '1' AFTER `super`");
+			case 8:
+				db_execute_prepare("INSERT INTO `settings` (`setting`, `value`) VALUES (?, ?)", array('allowed_modules', 'gather_facts'));
 
 		}
 	} catch (Exception $e) {
