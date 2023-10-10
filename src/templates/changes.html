@@ -6,19 +6,36 @@
 		<div class="border p-4">
 			<div class="border p-2">
 				<form action="/changes/">
-					<div class="row filters">
-						<label for="hosts" class="col-sm-1 col-form-label text-end">Hosts</label>
-						<div class="col">
-							<select class="form-control form-select-sm chosen-select" name=hosts id=hosts>
-								<option></option>
-			{% for i,h in hosts %}
-								<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
-			{% endfor %}
-							</select>
+					<div class="row">
+						<div class="col-7">
+							<label for="hosts" class="col-form-label text-end pe-3">Add a Filter</label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-2">
+								<select class="form-control form-select form-select-sm" name=addfilter id=addfilter>
+									<option class="fst-italic" selected disabled>Select a Filter</option>
+									<option value="csearch">Search</option>
+									<option value="hosts">Hosts</option>
+									<option value="templates">Templates</option>
+									<option value="playbooks">Playbooks</option>
+									<option value="modules">Modules</option>
+									<option value="types">Job Type</option>
+									<option value="inventories">Inventory</option>
+									<option value="projects">Project</option>
+								</select>
 						</div>
 
-						<label for="playbooks" class="col-sm-1 col-form-label text-end">Playbooks</label>
-						<div class="col">
+						<div id=filter_hosts class="col-4" style="display: none">
+								<select class="form-control form-select-sm chosen-select" name=hosts id=hosts >
+									<option></option>
+			{% for i,h in hosts %}
+									<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
+			{% endfor %}
+								</select>
+						</div>
+
+						<div id=filter_playbooks class="col-4" style="display: none">
 							<select class="form-control form-select-sm chosen-select" name=playbooks id=playbooks>
 								<option></option>
 			{% for p in playbooks %}
@@ -27,17 +44,73 @@
 							</select>
 						</div>
 
-						<label for="csearch" class="col-sm-1 col-form-label text-end">Search</label>
-						<div class="col">
+						<div id=filter_templates class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name=templates id=templates>
+								<option></option>
+			{% for t in templates %}
+								<option value={{ t.job_template_id }} {% if template == t.job_template_id %} selected{% endif %}>{{ t.name }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<div id=filter_modules class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name=modules id=modules>
+								<option></option>
+			{% for m in modules %}
+								<option{% if module == m %} selected{% endif %}>{{ m }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<div id=filter_types class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name=types id=types>
+								<option></option>
+			{% for t,n in types %}
+								<option value="{{ t }}" {% if type == t %} selected{% endif %}>{{ n }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<div id=filter_inventories class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name=inventories id=inventories>
+								<option></option>
+			{% for t,n in inventories %}
+								<option value="{{ t }}" {% if type == t %} selected{% endif %}>{{ n }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<div id=filter_projects class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name=projects id=projects>
+								<option></option>
+			{% for t,n in projects %}
+								<option value="{{ t }}" {% if type == t %} selected{% endif %}>{{ n }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+
+
+						<div id=filter_csearch class="col-4" style="display: none">
 							<input type="text" class="form-control form-control-sm" name=csearch id=csearch value="{{ csearch }}" placeholder="Search all Changes">
 						</div>
-						<div class="col">
-							<a href=/changes/?clear=1><button type="button" class="btn btn-primary btn-s">Clear</button></a>
-							<input type="submit" style="display: none" />
+						<div class="col-1 align-text-bottom">
+							<a onclick="addfilters()" href="#"><button type="button" class="btn btn-primary btn-s" name=add id=add>Add</button></a>
 						</div>
 					</div>
 				</form>
-
+				<br>
+				<div class="col-12">
+					Filters: 
+					{%if host %}<a href=/changes/?clear=host><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
+					{%if template %}<a href=/changes/?clear=template><button type="button" class="btn btn-primary btn-xs ms-1">TEMPLATE: <i>{{ templates[template].name }}</i></button></a>{% endif %}
+					{%if playbook %}<a href=/changes/?clear=playbook><button type="button" class="btn btn-primary btn-xs ms-1">PLAYBOOK: <i>{{ playbook }}</i></button></a>{% endif %}
+					{%if module %}<a href=/changes/?clear=module><button type="button" class="btn btn-primary btn-xs ms-1">MODULE: <i>{{ module }}</i></button></a>{% endif %}
+					{%if type %}<a href=/changes/?clear=type><button type="button" class="btn btn-primary btn-xs ms-1">JOB TYPE: <i>{{ types[type] }}</i></button></a>{% endif %}
+					{%if inventory %}<a href=/changes/?clear=inventory><button type="button" class="btn btn-primary btn-xs ms-1">INVENTORY: <i>{{ inventories[inventory] }}</i></button></a>{% endif %}
+					{%if project %}<a href=/changes/?clear=project><button type="button" class="btn btn-primary btn-xs ms-1">PROJECT: <i>{{ projects[project] }}</i></button></a>{% endif %}
+					{%if csearch %}<a href=/changes/?clear=csearch><button type="button" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ csearch }}</i></button></a>{% endif %}
+				</div>
 			</div>
 			<br><br>
 			<div class="table-responsive">
@@ -51,20 +124,18 @@
 							<th>Role</th>
 							<th>Task</th>
 							<th>Module</th>
-								<th style="display:none;">Changes</th>
 						</tr>
 						</thead>
 						<tbody>
 	{% for r in changes %}
 						<tr>
 							<td width=30><a href='/changes/view/{{ r['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-eye"></i></a></td>
-							<td nowrap>{{ (r['time'] - 21600)|date("m/d/Y H:i") }}</td>
-							<td nowrap>{{ hosts[r['host']] }}</td>
-							<td>{{ r['playbook'] }}</td>
-							<td>{{ r['role'] }}</td>
-							<td>{{ r['task'] }}</td>
-							<td>{{ r['task_action'] }}</td>
-							<td style="display:none;">{{ r['res'] }}</td>
+							<td nowrap{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ (r['time'] - 21600)|date("m/d/Y H:i") }}</td>
+							<td nowrap{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ hosts[r['host']] }}</td>
+							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['playbook'] }}</td>
+							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['role'] }}</td>
+							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['task'] }}</td>
+							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['task_action'] }}</td>
 						</tr>
 	{% endfor %}
 					</tbody>
@@ -78,29 +149,104 @@
 
 {% endblock %}
 {% block javascriptinc %}
-{% endblock %}
-{% block javascript %}
+<script>
 
-	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true });
+	function change_addfilter () {
+		var filter = $("#addfilter").find(":selected").attr("value");
+		$("#filter_hosts").hide();
+		$("#filter_playbooks").hide();
+		$("#filter_templates").hide();
+		$("#filter_modules").hide();
+		$("#filter_types").hide();
+		$("#filter_inventories").hide();
+		$("#filter_projects").hide();
+		$("#filter_csearch").hide();
+		if (filter != undefined && filter != "") {
+			$("#filter_" +	 filter).show()
+		}
+	}
 
-	function change_host_filter () {
+	function addfilters () {
+		var filter = $("#addfilter").find(":selected").attr("value");
+		if (filter != undefined) {
+			var func = "change_" + filter + "_filter";
+			eval(func + "()"); 
+		}
+	}
+
+	function change_hosts_filter () {
 		var host = $("#hosts").find(":selected").attr("id");
 		if (host == undefined) {
 			host = "";
 		}
-		window.location = "/changes/?host=" + host;
+		window.location = "/changes/addfilter/host/" + host;
 	}
 
-	function change_playbook_filter () {
+	function change_playbooks_filter () {
 		var playbook = $("#playbooks").find(":selected").val();
 		if (playbook == undefined) {
 			playbook = "";
 		}
-		window.location = "/changes/?playbook=" + playbook;
+		window.location = "/changes/addfilter/playbook/" + playbook;
 	}
 
-	$("#hosts").change(change_host_filter);
-	$("#playbooks").change(change_playbook_filter);
+	function change_templates_filter () {
+		var template = $("#templates").find(":selected").val();
+		if (template == undefined) {
+			template = "";
+		}
+		window.location = "/changes/addfilter/template/" + template ;
+	}
+
+	function change_modules_filter () {
+		var module = $("#modules").find(":selected").val();
+		if (module == undefined) {
+			module = "";
+		}
+		window.location = "/changes/addfilter/module/" + module;
+	}
+
+	function change_types_filter () {
+		var type = $("#types").find(":selected").val();
+		if (type == undefined) {
+			type= "";
+		}
+		window.location = "/changes/addfilter/type/" + type;
+	}
+
+	function change_inventories_filter () {
+		var inventory = $("#inventories").find(":selected").attr("value");
+		if (inventory == undefined) {
+			inventory = "";
+		}
+		window.location = "/changes/addfilter/inventory/" + inventory;
+	}
+
+	function change_projects_filter () {
+		var project = $("#projects").find(":selected").attr("value");
+		if (project == undefined) {
+			project = "";
+		}
+		window.location = "/changes/addfilter/project/" + project;
+	}
+
+	function change_csearch_filter () {
+		var csearch = $("#csearch").val();
+		if (csearch == undefined) {
+			csearch = "";
+		}
+		window.location = "/changes/addfilter/csearch/" + csearch;
+	}
+
+	$("#addfilter").change(change_addfilter);
+	change_addfilter ();
+
+</script>
+
+{% endblock %}
+{% block javascript %}
+
+	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true });
 
 
 	$('.datatable-facts').DataTable({

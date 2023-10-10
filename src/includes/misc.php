@@ -84,6 +84,12 @@ function reindex_arr_by_id_col($a, $c) {
 	return $d;
 }
 
+function ppre($arr) {
+	print "<pre>";
+	print_r($arr);
+	print "</pre>";
+}
+
 function build_filter($filters) {
 
 	$sql = "SELECT DISTINCT f.`host` FROM `facts` as f\n";
