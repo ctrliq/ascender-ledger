@@ -17,7 +17,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'view' && $_GET['change'] == in
 	if (isset($change['id']) && $change['id']) {
 #		$change['res'] = unserialize(base64_decode($change['res']));
 		$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `name` = ?', array($change['server']));
-		$job = db_fetch_assoc_prepare('SELECT * FROM `jobs` WHERE `job` = ? AND `host` = ?', array($change['job'], $change['server']));
+#		$job = db_fetch_assoc_prepare('SELECT * FROM `jobs` WHERE `job` = ? AND `host` = ?', array($change['job'], $change['server']));
+		$job = db_fetch_assoc_prepare('SELECT * FROM `jobs` WHERE `job` = ?', array($change['job']));
 		//$res = parse_res($change['task_action'], $change['res']);
 		$res = $change['res'];
 		echo $twig->render('change.html', array_merge($twigarr, array('change' => $change, 'server' => $server, 'hosts' => $h, 'res' => $res, 'job' => $job)));
