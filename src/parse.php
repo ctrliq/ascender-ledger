@@ -134,7 +134,7 @@ if (isset($d['logger_name'])) {
 										sql_clean_project($d['changes']['inventory']),
 										sql_clean_project($d['changes']['project']),
 										sql_clean_project($d['changes']['scm_branch']),
-										(isset($d['changes']['execution_environment']) ? sql_clean_name($d['changes']['execution_environment']) : ''), 
+										(isset($d['changes']['execution_environment']) ? sql_clean_project($d['changes']['execution_environment']) : ''), 
 										sql_clean_email($d['actor']),
 										sql_clean_limit($d['changes']['limit'])
 									));
