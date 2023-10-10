@@ -7,14 +7,9 @@
 			<div class="border p-2">
 				<form action="/changes/">
 					<div class="row">
-						<div class="col-7">
-							<label for="hosts" class="col-form-label text-end pe-3">Add a Filter</label>
-						</div>
-					</div>
-					<div class="row">
 						<div class="col-2">
 								<select class="form-control form-select form-select-sm" name=addfilter id=addfilter>
-									<option class="fst-italic" selected disabled>Select a Filter</option>
+									<option class="fst-italic" selected disabled>Add a Filter</option>
 									<option value="csearch">Search</option>
 									<option value="hosts">Hosts</option>
 									<option value="templates">Templates</option>
@@ -102,14 +97,14 @@
 				<br>
 				<div class="col-12">
 					Filters: 
-					{%if host %}<a href=/changes/?clear=host><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
-					{%if template %}<a href=/changes/?clear=template><button type="button" class="btn btn-primary btn-xs ms-1">TEMPLATE: <i>{{ templates[template].name }}</i></button></a>{% endif %}
-					{%if playbook %}<a href=/changes/?clear=playbook><button type="button" class="btn btn-primary btn-xs ms-1">PLAYBOOK: <i>{{ playbook }}</i></button></a>{% endif %}
-					{%if module %}<a href=/changes/?clear=module><button type="button" class="btn btn-primary btn-xs ms-1">MODULE: <i>{{ module }}</i></button></a>{% endif %}
-					{%if type %}<a href=/changes/?clear=type><button type="button" class="btn btn-primary btn-xs ms-1">JOB TYPE: <i>{{ types[type] }}</i></button></a>{% endif %}
-					{%if inventory %}<a href=/changes/?clear=inventory><button type="button" class="btn btn-primary btn-xs ms-1">INVENTORY: <i>{{ inventories[inventory] }}</i></button></a>{% endif %}
-					{%if project %}<a href=/changes/?clear=project><button type="button" class="btn btn-primary btn-xs ms-1">PROJECT: <i>{{ projects[project] }}</i></button></a>{% endif %}
-					{%if csearch %}<a href=/changes/?clear=csearch><button type="button" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ csearch }}</i></button></a>{% endif %}
+					{%if host %}<a href=/changes/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
+					{%if template %}<a href=/changes/?clear=template title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">TEMPLATE: <i>{{ templates[template].name }}</i></button></a>{% endif %}
+					{%if playbook %}<a href=/changes/?clear=playbook title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">PLAYBOOK: <i>{{ playbook }}</i></button></a>{% endif %}
+					{%if module %}<a href=/changes/?clear=modul title="Remove"e><button type="button" class="btn btn-primary btn-xs ms-1">MODULE: <i>{{ module }}</i></button></a>{% endif %}
+					{%if type %}<a href=/changes/?clear=type title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">JOB TYPE: <i>{{ types[type] }}</i></button></a>{% endif %}
+					{%if inventory %}<a href=/changes/?clear=inventory title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">INVENTORY: <i>{{ inventories[inventory] }}</i></button></a>{% endif %}
+					{%if project %}<a href=/changes/?clear=project title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">PROJECT: <i>{{ projects[project] }}</i></button></a>{% endif %}
+					{%if csearch %}<a href=/changes/?clear=csearch title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ csearch }}</i></button></a>{% endif %}
 				</div>
 			</div>
 			<br><br>
