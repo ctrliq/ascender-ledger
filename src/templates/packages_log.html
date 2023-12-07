@@ -62,7 +62,7 @@
 					</thead>
 					<tbody>
 {% for r in packages %}
-						<tr>
+						<tr class='{% if r['status'] == 2 %}table-danger{% else %}table-success{% endif %}'>
 							<td nowrap data-order="{{ r['time'] }}">{{ r['time']|date("m/d/Y H:i") }}</td>
 							<td nowrap>{{ hosts[r['host']] }}</td>
 							<td nowrap>{{ r['name'] }}</td>
