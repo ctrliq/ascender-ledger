@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 9;
+$new_db_version = 10;
 
 $db_version = read_setting('db_version', 1);
 
@@ -29,6 +29,53 @@ if ($new_db_version != $db_version) {
 				db_execute("ALTER TABLE `users` ADD `view_facts` tinyint(1) NOT NULL DEFAULT '1' AFTER `super`");
 			case 8:
 				db_execute_prepare("INSERT INTO `settings` (`setting`, `value`) VALUES (?, ?)", array('allowed_modules', 'gather_facts'));
+			case 9:
+				db_execute("CREATE TABLE IF NOT EXISTS `packages` (
+							`host` int NOT NULL,
+							`name` varchar(128) NOT NULL,
+							`version` varchar(32) NOT NULL,
+							`release` varchar(32) NOT NULL,
+							`epoch` varchar(32) NOT NULL,
+							`arch` varchar(32) NOT NULL,
+							`source` varchar(32) NOT NULL,
+							`check` tinyint(1) NOT NULL DEFAULT '0')");
+				db_execute("ALTER TABLE `packages`
+							ADD PRIMARY KEY `host_name` (`host`, `name`),
+							ADD INDEX `host` (`host`),
+							ADD INDEX `name` (`name`),
+							ADD INDEX `arch` (`arch`),
+							ADD INDEX `check` (`check`);");
+				db_execute("CREATE TABLE IF NOT EXISTS `services` (
+							`host` int NOT NULL,
+							`name` varchar(128) NOT NULL,
+							`state` varchar(32) NOT NULL,
+							`status` varchar(32) NOT NULL,
+							`source` varchar(32) NOT NULL);");
+				db_execute("ALTER TABLE `services`
+							ADD PRIMARY KEY `host_name` (`host`, `name`),
+							ADD INDEX `host` (`host`),
+							ADD INDEX `name` (`name`),
+							ADD INDEX `state` (`state`),
+							ADD INDEX `status` (`status`),
+							ADD INDEX `source` (`source`);");
+				db_execute("CREATE TABLE IF NOT EXISTS `packages_log` (
+							`host` int NOT NULL,
+							`name` varchar(128) NOT NULL,
+							`version` varchar(32) NOT NULL,
+							`release` varchar(32) NOT NULL,
+							`epoch` varchar(32) NOT NULL,
+							`arch` varchar(32) NOT NULL,
+							`source` varchar(32) NOT NULL,
+							`date` int NOT NULL,
+							`status` tinyint NOT NULL
+							);");
+				db_execute("ALTER TABLE `packages_log`
+							ADD PRIMARY KEY `host_name_version_release` (`host`, `name`, `version`, `release`),
+							ADD INDEX `host` (`host`),
+							ADD INDEX `name` (`name`),
+							ADD INDEX `date` (`date`),
+							ADD INDEX `status` (`status`);");
+
 
 		}
 	} catch (Exception $e) {

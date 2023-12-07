@@ -17,9 +17,11 @@ require_once('includes/email.php');
 $changes_retention = read_setting('changes_retention', 30);
 $hosts_retention = read_setting('hosts_retention', 30);
 $facts_retention = read_setting('facts_retention', 30);
+$packages_retention = read_setting('packages_retention', 30);
 
 $hr = time() - ($hosts_retention * 86400);
 $fr = time() - ($facts_retention * 86400);
+$pr = time() - ($packages_retention * 86400);
 $cr = time() - ($changes_retention * 86400);
 $sr = time() - (7 * 86400);
 
@@ -28,6 +30,9 @@ $sr = time() - (7 * 86400);
 $hosts = db_fetch_assocs_prepare('SELECT * FROM `hosts` WHERE `time` < ?', array($hr));
 if (!empty($hosts)) {
     foreach ($hosts as $h) {
+        db_execute_prepare('DELETE FROM `services` WHERE `host` = ?', array($h['id']));
+        db_execute_prepare('DELETE FROM `packages` WHERE `host` = ?', array($h['id']));
+        db_execute_prepare('DELETE FROM `packages_logs` WHERE `host` = ?', array($h['id']));
         db_execute_prepare('DELETE FROM `facts` WHERE `host` = ?', array($h['id']));
         db_execute_prepare('DELETE FROM `changes` WHERE `host` = ?', array($h['id']));
         db_execute_prepare('DELETE FROM `hosts` WHERE `id` = ?', array($h['id']));
@@ -39,6 +44,9 @@ db_execute_prepare('DELETE FROM `facts` WHERE `time` < ?', array($fr));
 
 # Clean Up old Changes
 db_execute_prepare('DELETE FROM `changes` WHERE `time` < ?', array($cr));
+
+# Clean Up Packages Log
+db_execute_prepare('DELETE FROM `packages_log` WHERE `time` < ?', array($pr));
 
 # Clean Up old Sessions
 db_execute_prepare('DELETE FROM `sessions` WHERE `access` < ?', array($sr));

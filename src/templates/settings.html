@@ -53,6 +53,16 @@
 								</select>
 							</div>
 						</div>
+						<div class="mb-3">
+							<label class="form-label">Package Log Retention (Days)</label>
+							<div>
+								<select class="form-control" name=packages_retention id=packages_retention>
+									{% for i in range(30, 360, 30) %}
+									<option{% if settings.packages_retention == i %} selected{% endif %}>{{ i }}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
 
 						<div class="form-outline mb-3">
 							<label class="form-label" for="author">Allowed Fact Modules</label>

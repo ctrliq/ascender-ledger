@@ -56,6 +56,14 @@ function sql_clean_username($text) {
 	return preg_replace('/[^A-Za-z0-9\.@\-\+]/', '', $text);
 }
 
+function sql_clean_code($text) {
+	return preg_replace('/[^A-Za-z0-9]/', '', $text);
+}
+
+function sql_clean_csearch($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\. ]/', '', $text);
+}
+
 function sql_clean_email($text) {
 	return preg_replace('/[^A-Za-z0-9\.@\-\+]/', '', $text);
 }
@@ -76,12 +84,8 @@ function sql_clean_limit($text) {
 	return preg_replace('/[^A-Za-z0-9_\-: \|\[\],]/', '', $text);
 }
 
-function sql_clean_project($text) {
-	return preg_replace('/[^A-Za-z0-9\-_\. ]/', '', $text);
-}
-
-function sql_clean_playbook($text) {
-	return preg_replace('/[^A-Za-z0-9\-_\.\/]/', '', $text);
+function sql_clean_package($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\.@\+]/', '', $text);
 }
 
 function sql_clean_play($text) {
@@ -90,12 +94,12 @@ function sql_clean_play($text) {
 	return $text;
 }
 
-function sql_clean_csearch($text) {
-	return preg_replace('/[^A-Za-z0-9\-_\. ]/', '', $text);
+function sql_clean_playbook($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\.\/]/', '', $text);
 }
 
-function sql_clean_code($text) {
-	return preg_replace('/[^A-Za-z0-9]/', '', $text);
+function sql_clean_project($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\. ]/', '', $text);
 }
 
 function sql_clean_setting($text) {
@@ -106,6 +110,9 @@ function sql_clean_timestamp($text) {
 	return preg_replace('/[^A-Za-z0-9_\-: ]/', '', $text);
 }
 
+function sql_clean_service_name($text) {
+	return preg_replace('/[^A-Za-z0-9\-_\.@\+]/', '', $text);
+}
 
 
 

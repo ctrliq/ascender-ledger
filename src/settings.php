@@ -9,6 +9,7 @@ if (!$account['super']) {
 
 $changes_retention = read_setting('changes_retention', 30);
 $facts_retention = read_setting('facts_retention', 30);
+$packages_retention = read_setting('packages_retention', 30);
 $hosts_retention = read_setting('hosts_retention', 30);
 $remove_invocation = read_setting('remove_invocation', 0);
 $email_fromname = read_setting('email_fromname', 'Ascender Ledger');
@@ -23,6 +24,7 @@ $smtp_password = read_setting('smtp_password', '');
 
 if (isset($_GET['action']) && $_GET['action'] == 'save') {
 	$changes_retention = intval($_POST['changes_retention']);
+	$packages_retention = intval($_POST['packages_retention']);
 	$facts_retention = intval($_POST['facts_retention']);
 	$hosts_retention = intval($_POST['hosts_retention']);
 	$remove_invocation = (isset($_POST['remove_invocation']) ? 1 : 0);
@@ -38,6 +40,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'save') {
 	}
 	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($allowed_modules, 'allowed_modules'));
 	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($changes_retention, 'changes_retention'));
+	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($packages_retention, 'packages_retention'));
 	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($facts_retention, 'facts_retention'));
 	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($hosts_retention, 'hosts_retention'));
 
@@ -78,6 +81,6 @@ foreach ($set as $s) {
 	$settings[$s['setting']] = $s['value'];
 }
 
-$default_modules = array('gather_facts', 'ansible.builtin.package_facts', 'ansible.builtin.service_facts');
+$default_modules = array('gather_facts');
 
 echo $twig->render('settings.html', array_merge($twigarr, array('settings' => $settings, 'default_modules' => $default_modules)));
