@@ -71,7 +71,7 @@ body {
 }
 
 body {
-    font-size: 13px !important;
+    font-size: 14px !important;
 }
 
 .nav-link {
@@ -120,3 +120,18 @@ body {
   background-color: #555 !important;
 }
 
+.accordion-button {
+  color: #000;
+  --bs-accordion-border-color: #000 !important;
+  --bs-accordion-btn-focus-border-color: #000 !important;
+}
+
+.accordion-button:not(.collapsed) {
+  color: #000;
+  background-color: #e3e3e3;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(0,0,0,.125);
+}
