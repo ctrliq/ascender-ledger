@@ -3,7 +3,7 @@
 {% block body %}
 <div class="wrapper  text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="bd-example">
+		<div class="shadow-sm bd-example">
 			<h3>Change</h3>
 				<table class="table table-striped datatable-columns">
 					<thead>
@@ -44,7 +44,12 @@
 						<tr><td>Role</td><td>{{ change.role }}</td></tr>
 						<tr><td>Task</td><td>{{ change.task }}</td></tr>
 						<tr><td>Module</td><td>{{ change.task_action }}</td></tr>
-						<tr><td>Data</td><td><pre>{{ res | raw }}</pre></td></tr>
+						{% set res = (res | escape('html')) %}
+						{% set res = (res | replace({'&lt;font color=red&gt;':'<font color=red>'})   ) %}
+						{% set res = (res | replace({'&lt;font color=green&gt;':'<font color=green>'})   ) %}
+						{% set res = (res | replace({'&lt;font color=blue&gt;':'<font color=blue>'})   ) %}
+						{% set res = (res | replace({'&lt;/font&gt;':'</font>'})   ) %}
+						<tr><td>Data</td><td><pre>{{ res| raw }}</pre></td></tr>
 					</tbody>
 				</table>
 		</div>
