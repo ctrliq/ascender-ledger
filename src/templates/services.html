@@ -34,7 +34,7 @@
 							<select class="form-select form-select-sm chosen-select" name=state id=state data-placeholder="Choose a state...">
 								<option></option>
 		{% for t in states %}
-								<option{% if state == t %} selected{% endif %}>{{ t }}</option>
+								<option{% if state == t %} selected{% endif %} value="{{ t }}">{{ t | title }}</option>
 		{% endfor %}
 							</select>
 						</div>
@@ -45,7 +45,7 @@
 							<select class="form-select form-select-sm chosen-select" name=status id=status data-placeholder="Choose a status...">
 								<option></option>
 		{% for t in statuses %}
-								<option{% if status == t %} selected{% endif %}>{{ t }}</option>
+								<option{% if status == t %} selected{% endif %} value="{{ t }}">{{ t | title }}</option>
 		{% endfor %}
 							</select>
 						</div>
@@ -65,7 +65,7 @@
 							<th>Name</th>
 							<th>State</th>
 							<th>Status</th>
-							<th>Source</th>
+							<th>Type</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -73,9 +73,9 @@
 						<tr>
 							<td nowrap>{{ hosts[r['host']] }}</td>
 							<td nowrap>{{ r['name'] }}</td>
-							<td nowrap>{{ r['state'] }}</td>
-							<td nowrap>{{ r['status'] }}</td>
-							<td nowrap>{{ r['source'] }}</td>
+							<td nowrap>{{ r['state'] | title }}</td>
+							<td nowrap>{{ r['status'] | title }}</td>
+							<td nowrap>{{ r['source'] | title }}</td>
 						</tr>
 {% endfor %}
 					</tbody>
