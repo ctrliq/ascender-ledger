@@ -24,5 +24,7 @@ $counts = array('hosts' => 0, 'facts' => 0, 'changes' => 0);
 $counts['hosts'] = db_fetch_cell('SELECT count(`id`) as count FROM `hosts`', 'count');
 $counts['facts'] = db_fetch_cell('SELECT count(`host`) as count FROM `facts`', 'count');
 $counts['changes'] = db_fetch_cell('SELECT count(`id`) as count FROM `changes`', 'count');
+$counts['packages'] = db_fetch_cell('SELECT count(`host`) as count FROM `packages`', 'count');
+
 
 echo $twig->render('dashboard.html', array_merge($twigarr, array('changes' => $changes, 'counts' => $counts, 'untrusted' => $untrusted)));

@@ -42,17 +42,35 @@ if (isset($d['logger_name'])) {
 			if (isset($d['event_data']['res']['ansible_facts'])) {
 				if (isset($d['host_name']) && strtolower($d['host_name']) != 'localhost') {
 					$f = $d['event_data']['res']['ansible_facts'];
-					$t = $d['event_data']['task_action'];
+					$t = strtolower($d['event_data']['task_action']);
 					$fs = parse_facts($f);
 					if (count($fs)) {
 						$h = check_host($d['host_name']);
 						if ($h) {
-							$allowed_modules = explode(',', db_fetch_cell("SELECT `value` FROM `settings` WHERE `setting` = 'allowed_modules'", 'value'));
-							$s = 'INSERT INTO `facts` (`host`, `fact`, `data`, `type`, `time`) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `data` = ?, `time` = ?';
-							foreach ($fs as $k => $v) {
-								if (in_array(strtolower($t), $allowed_modules)) {
-									$v = str_replace(array("'", '"'), '', $v);
-									db_execute_prepare($s, array($h, sql_clean_fact($k), $v, sql_clean_fact($t), $time, $v, $time));
+							if ($t == 'ansible.builtin.package_facts') {
+								$s = 'INSERT INTO `packages` (`host`, `name`, `version`, `release`, `epoch`, `arch`, `source`, `check`) VALUES (?, ?, ?, ?, ?, ?, ?, 1)';
+								$fs = $f['packages'];
+								db_execute_prepare('DELETE FROM `packages` WHERE `host` = ?', array($h));
+								foreach ($fs as $k => $v) {
+									db_execute_prepare($s, array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
+												sql_clean_package($v['arch']), sql_clean_package($v['source'])));
+								}
+							} elseif ($t == 'ansible.builtin.service_facts') {
+								$s = 'INSERT INTO `services` (`host`, `name`, `state`, `status`, `source`) VALUES (?, ?, ?, ?, ?)';
+								$fs = $f['services'];
+								db_execute_prepare('DELETE FROM `services` WHERE `host` = ?', array($h));
+								foreach ($fs as $k => $v) {
+									$v['name'] = str_replace("\\x2d", '-', $v['name']);
+									db_execute_prepare($s, array($h, sql_clean_service_name($v['name']), sql_clean_fact($v['state']), sql_clean_fact($v['status']), sql_clean_fact($v['source'])));
+								}
+							} else {
+								$allowed_modules = explode(',', db_fetch_cell("SELECT `value` FROM `settings` WHERE `setting` = 'allowed_modules'", 'value'));
+								if (in_array($t, $allowed_modules)) {
+									$s = 'INSERT INTO `facts` (`host`, `fact`, `data`, `type`, `time`) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `data` = ?, `time` = ?';
+									foreach ($fs as $k => $v) {
+										$v = str_replace(array("'", '"'), '', $v);
+										db_execute_prepare($s, array($h, sql_clean_fact($k), $v, sql_clean_fact($t), $time, $v, $time));
+									}
 								}
 							}
 						}

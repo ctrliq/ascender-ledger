@@ -3,8 +3,8 @@
 {% block body %}
 <div class="wrapper text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="border p-4">
-			<div class="border p-2">
+		<div class="shadow-sm border p-4">
+			<div class="shadow-sm border p-2">
 				<form action="/changes/">
 					<div class="row">
 						<div class="col-2">
@@ -116,7 +116,6 @@
 							<th>Date</th>
 							<th>Host</th>
 							<th>Playbook</th>
-							<th>Role</th>
 							<th>Task</th>
 							<th>Module</th>
 						</tr>
@@ -125,10 +124,9 @@
 	{% for r in changes %}
 						<tr>
 							<td width=30><a href='/changes/view/{{ r['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-eye"></i></a></td>
-							<td nowrap{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ (r['time'] - 21600)|date("m/d/Y H:i") }}</td>
+							<td nowrap{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['time']|date("m/d/Y H:i") }}</td>
 							<td nowrap{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ hosts[r['host']] }}</td>
 							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['playbook'] }}</td>
-							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['role'] }}</td>
 							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['task'] }}</td>
 							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['task_action'] }}</td>
 						</tr>

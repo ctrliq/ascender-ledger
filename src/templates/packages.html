@@ -1,0 +1,123 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper text-bg-light">
+	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+		<div class="border p-4">
+			<div class="border p-2">
+				<div class="row filters">
+					<div class="col">
+						<label for="hosts" class="col-sm-1 col-form-label text-end pe-3">Hosts</label>
+						<div>
+							<select class="form-select form-select-sm chosen-select" name=hosts id=hosts data-placeholder="Choose a host...">
+								<option></option>
+		{% for i,h in hosts %}
+								<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
+		{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="col">
+						<label for="facts" class="col-sm-1 col-form-label text-end pe-3">Package</label>
+						<div>
+							<select class="form-select form-select-sm chosen-select" name=package id=package data-placeholder="Choose a package...">
+								<option></option>
+		{% for f in upackages %}
+								<option{% if package == f %} selected{% endif %}>{{ f }}</option>
+		{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="col">
+						<label for="type" class="col-sm-1 col-form-label text-end pe-3">Arch Types</label>
+						<div>
+							<select class="form-select form-select-sm chosen-select" name=arch id=arch data-placeholder="Choose a type...">
+								<option></option>
+		{% for t in arches %}
+								<option{% if arch == t %} selected{% endif %}>{{ t }}</option>
+		{% endfor %}
+							</select>
+						</div>
+					</div>
+					<div class="col col-1 mt-auto">
+						<a href=/packages/?clear=1><button type="button" class="btn btn-primary btn-xs">Clear</button></a>
+					</div>
+				</div>
+			</div>
+			<br><br>
+			<div class="table-responsive">
+				<table class="table table-striped datatable-packages w-100">
+					<thead>
+						<tr>
+							<th>Host</th>
+							<th>Name</th>
+							<th>Version</th>
+							<th>Release</th>
+							<th>Epoch</th>
+							<th>Arch</th>
+							<th>Source</th>
+						</tr>
+					</thead>
+					<tbody>
+{% for r in packages %}
+						<tr>
+							<td nowrap>{{ hosts[r['host']] }}</td>
+							<td nowrap>{{ r['name'] }}</td>
+							<td nowrap>{{ r['version'] }}</td>
+							<td nowrap>{{ r['release'] }}</td>
+							<td nowrap>{{ r['epoch'] }}</td>
+							<td nowrap>{{ r['arch'] }}</td>
+							<td nowrap>{{ r['source'] }}</td>
+						</tr>
+{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+
+	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true, width: '100%' });
+
+	function change_host_filter () {
+		var host = $("#hosts").find(":selected").attr("id");
+		if (host == undefined) {
+			host = "";
+		}
+		window.location = "/packages/?host=" + host;
+	}
+
+	function change_package_filter () {
+		var package = $("#package").find(":selected").val();
+		if (package == undefined) {
+			package = "";
+		}
+		window.location = "/packages/?package=" + encodeURIComponent(package);
+	}
+
+	function change_arch_filter () {
+		var arch = $("#arch").find(":selected").val();
+		if (arch == undefined) {
+			arch = "";
+		}
+		window.location = "/packages/?arch=" + encodeURIComponent(arch);
+	}
+
+	$("#hosts").change(change_host_filter);
+	$("#package").change(change_package_filter);
+	$("#arch").change(change_arch_filter);
+
+	$('.datatable-packages').DataTable({
+		order: [[1, 'asc']],
+		pageLength: 25,
+		responsive: true,
+		buttons: []
+	});
+{% endblock %}

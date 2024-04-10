@@ -16,7 +16,7 @@
 	</style>
 
 	<script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
@@ -79,13 +79,25 @@
 								<i class="navicon fa fa-puzzle-piece"></i> <span class="ms-1 d-none d-sm-inline">Facts</span>
 							</a>
 						</li>
+
+						<li class="nav-item pf-c-nav__link mb-1">
+							<a href="/packages/" class="nav-link px-2 text-truncate align-middle{% if server == '/packages.php' %} active{%endif %}">
+								<i class="navicon fas fa-box"></i> <span class="ms-1 d-none d-sm-inline">Packages</span>
+							</a>
+						</li>
+
+						<li class="nav-item pf-c-nav__link mb-1">
+							<a href="/services/" class="nav-link px-2 text-truncate align-middle{% if server == '/services.php' %} active{%endif %}">
+								<i class="fas fa-database"></i> <span class="ms-1 d-none d-sm-inline">Services</span>
+							</a>
+						</li>
 {% endif %}
 {% if account.super %}
 						<li>
-							<a href="#submenu3" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-2 text-truncate align-middle mb-1" aria-expanded="true">
+							<a href="#submenu4" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-2 text-truncate align-middle mb-1" aria-expanded="true">
 								<i class="navicon fa fa-cog"></i> <span class="ms-1 d-none d-sm-inline">Admin</span>
 							</a>
-							<ul class="{% if server != '/users.php' and server != '/settings.php' and server != '/servers.php' %}collapse {%endif %} nav flex-column ms-4" id="submenu3" data-bs-parent="#menu">
+							<ul class="{% if server != '/users.php' and server != '/settings.php' and server != '/servers.php' %}collapse {%endif %} nav flex-column ms-4" id="submenu4" data-bs-parent="#menu">
 								<li class="pf-c-nav__link w-100 mb-1">
 									<a href="/users/" class="nav-link px-0{% if server == '/users.php' %} active{%endif %}"> <i class="navicon fa fa-users"></i> <span class="d-none d-sm-inline">Users</span></a>
 								</li>
