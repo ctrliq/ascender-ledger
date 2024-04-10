@@ -115,7 +115,7 @@ function sql_clean_service_name($text) {
 }
 
 function db_table_exists ($table) {
-	return (array_values(db_fetch_assoc("SHOW tables LIKE '$table'"))[0] ? true : false);
+	return (db_fetch_assoc("SHOW tables LIKE '$table'") ? true : false);
 }
 function db_column_exists ($table, $column) {
 	return (db_fetch_cell("SHOW columns FROM `$table` LIKE '$column'", 'Field') ? true : false);
