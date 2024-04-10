@@ -66,13 +66,6 @@
 								<i class="navicon fa fa-table"></i> <span class="ms-1 d-none d-sm-inline">Reports</span>
 							</a>
 						</li>
-{% if account.super %}
-						<li class="nav-item pf-c-nav__link mb-1">
-							<a href="/hosts/" class="nav-link px-2 text-truncate align-middle{% if server == '/hosts.php' %} active{%endif %}">
-								<i class="fas fa-server"></i> <span class="ms-1 d-none d-sm-inline">Hosts</span>
-							</a>
-						</li>
-{% endif %}
 {% if account.view_changes %}
 						<li class="nav-item pf-c-nav__link mb-1">
 							<a href="/changes/" class="nav-link px-2 text-truncate align-middle{% if server == '/changes.php' %} active{%endif %}">
