@@ -14,6 +14,7 @@ $hosts_retention = read_setting('hosts_retention', 30);
 $remove_invocation = read_setting('remove_invocation', 0);
 $email_fromname = read_setting('email_fromname', 'Ascender Ledger');
 $email_from = read_setting('email_from', 'ledger@ascender.local');
+$allowed_modules = read_setting('allowed_modules', 'gather_facts');
 
 $base_url = read_setting('base_url', (isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] . "://" : '') . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ''));
 $smtp_server = read_setting('smtp_server', '');
