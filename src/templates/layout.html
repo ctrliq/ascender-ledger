@@ -87,18 +87,10 @@
 							</a>
 						</li>
 
-						<li>
-							<a href="#submenu3" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-2 text-truncate align-middle mb-1" aria-expanded="true">
-								<i class="fas fa-box-open"></i> <span class="ms-1 d-none d-sm-inline">Packages</span>
+						<li class="nav-item pf-c-nav__link mb-1">
+							<a href="/packages/" class="nav-link px-2 text-truncate align-middle{% if server == '/packages.php' %} active{%endif %}">
+								<i class="navicon fas fa-box"></i> <span class="ms-1 d-none d-sm-inline">Packages</span>
 							</a>
-							<ul class="{% if server != '/packages.php' and server != '/packages_log.php' %}collapse {%endif %} nav flex-column ms-4" id="submenu3" data-bs-parent="#menu">
-								<li class="pf-c-nav__link w-100 mb-1">
-									<a href="/packages/" class="nav-link px-0{% if server == '/packages.php' %} active{%endif %}"> <i class="fas fa-box"></i> <span class="d-none d-sm-inline">Current</span></a>
-								</li>
-								<li class="pf-c-nav__link w-100 mb-1">
-									<a href="/packages/log/" class="nav-link px-0{% if server == '/packages_log.php' %} active{%endif %}"> <i class="fas fa-archive"></i> <span class="d-none d-sm-inline">Log</span></a>
-								</li>
-							</ul>
 						</li>
 
 						<li class="nav-item pf-c-nav__link mb-1">

@@ -114,7 +114,12 @@ function sql_clean_service_name($text) {
 	return preg_replace('/[^A-Za-z0-9\-_\.@\+]/', '', $text);
 }
 
-
+function db_table_exists ($table) {
+	return (array_values(db_fetch_assoc("SHOW tables LIKE '$table'"))[0] ? true : false);
+}
+function db_column_exists ($table, $column) {
+	return (db_fetch_cell("SHOW columns FROM `$table` LIKE '$column'", 'Field') ? true : false);
+}
 
 /**
  * Executes a SQL query, return last insert id

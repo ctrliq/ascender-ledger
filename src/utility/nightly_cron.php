@@ -23,7 +23,7 @@ $hr = time() - ($hosts_retention * 86400);
 $fr = time() - ($facts_retention * 86400);
 $pr = time() - ($packages_retention * 86400);
 $cr = time() - ($changes_retention * 86400);
-$sr = time() - (7 * 86400);
+$sr = time() - ($packages_retention * 86400);
 
 
 // Clean up old Hosts
@@ -32,7 +32,6 @@ if (!empty($hosts)) {
     foreach ($hosts as $h) {
         db_execute_prepare('DELETE FROM `services` WHERE `host` = ?', array($h['id']));
         db_execute_prepare('DELETE FROM `packages` WHERE `host` = ?', array($h['id']));
-        db_execute_prepare('DELETE FROM `packages_logs` WHERE `host` = ?', array($h['id']));
         db_execute_prepare('DELETE FROM `facts` WHERE `host` = ?', array($h['id']));
         db_execute_prepare('DELETE FROM `changes` WHERE `host` = ?', array($h['id']));
         db_execute_prepare('DELETE FROM `hosts` WHERE `id` = ?', array($h['id']));
@@ -44,9 +43,6 @@ db_execute_prepare('DELETE FROM `facts` WHERE `time` < ?', array($fr));
 
 # Clean Up old Changes
 db_execute_prepare('DELETE FROM `changes` WHERE `time` < ?', array($cr));
-
-# Clean Up Packages Log
-db_execute_prepare('DELETE FROM `packages_log` WHERE `time` < ?', array($pr));
 
 # Clean Up old Sessions
 db_execute_prepare('DELETE FROM `sessions` WHERE `access` < ?', array($sr));

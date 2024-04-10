@@ -48,48 +48,13 @@ if (isset($d['logger_name'])) {
 						$h = check_host($d['host_name']);
 						if ($h) {
 							if ($t == 'ansible.builtin.package_facts') {
-								// file_put_contents('packages.txt', print_r($f, true), FILE_APPEND);
 								$s = 'INSERT INTO `packages` (`host`, `name`, `version`, `release`, `epoch`, `arch`, `source`, `check`) VALUES (?, ?, ?, ?, ?, ?, ?, 1)';
-								$s2 = 'INSERT INTO `packages_log` (`host`, `name`, `version`, `release`, `epoch`, `arch`, `source`, `time`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)';
-								$s3 = 'INSERT INTO `packages_log` (`host`, `name`, `version`, `release`, `epoch`, `arch`, `source`, `time`, `status`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 2)';
-								db_execute_prepare('UPDATE `packages` SET `check` = 0 WHERE `host` = ?', array($h));
-								$opackages = db_fetch_assocs_prepare('SELECT * FROM `packages` WHERE `host` = ?', array($h));
-								$c = count($opackages);
-
 								$fs = $f['packages'];
-								foreach ($fs as $k => $b) {
-									foreach ($b as $v) {
-										$found = false;
-										if ($c) {
-											foreach ($opackages as $o) {
-												if ($o['name'] == sql_clean_package($v['name']) && $o['version'] == sql_clean_package($v['version']) && $o['release'] == sql_clean_package($v['release']) && intval($o['epoch']) == intval($v['epoch']) && $o['arch'] == sql_clean_package($v['arch']) && $o['source'] == sql_clean_package($v['source'])) {
-													$found = true;
-												}
-											}
-										}
-										if ($found) {
-											db_execute_prepare('UPDATE `packages` SET `check` = 1 WHERE `host` = ? AND `name` = ? AND `version` = ? AND `release` = ? AND `epoch` = ? AND `arch` = ? AND `source` = ?',
-												array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
+								db_execute_prepare('DELETE FROM `packages` WHERE `host` = ?', array($h));
+								foreach ($fs as $k => $v) {
+									db_execute_prepare($s, array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
 												sql_clean_package($v['arch']), sql_clean_package($v['source'])));
-										} else {
-											// Add the new Package
-											db_execute_prepare($s, array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
-												sql_clean_package($v['arch']), sql_clean_package($v['source'])));
-											if ($c) {
-												// Only log if we have existing packages
-												db_execute_prepare($s2, array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
-													sql_clean_package($v['arch']), sql_clean_package($v['source']), $time));
-											}
-										}
-									}
 								}
-
-								$removed = db_fetch_assocs_prepare('SELECT * FROM `packages` WHERE `host` = ? AND `check` = 0', array($h));
-								foreach ($removed as $v) {
-									// Package is missing so log it
-									db_execute_prepare($s3, array($h, $v['name'], $v['version'], $v['release'], $v['epoch'], $v['arch'], $v['source'], $time));
-								}
-								db_execute_prepare('DELETE FROM `packages` WHERE `host` = ? AND `check` = 0', array($h));
 							} elseif ($t == 'ansible.builtin.service_facts') {
 								$s = 'INSERT INTO `services` (`host`, `name`, `state`, `status`, `source`) VALUES (?, ?, ?, ?, ?)';
 								$fs = $f['services'];
