@@ -21,7 +21,7 @@ COPY ./files/php-fpm.conf /etc/php-fpm.d/www.conf
 
 COPY ./src /var/www/html
 
-RUN cd /var/www/html; /usr/local/bin/composer install
+RUN cd /var/www/html && /usr/local/bin/composer update && /usr/local/bin/composer install
 
 RUN mkdir -p /var/www/cache/ && chown nginx:nginx -R /var/www/cache/
 
