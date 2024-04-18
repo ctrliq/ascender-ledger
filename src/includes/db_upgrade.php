@@ -7,6 +7,8 @@ $db_version = read_setting('db_version', 1);
 if ($new_db_version != $db_version) {
 	try {
 		switch ($db_version) {
+			case 0:
+			case 1:
 			case 2:
 				if (!db_column_exists('users', 'super')) {
 					db_execute("ALTER TABLE `users` ADD `super` tinyint(1) NOT NULL DEFAULT '0';");
