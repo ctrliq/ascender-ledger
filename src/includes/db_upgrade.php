@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 10;
+$new_db_version = 11;
 
 $db_version = read_setting('db_version', 1);
 
@@ -57,7 +57,7 @@ if ($new_db_version != $db_version) {
 								`source` varchar(32) NOT NULL,
 								`check` tinyint(1) NOT NULL DEFAULT '0')");
 					db_execute("ALTER TABLE `packages`
-								ADD PRIMARY KEY `host_name` (`host`, `name`),
+								ADD PRIMARY KEY (`host`,`name`,`version`,`release`,`epoch`,`arch`),
 								ADD INDEX `host` (`host`),
 								ADD INDEX `name` (`name`),
 								ADD INDEX `arch` (`arch`),
@@ -78,6 +78,8 @@ if ($new_db_version != $db_version) {
 								ADD INDEX `status` (`status`),
 								ADD INDEX `source` (`source`);");
 				}
+			case 10:
+				db_execute("ALTER TABLE `packages` DROP PRIMARY KEY, ADD PRIMARY KEY (`host`,`name`,`version`,`release`,`epoch`,`arch`);");
 		}
 	} catch (Exception $e) {
 
