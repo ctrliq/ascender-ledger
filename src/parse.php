@@ -51,9 +51,11 @@ if (isset($d['logger_name'])) {
 								$s = 'INSERT INTO `packages` (`host`, `name`, `version`, `release`, `epoch`, `arch`, `source`, `check`) VALUES (?, ?, ?, ?, ?, ?, ?, 1)';
 								$fs = $f['packages'];
 								db_execute_prepare('DELETE FROM `packages` WHERE `host` = ?', array($h));
-								foreach ($fs as $k => $v) {
-									db_execute_prepare($s, array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
-												sql_clean_package($v['arch']), sql_clean_package($v['source'])));
+								foreach ($fs as $k => $b) {
+									foreach ($b as $v) {
+										db_execute_prepare($s, array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
+													sql_clean_package($v['arch']), sql_clean_package($v['source'])));
+									}
 								}
 							} elseif ($t == 'ansible.builtin.service_facts') {
 								$s = 'INSERT INTO `services` (`host`, `name`, `state`, `status`, `source`) VALUES (?, ?, ?, ?, ?)';
