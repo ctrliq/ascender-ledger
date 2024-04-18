@@ -53,8 +53,11 @@ if (isset($d['logger_name'])) {
 								db_execute_prepare('DELETE FROM `packages` WHERE `host` = ?', array($h));
 								foreach ($fs as $k => $b) {
 									foreach ($b as $v) {
-										db_execute_prepare($s, array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
-													sql_clean_package($v['arch']), sql_clean_package($v['source'])));
+										try {
+											db_execute_prepare($s, array($h, sql_clean_package($v['name']), sql_clean_package($v['version']), sql_clean_package($v['release']), sql_clean_package($v['epoch']),
+														sql_clean_package($v['arch']), sql_clean_package($v['source'])));
+										} catch (Exception $e) {
+										}
 									}
 								}
 							} elseif ($t == 'ansible.builtin.service_facts') {
