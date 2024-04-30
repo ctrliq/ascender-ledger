@@ -85,7 +85,7 @@ function sql_clean_limit($text) {
 }
 
 function sql_clean_package($text) {
-	return preg_replace('/[^A-Za-z0-9\-_\.@\+]/', '', $text);
+	return preg_replace('/[^A-Za-z0-9\-:_\.@\+]/', '', $text);
 }
 
 function sql_clean_play($text) {
