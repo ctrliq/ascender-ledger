@@ -26,8 +26,9 @@ if (isset($_GET['action']) && $_GET['action'] == 'view' && $_GET['change'] == in
 	}
 }
 
-$playbooks = reindex_col(db_fetch_assocs("SELECT DISTINCT `playbook` FROM `changes` ORDER BY `playbook` ASC"), 'playbook');
 $templates = reindex_arr_by_col(db_fetch_assocs("SELECT DISTINCT `jobs`.`job_template_id`, `jobs`.`name` FROM `changes` LEFT JOIN `jobs` ON `jobs`.`job` = `changes`.`job` ORDER BY `jobs`.`name` ASC"), 'job_template_id');
+$playbooks = reindex_col(db_fetch_assocs("SELECT DISTINCT `playbook` FROM `changes` ORDER BY `playbook` ASC"), 'playbook');
+$roles = reindex_col(db_fetch_assocs("SELECT DISTINCT `role` FROM `changes` ORDER BY `role` ASC"), 'role');
 $modules = reindex_col(db_fetch_assocs("SELECT DISTINCT `task_action` FROM `changes` ORDER BY `task_action` ASC"), 'task_action');
 $types = array('run' => 'Run Mode', 'check' => 'Check Mode');
 
@@ -53,8 +54,9 @@ foreach ($pros as $i) {
 
 $filters = array();
 $host = '';
-$playbook = '';
 $template = '';
+$playbook = '';
+$role = '';
 $module = '';
 $type = '';
 $inventory = '';
@@ -66,14 +68,17 @@ if (isset($_GET['clear'])) {
 	if ($_GET['clear'] == 'host') {
 		unset($_SESSION['changes_host']);
 	}
-	if ($_GET['clear'] == 'playbook') {
-		unset($_SESSION['changes_playbook']);
-	}
 	if ($_GET['clear'] == 'csearch') {
 		unset($_SESSION['changes_csearch']);
 	}
 	if ($_GET['clear'] == 'template') {
 		unset($_SESSION['changes_template']);
+	}
+	if ($_GET['clear'] == 'playbook') {
+		unset($_SESSION['changes_playbook']);
+	}
+	if ($_GET['clear'] == 'role') {
+		unset($_SESSION['changes_role']);
 	}
 	if ($_GET['clear'] == 'module') {
 		unset($_SESSION['changes_module']);
@@ -114,6 +119,13 @@ if (isset($_GET['action']) && $_GET['action'] == 'addfilter') {
 			$_SESSION['changes_template'] = intval($_GET['template']);
 		} else {
 			unset($_SESSION['changes_template']);
+		}
+	}
+	if (isset($_GET['role'])) {
+		if (in_array($_GET['role'], $roles)) {
+			$_SESSION['changes_role'] = sql_clean_fact($_GET['role']);
+		} else {
+			unset($_SESSION['changes_role']);
 		}
 	}
 	if (isset($_GET['module'])) {
@@ -161,13 +173,17 @@ if (isset($_SESSION['changes_host']) && $_SESSION['changes_host'] != '') {
 	$filters[] = " `changes`.`host` = " . intval($_SESSION['changes_host']);
 	$host = $_SESSION['changes_host'];
 }
+if (isset($_SESSION['changes_template']) && $_SESSION['changes_template'] != '') {
+	$filters[] = " `jobs`.`job_template_id` = " . intval($_SESSION['changes_template']);
+	$template = $_SESSION['changes_template'];
+}
 if (isset($_SESSION['changes_playbook']) && $_SESSION['changes_playbook'] != '') {
 	$filters[] = " `changes`.`playbook` = '" . sql_clean_playbook($_SESSION['changes_playbook']) . "'";
 	$playbook = $_SESSION['changes_playbook'];
 }
-if (isset($_SESSION['changes_template']) && $_SESSION['changes_template'] != '') {
-	$filters[] = " `jobs`.`job_template_id` = " . intval($_SESSION['changes_template']);
-	$template = $_SESSION['changes_template'];
+if (isset($_SESSION['changes_role']) && $_SESSION['changes_role'] != '') {
+	$filters[] = " `changes`.`role` = '" . sql_clean_hostname($_SESSION['changes_role']) . "'";
+	$role = $_SESSION['changes_role'];
 }
 if (isset($_SESSION['changes_module']) && $_SESSION['changes_module'] != '') {
 	$filters[] = " `changes`.`task_action` = '" . sql_clean_hostname($_SESSION['changes_module']) . "'";
@@ -203,7 +219,8 @@ if (!empty($filters)) {
 $changes = db_fetch_assocs("SELECT `changes`.*, `jobs`.`job_type` FROM `changes` LEFT JOIN `jobs` ON `jobs`.`job` = `changes`.`job` $filters ORDER BY `changes`.`time` DESC LIMIT 0,100");
 echo $twig->render('changes.html', array_merge($twigarr, array(
 		'changes' => $changes, 'hosts' => $h, 'playbooks' => $playbooks, 'templates' => $templates, 'modules' => $modules, 'types' => $types, 'inventories' => $inventories, 'projects' => $projects, 
-		'host' => $host, 'playbook' => $playbook, 'template' => $template, 'module' => $module, 'type' => $type, 'inventory' => $inventory, 'project' => $project, 'csearch' => $csearch)));
+		'host' => $host, 'playbook' => $playbook, 'template' => $template, 'roles' => $roles, 'role' => $role, 'module' => $module, 'type' => $type, 'inventory' => $inventory, 'project' => $project,
+		'csearch' => $csearch)));
 
 
 
