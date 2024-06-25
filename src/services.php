@@ -19,12 +19,18 @@ $state = '';
 $status = '';
 
 if (isset($_GET['clear'])) {
-	unset($_SESSION['services_host']);
-	unset($_SESSION['services_service']);
-	unset($_SESSION['services_state']);
-	unset($_SESSION['services_status']);
-	header("Location: /services/");
-	exit;
+	if ($_GET['clear'] == 'host') {
+		unset($_SESSION['services_host']);
+	}
+	if ($_GET['clear'] == 'service') {
+		unset($_SESSION['services_service']);
+	}
+	if ($_GET['clear'] == 'state') {
+		unset($_SESSION['services_state']);
+	}
+	if ($_GET['clear'] == 'status') {
+		unset($_SESSION['services_status']);
+	}
 }
 
 if (isset($_GET['host'])) {

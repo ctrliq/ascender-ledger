@@ -5,43 +5,63 @@
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
 		<div class="shadow-sm border p-4">
 			<div class="shadow-sm border p-2">
-				<div class="row filters">
-					<div class="col">
-						<label for="hosts" class="col-sm-1 col-form-label text-end pe-3">Hosts</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=hosts id=hosts data-placeholder="Choose a host...">
+				<form action="/facts/">
+					<div class="row">
+						<div class="col-2">
+								<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
+									<option class="fst-italic" selected disabled>Add a Filter</option>
+									<option value="hosts">Hosts</option>
+									<option value="facts">Facts</option>
+									<option value="types">Types</option>
+									<option value="search">Search</option>
+
+								</select>
+						</div>
+
+						<div id="filter_hosts" class="col-4" style="display: none">
+								<select class="form-control form-select-sm chosen-select" name="hosts" id="hosts" data-placeholder="Choose a Host...">
+									<option></option>
+			{% for i,h in hosts %}
+									<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
+			{% endfor %}
+								</select>
+						</div>
+
+						<div id="filter_facts" class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name="facts" id="facts" data-placeholder="Choose a Fact...">
 								<option></option>
-		{% for i,h in hosts %}
-								<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
-		{% endfor %}
+			{% for p in ufacts %}
+								<option{% if fact == p %} selected{% endif %}>{{ p }}</option>
+			{% endfor %}
 							</select>
 						</div>
-					</div>
-					<div class="col">
-						<label for="facts" class="col-sm-1 col-form-label text-end pe-3">Facts</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=facts id=facts data-placeholder="Choose a fact...">
+
+						<div id="filter_types" class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name="types" id="types" data-placeholder="Choose a Type...">
 								<option></option>
-		{% for f in ufacts %}
-								<option{% if fact == f %} selected{% endif %}>{{ f }}</option>
-		{% endfor %}
+			{% for t in types %}
+								<option {% if type == t %} selected{% endif %}>{{ t }}</option>
+			{% endfor %}
 							</select>
 						</div>
-					</div>
-					<div class="col">
-						<label for="type" class="col-sm-1 col-form-label text-end pe-3">Types</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=type id=type data-placeholder="Choose a type...">
-								<option></option>
-		{% for t in types %}
-								<option{% if type == t %} selected{% endif %}>{{ t }}</option>
-		{% endfor %}
-							</select>
+
+						<div id=filter_search class="col-4" style="display: none">
+							<input type="text" class="form-control form-control-sm" name="search" id="search" value="{{ search }}" placeholder="Search all values">
+						</div>
+
+						<div class="col-1 align-text-bottom">
+							<a onclick="addfilters()" href="#"><button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button></a>
 						</div>
 					</div>
-					<div class="col col-1 mt-auto">
-						<a href=/facts/?clear=1><button type="button" class="btn btn-primary btn-xs">Clear</button></a>
-					</div>
+				</form>
+				<br>
+				<div class="col-12">
+					Filters: 
+					{% if host %}<a href=/facts/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
+					{% if fact %}<a href=/facts/?clear=fact title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">FACT: <i>{{ fact }}</i></button></a>{% endif %}
+					{% if type %}<a href=/facts/?clear=type title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">TYPE: <i>{{ type }}</i></button></a>{% endif %}
+					{% if search %}<a href=/facts/?clear=search title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ search }}</i></button></a>{% endif %}
+
 				</div>
 			</div>
 			<br><br>
@@ -75,12 +95,27 @@
 
 {% endblock %}
 {% block javascriptinc %}
-{% endblock %}
-{% block javascript %}
+	<script>
+	function addfilters () {
+		var filter = $("#addfilter").find(":selected").attr("value");
+		if (filter != undefined) {
+			var func = "change_" + filter + "_filter";
+			eval(func + "()"); 
+		}
+	}
 
-	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true, width: '100%' });
+	function change_addfilter () {
+		var filter = $("#addfilter").find(":selected").attr("value");
+		$("#filter_hosts").hide();
+		$("#filter_facts").hide();
+		$("#filter_types").hide();
+		$("#filter_search").hide();
+		if (filter != undefined && filter != "") {
+			$("#filter_" +	 filter).show()
+		}
+	}
 
-	function change_host_filter () {
+	function change_hosts_filter () {
 		var host = $("#hosts").find(":selected").attr("id");
 		if (host == undefined) {
 			host = "";
@@ -88,7 +123,7 @@
 		window.location = "/facts/?host=" + host;
 	}
 
-	function change_fact_filter () {
+	function change_facts_filter () {
 		var fact = $("#facts").find(":selected").val();
 		if (fact == undefined) {
 			fact = "";
@@ -96,17 +131,28 @@
 		window.location = "/facts/?fact=" + fact;
 	}
 
-	function change_type_filter () {
-		var type = $("#type").find(":selected").val();
+	function change_types_filter () {
+		var type = $("#types").find(":selected").val();
 		if (type == undefined) {
 			type = "";
 		}
 		window.location = "/facts/?type=" + type;
 	}
 
-	$("#hosts").change(change_host_filter);
-	$("#facts").change(change_fact_filter);
-	$("#type").change(change_type_filter);
+	function change_search_filter () {
+		var search = $("#search").val();
+		if (search == undefined) {
+			search = "";
+		}
+		window.location = "/facts/?search=" + search;
+	}
+
+	$("#addfilter").change(change_addfilter);
+	change_addfilter ();
+	</script>
+{% endblock %}
+{% block javascript %}
+	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true, width: '100%' });
 
 	$('.datatable-changes').DataTable({
 		order: [[1, 'asc']],

@@ -15,13 +15,30 @@ $filters = array();
 $host = '';
 $package = '';
 $arch = '';
+$fullname = '';
+$errata = 0;
+
+if (isset($_GET['clearf'])) {
+	$_SESSION['packages_host'] = '';
+	$_SESSION['packages_package'] = '';
+	$_SESSION['packages_arch'] = '';
+	$_SESSION['packages_fullname'] = '';
+}
 
 if (isset($_GET['clear'])) {
-	unset($_SESSION['packages_host']);
-	unset($_SESSION['packages_package']);
-	unset($_SESSION['packages_arch']);
-	header("Location: /packages/");
-	exit;
+	if ($_GET['clear'] == 'host') {
+		unset($_SESSION['packages_host']);
+	}
+	if ($_GET['clear'] == 'package') {
+		unset($_SESSION['packages_package']);
+	}
+	if ($_GET['clear'] == 'arch') {
+		unset($_SESSION['packages_arch']);
+	}
+}
+
+if (isset($_GET['errata'])) {
+	$_SESSION['errata'] = 1;
 }
 
 if (isset($_GET['host'])) {
@@ -62,12 +79,12 @@ if (isset($_SESSION['packages_host']) && $_SESSION['packages_host'] != '') {
 
 if (isset($_SESSION['packages_package']) && $_SESSION['packages_package'] != '') {
 	$filters[] = " `name` = '" . sql_clean_package($_SESSION['packages_package']) . "'";
-	$package = sql_clean_fact($_SESSION['packages_package']);
+	$package = sql_clean_package($_SESSION['packages_package']);
 }
 
 if (isset($_SESSION['packages_arch']) && $_SESSION['packages_arch'] != '') {
 	$filters[] = " `arch` = '" . sql_clean_package($_SESSION['packages_arch']) . "'";
-	$arch = sql_clean_fact($_SESSION['packages_arch']);
+	$arch = sql_clean_package($_SESSION['packages_arch']);
 }
 
 $h = array();
@@ -80,6 +97,6 @@ if (!empty($filters)) {
 	$filters = '';
 }
 
-$packages = db_fetch_assocs("SELECT * FROM `packages` $filters ORDER BY `host`, `name` ASC" . ($filters == '' ? ' LIMIT 0,500' : ''));
+$packages = db_fetch_assocs("SELECT * FROM `packages` $filters ORDER BY `host`, `name` ASC, `version`, `release`" . ($filters == '' ? ' LIMIT 0,500' : ''));
 
 echo $twig->render('packages.html', array_merge($twigarr, array('arches' => $arches, 'arch' => $arch, 'upackages' => $upackages, 'hosts' => $h, 'host' => $host, 'package' => $package, 'packages' => $packages)));
