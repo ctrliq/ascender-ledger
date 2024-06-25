@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 11;
+$new_db_version = 17;
 
 $db_version = read_setting('db_version', 1);
 
@@ -80,6 +80,14 @@ if ($new_db_version != $db_version) {
 				}
 			case 10:
 				db_execute("ALTER TABLE `packages` DROP PRIMARY KEY, ADD PRIMARY KEY (`host`,`name`,`version`,`release`,`epoch`,`arch`);");
+			case 11:
+			case 12:
+			case 13:
+			case 14:
+			case 15:
+			case 16:
+				db_execute("ALTER TABLE `users` CHANGE `password` `password` varchar(256) NOT NULL AFTER `email`;");
+	
 		}
 	} catch (Exception $e) {
 
