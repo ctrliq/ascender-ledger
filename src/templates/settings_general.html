@@ -1,0 +1,118 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+		<form method="post" action=/settings/save/ id=settingform class="form-horizontal">
+			<div class="shadow-sm border row justify-content-center p-4 mb-3">
+				<div class="float-start w-50">
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Ledger Base URL</label>
+						<div>
+							<input type="text" class="form-control w-75" name=base_url id=base_url value='{{ settings.base_url }}'>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Remove Invocation from Changes</label>
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=remove_invocation id=remove_invocation {% if settings.remove_invocation %}checked{% endif %}>
+						</div>
+					</div>
+
+					<div class="form-outline mb-3">
+						<label class="form-label fs-6 fw-bold" for="author">Allowed Fact Modules</label>
+						<div class="w-75">
+							<select id="allowed_modules" name=allowed_modules[] class="chosen-select form-control" multiple/>
+{% for a in settings.allowed_modules|split(",") %}
+								<option value="{{ a }}" selected>{{ a }}</option>
+{% endfor %}
+{% for d in default_modules %}
+	{%- if d not in settings.allowed_modules|split(",") -%}
+								<option value="{{ d }}">{{ d }}</option>
+	{%- endif -%}
+{% endfor %}
+							</select><br>
+						</div>
+					</div>
+				</div>
+
+
+				<div class="float-start w-50">
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Hosts Retention (Days)</label>
+						<div>
+							<select class="form-control w-75" name=hosts_retention id=hosts_retention>
+								{% for i in range(30, 360, 30) %}
+								<option{% if settings.hosts_retention == i %} selected{% endif %}>{{ i }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Facts Retention (Days)</label>
+						<div>
+							<select class="form-control w-75" name=facts_retention id=facts_retention>
+								{% for i in range(30, 360, 30) %}
+								<option{% if settings.facts_retention == i %} selected{% endif %}>{{ i }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Changes Retention (Days)</label>
+						<div>
+							<select class="form-control w-75" name=changes_retention id=changes_retention>
+								{% for i in range(30, 360, 30) %}
+								<option{% if settings.changes_retention == i %} selected{% endif %}>{{ i }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Packages Retention (Days)</label>
+						<div>
+							<select class="form-control w-75" name=packages_retention id=packages_retention>
+								{% for i in range(30, 360, 30) %}
+								<option{% if settings.packages_retention == i %} selected{% endif %}>{{ i }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</div>
+
+				</div>
+			</div>
+
+			<div class="mb-3">
+				<div class="col-sm-offset-2">
+					<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
+				</div>
+			</div>
+
+		</form>
+	</div>
+</div>
+
+{% endblock %}
+{% block javascript %}
+$(function() {
+	var select = [], chosen = [];
+	$(".chosen-select").each(function(index) {
+		select[index] = $(this);
+		select[index].chosen({ no_results_text: 'Press Enter to add new entry:' });
+		chosen[index] = select[index].data('chosen');
+		chosen[index].search_field.on('keyup', function(e) {
+			if (e.which === 13 && chosen[index].dropdown.find('li.no-results').length > 0) {
+				var option = $("<option>").val(this.value).text(this.value);
+				select[index].prepend(option);
+				select[index].find(option).prop('selected', true);
+				select[index].trigger("chosen:updated");
+			}
+		});
+	});
+});
+
+{% endblock %}
