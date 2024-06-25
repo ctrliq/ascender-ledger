@@ -178,7 +178,9 @@ function clean_null_args($inv) {
 
 function create_diff($res) {
 	$from = $to = (isset($res[0]['before_header']) ? $res[0]['before_header'] : '');
-
+	$before = (isset($res[0]['before']) ? $res[0]['before'] : '');
+	$after = (isset($res[0]['after']) ? $res[0]['after'] : '');
+	
 	$builder = new StrictUnifiedDiffOutputBuilder([
 		'collapseRanges'      => true, // ranges of length one are rendered with the trailing `,1`
 		'commonLineThreshold' => 6,    // number of same lines before ending a new hunk and creating a new one (if needed)
@@ -190,7 +192,7 @@ function create_diff($res) {
 	]);
 
 	$differ = new Differ($builder);
-	$diff = $differ->diff($res[0]['before'], $res[0]['after']);
+	$diff = $differ->diff($before, $after);
 	return color_diff($diff);
 }
 
