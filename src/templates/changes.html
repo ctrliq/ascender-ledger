@@ -14,6 +14,7 @@
 									<option value="hosts">Hosts</option>
 									<option value="templates">Templates</option>
 									<option value="playbooks">Playbooks</option>
+									<option value="roles">Roles</option>
 									<option value="modules">Modules</option>
 									<option value="types">Job Type</option>
 									<option value="inventories">Inventory</option>
@@ -44,6 +45,15 @@
 								<option></option>
 			{% for t in templates %}
 								<option value={{ t.job_template_id }} {% if template == t.job_template_id %} selected{% endif %}>{{ t.name }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<div id=filter_roles class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name=roles id=roles>
+								<option></option>
+			{% for r in roles %}
+								<option value={{ r }} {% if role == r %} selected{% endif %}>{{ r }}</option>
 			{% endfor %}
 							</select>
 						</div>
@@ -100,6 +110,7 @@
 					{%if host %}<a href=/changes/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
 					{%if template %}<a href=/changes/?clear=template title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">TEMPLATE: <i>{{ templates[template].name }}</i></button></a>{% endif %}
 					{%if playbook %}<a href=/changes/?clear=playbook title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">PLAYBOOK: <i>{{ playbook }}</i></button></a>{% endif %}
+					{%if role %}<a href=/changes/?clear=role title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">ROLE: <i>{{ role }}</i></button></a>{% endif %}
 					{%if module %}<a href=/changes/?clear=module title="Remove"e><button type="button" class="btn btn-primary btn-xs ms-1">MODULE: <i>{{ module }}</i></button></a>{% endif %}
 					{%if type %}<a href=/changes/?clear=type title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">JOB TYPE: <i>{{ types[type] }}</i></button></a>{% endif %}
 					{%if inventory %}<a href=/changes/?clear=inventory title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">INVENTORY: <i>{{ inventories[inventory] }}</i></button></a>{% endif %}
@@ -149,6 +160,7 @@
 		$("#filter_hosts").hide();
 		$("#filter_playbooks").hide();
 		$("#filter_templates").hide();
+		$("#filter_roles").hide();
 		$("#filter_modules").hide();
 		$("#filter_types").hide();
 		$("#filter_inventories").hide();
@@ -189,6 +201,14 @@
 			template = "";
 		}
 		window.location = "/changes/addfilter/template/" + template ;
+	}
+
+	function change_roles_filter () {
+		var role = $("#roles").find(":selected").val();
+		if (role == undefined) {
+			role = "";
+		}
+		window.location = "/changes/addfilter/role/" + role;
 	}
 
 	function change_modules_filter () {

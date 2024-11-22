@@ -12,7 +12,7 @@
         "php": ">=8.0",
         "ext-openssl": "*",
         "ext-dom": "*",
-        "twig/twig": "~2.0",
+        "twig/twig": ">=3.11.2",
         "composer/composer": "*",
         "composer-plugin-api": "*",
         "phpmailer/phpmailer": "*",

@@ -48,7 +48,9 @@ class User {
 	}
 
 	function set_password($password) {
-		$this->password = hash('sha256', $password);
+		// Hash the password first to allow for longer than 72 characters
+		$password = hash_hmac('sha256', $password, FIRSTKEY);
+		$this->password = password_hash($password, PASSWORD_DEFAULT);
 	}
 
 	function set_username($username) {

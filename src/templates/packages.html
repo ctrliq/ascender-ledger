@@ -3,45 +3,60 @@
 {% block body %}
 <div class="wrapper text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="border p-4">
-			<div class="border p-2">
-				<div class="row filters">
-					<div class="col">
-						<label for="hosts" class="col-sm-1 col-form-label text-end pe-3">Hosts</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=hosts id=hosts data-placeholder="Choose a host...">
+		<div class="shadow-sm border p-4">
+			<div class="shadow-sm border p-2">
+				<form action="/packages/">
+					<div class="row">
+						<div class="col-2">
+								<select class="form-control form-select form-select-sm" name=addfilter id=addfilter>
+									<option class="fst-italic" selected disabled>Add a Filter</option>
+									<option value="hosts">Hosts</option>
+									<option value="packages">Packages</option>
+									<option value="arches">Arches</option>
+								</select>
+						</div>
+
+						<div id=filter_hosts class="col-4" style="display: none">
+								<select class="form-control form-select-sm chosen-select" name="hosts" id="hosts">
+									<option></option>
+			{% for i,h in hosts %}
+									<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
+			{% endfor %}
+								</select>
+						</div>
+
+						<div id=filter_packages class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name="packages" id="packages" data-placeholder="Choose a package...">
 								<option></option>
-		{% for i,h in hosts %}
-								<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
-		{% endfor %}
+			{% for p in upackages %}
+								<option{% if package == p %} selected{% endif %}>{{ p }}</option>
+			{% endfor %}
 							</select>
 						</div>
-					</div>
-					<div class="col">
-						<label for="facts" class="col-sm-1 col-form-label text-end pe-3">Package</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=package id=package data-placeholder="Choose a package...">
+
+						<div id=filter_arches class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name="arch" id="arch">
 								<option></option>
-		{% for f in upackages %}
-								<option{% if package == f %} selected{% endif %}>{{ f }}</option>
-		{% endfor %}
+			{% for t in arches %}
+								<option {% if arch == t %} selected{% endif %}>{{ t }}</option>
+			{% endfor %}
 							</select>
 						</div>
-					</div>
-					<div class="col">
-						<label for="type" class="col-sm-1 col-form-label text-end pe-3">Arch Types</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=arch id=arch data-placeholder="Choose a type...">
-								<option></option>
-		{% for t in arches %}
-								<option{% if arch == t %} selected{% endif %}>{{ t }}</option>
-		{% endfor %}
-							</select>
+
+
+						<div class="col-1 align-text-bottom">
+							<a onclick="addfilters()" href="#"><button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button></a>
 						</div>
 					</div>
-					<div class="col col-1 mt-auto">
-						<a href=/packages/?clear=1><button type="button" class="btn btn-primary btn-xs">Clear</button></a>
-					</div>
+				</form>
+				<br>
+				<div class="col-12">
+					Filters: 
+					{% if host %}<a href=/packages/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
+					{% if package %}<a href=/packages/?clear=package title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">PACKAGE: <i>{{ package }}</i></button></a>{% endif %}
+					{% if arch %}<a href=/packages/?clear=arch title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">ARCH: <i>{{ arch }}</i></button></a>{% endif %}
+					{% if fullname %}<a href=/packages/?clear=fullname title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">FULLNAME: <i>{{ fullname }}</i></button></a>{% endif %}
+					{% if errata %}<a href=/packages/?clear=errata title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">ERRATA: <i>YES</i></button></a>{% endif %}
 				</div>
 			</div>
 			<br><br>
@@ -55,7 +70,7 @@
 							<th>Release</th>
 							<th>Epoch</th>
 							<th>Arch</th>
-							<th>Source</th>
+							<th>Type</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -81,12 +96,26 @@
 
 {% endblock %}
 {% block javascriptinc %}
-{% endblock %}
-{% block javascript %}
+	<script>
+	function addfilters () {
+		var filter = $("#addfilter").find(":selected").attr("value");
+		if (filter != undefined) {
+			var func = "change_" + filter + "_filter";
+			eval(func + "()"); 
+		}
+	}
 
-	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true, width: '100%' });
+	function change_addfilter () {
+		var filter = $("#addfilter").find(":selected").attr("value");
+		$("#filter_hosts").hide();
+		$("#filter_packages").hide();
+		$("#filter_arches").hide();
+		if (filter != undefined && filter != "") {
+			$("#filter_" +	 filter).show()
+		}
+	}
 
-	function change_host_filter () {
+	function change_hosts_filter () {
 		var host = $("#hosts").find(":selected").attr("id");
 		if (host == undefined) {
 			host = "";
@@ -94,15 +123,15 @@
 		window.location = "/packages/?host=" + host;
 	}
 
-	function change_package_filter () {
-		var package = $("#package").find(":selected").val();
+	function change_packages_filter () {
+		var package = $("#packages").find(":selected").val();
 		if (package == undefined) {
 			package = "";
 		}
 		window.location = "/packages/?package=" + encodeURIComponent(package);
 	}
 
-	function change_arch_filter () {
+	function change_arches_filter () {
 		var arch = $("#arch").find(":selected").val();
 		if (arch == undefined) {
 			arch = "";
@@ -110,14 +139,34 @@
 		window.location = "/packages/?arch=" + encodeURIComponent(arch);
 	}
 
-	$("#hosts").change(change_host_filter);
-	$("#package").change(change_package_filter);
-	$("#arch").change(change_arch_filter);
+	$("#addfilter").change(change_addfilter);
+	change_addfilter ();
+
+	</script>
+{% endblock %}
+{% block javascript %}
+
+	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true, width: '100%' });
 
 	$('.datatable-packages').DataTable({
 		order: [[1, 'asc']],
 		pageLength: 25,
 		responsive: true,
-		buttons: []
+		dom: '<"html5buttons d-flex justify-content-end"B>lfgtip',
+		buttons: [
+			'copy',
+			'csv',
+			{extend: 'pdf', title: 'Packages'},
+			{extend: 'print',
+				customize: function (win){
+					$(win.document.body).addClass('white-bg');
+					$(win.document.body).css('font-size', '10px');
+
+					$(win.document.body).find('table')
+							.addClass('compact')
+							.css('font-size', 'inherit');
+			}
+			}
+		]
 	});
 {% endblock %}

@@ -15,13 +15,21 @@ $filters = array();
 $host = '';
 $fact = '';
 $type = '';
+$search = '';
 
 if (isset($_GET['clear'])) {
-	unset($_SESSION['facts_host']);
-	unset($_SESSION['facts_fact']);
-	unset($_SESSION['facts_type']);
-	header("Location: /facts/");
-	exit;
+	if ($_GET['clear'] == 'host') {
+		unset($_SESSION['facts_host']);
+	}
+	if ($_GET['clear'] == 'fact') {
+		unset($_SESSION['facts_fact']);
+	}
+	if ($_GET['clear'] == 'type') {
+		unset($_SESSION['facts_type']);
+	}
+	if ($_GET['clear'] == 'search') {
+		unset($_SESSION['facts_search']);
+	}
 }
 
 if (isset($_GET['host'])) {
@@ -54,6 +62,14 @@ if (isset($_GET['type'])) {
 	exit;
 }
 
+if (isset($_GET['search'])) {
+	if ($_GET['search'] == '') {
+		unset($_SESSION['facts_search']);
+	} else {
+		$_SESSION['facts_search'] = sql_clean_csearch($_GET['search']);
+	}
+}
+
 // Create filters
 if (isset($_SESSION['facts_host']) && $_SESSION['facts_host'] != '') {
 	$filters[] = " `host` = " . intval($_SESSION['facts_host']);
@@ -70,6 +86,15 @@ if (isset($_SESSION['facts_type']) && $_SESSION['facts_type'] != '') {
 	$type = sql_clean_fact($_SESSION['facts_type']);
 }
 
+if (isset($_SESSION['facts_search']) && $_SESSION['facts_search'] != '') {
+	$s = sql_clean_csearch($_SESSION['facts_search']);
+	$c = explode(' ', $s);
+	foreach ($c as $s) {
+		$filters[] = " `data` LIKE '%$s%'";
+	}
+	$search = $_SESSION['facts_search'];
+}
+
 $h = array();
 foreach ($hosts as $h2) {
 	$h[$h2['id']] = $h2['hostname'];
@@ -82,4 +107,4 @@ if (!empty($filters)) {
 
 $facts = db_fetch_assocs("SELECT * FROM `facts` $filters ORDER BY `fact` ASC" . ($filters == '' ? ' LIMIT 0,500' : ''));
 
-echo $twig->render('facts.html', array_merge($twigarr, array('types' => $types, 'type' => $type, 'facts' => $facts, 'ufacts' => $ufacts, 'hosts' => $h, 'host' => $host, 'fact' => $fact)));
+echo $twig->render('facts.html', array_merge($twigarr, array('types' => $types, 'type' => $type, 'facts' => $facts, 'ufacts' => $ufacts, 'hosts' => $h, 'host' => $host, 'fact' => $fact, 'search' => $search)));

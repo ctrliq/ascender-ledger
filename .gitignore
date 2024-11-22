@@ -1,5 +1,4 @@
 src/twig/cache/*
 src/*.txt
-src/composer.lock
 src/myadmin*
 src/vendor/*

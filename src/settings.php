@@ -7,16 +7,18 @@ if (!$account['super']) {
     exit;
 }
 
+// General
+$base_url = read_setting('base_url', (isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] . "://" : '') . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ''));
+$remove_invocation = read_setting('remove_invocation', 0);
 $changes_retention = read_setting('changes_retention', 30);
 $facts_retention = read_setting('facts_retention', 30);
 $packages_retention = read_setting('packages_retention', 30);
 $hosts_retention = read_setting('hosts_retention', 30);
-$remove_invocation = read_setting('remove_invocation', 0);
-$email_fromname = read_setting('email_fromname', 'Ascender Ledger');
-$email_from = read_setting('email_from', 'ledger@ascender.local');
 $allowed_modules = read_setting('allowed_modules', 'gather_facts');
 
-$base_url = read_setting('base_url', (isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] . "://" : '') . (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ''));
+// Mail
+$email_fromname = read_setting('email_fromname', 'Ascender Ledger');
+$email_from = read_setting('email_from', 'ledger@ascender.local');
 $smtp_server = read_setting('smtp_server', '');
 $smtp_port = read_setting('smtp_port', '25');
 $smtp_security = read_setting('smtp_security', '');
@@ -24,53 +26,59 @@ $smtp_username = read_setting('smtp_username', '');
 $smtp_password = read_setting('smtp_password', '');
 
 if (isset($_GET['action']) && $_GET['action'] == 'save') {
-	$changes_retention = intval($_POST['changes_retention']);
-	$packages_retention = intval($_POST['packages_retention']);
-	$facts_retention = intval($_POST['facts_retention']);
-	$hosts_retention = intval($_POST['hosts_retention']);
-	$remove_invocation = (isset($_POST['remove_invocation']) ? 1 : 0);
-
-	if (isset($_POST['allowed_modules']) && is_array($_POST['allowed_modules'])) {
-		$allowed_modules = array();
-		foreach ($_POST['allowed_modules'] as $a) {
-			$allowed_modules[] = strtolower(sql_clean_fact($a));
+	if (count($_POST)) {
+		foreach ($_POST as $f => $v) {
+			$skip = false;
+			if ($f == 'changes_retention' || $f == 'packages_retention' || $f == 'facts_retention' || $f == 'hosts_retention') {
+				if (intval($v / 30) == $v / 30) {
+					$v = intval($v);
+				} else {
+					$skip = true;
+				}
+			}
+			if ($f == 'remove_invocation' || $f == 'cache_templates' || $f == 'disable_email') {
+				$v = (intval($v) ? 1 : 0);
+			}
+			if ($f == 'allowed_modules') {
+				$allowed_modules = array();
+				foreach ($v as $a) {
+					$allowed_modules[] = strtolower(sql_clean_fact($a));
+				}
+				$v = implode(',', $allowed_modules);
+			}
+			if ($f == 'base_url') {
+				$v = sql_clean_url($v);
+			}
+			if ($f == 'email_fromname') {
+				$v = sql_clean_name($v);
+			}
+			if ($f == 'email_from') {
+				$v = sql_clean_email($v);
+			}
+			if ($f == 'smtp_server') {
+				$v = sql_clean_hostname($v);
+			}
+			if ($f == 'smtp_port') {
+				$v = ($v != '' ? intval($v) : '');
+			}
+			if ($f == 'smtp_security') {
+				$v = ($v != '' ? 'tls' : '');
+			}
+			if ($f == 'smtp_username') {
+				$v = sql_clean_email($v);
+			}
+			if ($f == 'smtp_password') {
+				if ($v == '') {
+					$skip = true;
+				} else {
+					$v = ($v != ''  ? secured_encrypt($v) : '');
+				}
+			}
+			if (!$skip) {
+				db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($v, $f));
+			}
 		}
-		$allowed_modules = implode(',', $allowed_modules);
-	} else {
-		$allowed_modules = '';
 	}
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($allowed_modules, 'allowed_modules'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($changes_retention, 'changes_retention'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($packages_retention, 'packages_retention'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($facts_retention, 'facts_retention'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($hosts_retention, 'hosts_retention'));
-
-	$base_url       = sql_clean_url($_POST['base_url']);
-	$email_fromname = sql_clean_name($_POST['email_fromname']);
-	$email_from     = sql_clean_email($_POST['email_from']);
-	$smtp_server    = sql_clean_hostname($_POST['smtp_server']);
-	$smtp_port      = ($_POST['smtp_port'] != '' ? intval($_POST['smtp_port']) : '25');
-	$smtp_security  = ($_POST['smtp_security'] != '' ? 'tls' : '');
-	$smtp_username  = sql_clean_email($_POST['smtp_username']);
-	if ($_POST['smtp_password'] != '') {
-		$smtp_password  = $_POST['smtp_password'];
-		db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array(secured_encrypt($smtp_password), 'smtp_password'));
-	}
-
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($base_url, 'base_url'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($email_fromname, 'email_fromname'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($email_from, 'email_from'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($smtp_server, 'smtp_server'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($smtp_port, 'smtp_port'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($smtp_security, 'smtp_security'));
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($smtp_username, 'smtp_username'));
-
-	$remove_invocation = (isset($_POST['remove_invocation']) ? 1 : 0);
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($remove_invocation, 'remove_invocation'));
-
-	$disable_email = (isset($_POST['disable_email']) ? 1 : 0);
-	db_execute_prepare('UPDATE `settings` SET `value` = ? WHERE `setting` = ?', array($disable_email, 'disable_email'));
-
 	Header("Location: /settings/\n\n");
 	exit;
 }
@@ -83,5 +91,16 @@ foreach ($set as $s) {
 }
 
 $default_modules = array('gather_facts');
+
+if (isset($_GET['action']) && $_GET['action'] == 'general') {
+	echo $twig->render('settings_general.html', array_merge($twigarr, array('settings' => $settings, 'default_modules' => $default_modules)));
+	exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] == 'mail') {
+	echo $twig->render('settings_mail.html', array_merge($twigarr, array('settings' => $settings, 'default_modules' => $default_modules)));
+	exit;
+}
+
 
 echo $twig->render('settings.html', array_merge($twigarr, array('settings' => $settings, 'default_modules' => $default_modules)));

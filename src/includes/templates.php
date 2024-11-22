@@ -4,9 +4,9 @@
 	This file simply loads our Twig environment
 */
 
-$loader = new Twig_Loader_Filesystem('templates');
+$loader = new \Twig\Loader\FilesystemLoader('templates');
 
-$twig = new Twig_Environment($loader, array('debug' => true));
+$twig = new \Twig\Environment($loader, array('debug' => true));
 
 /*
 	We pass in the account variable automatically since we use it in most templates
@@ -21,9 +21,9 @@ $imp = (isset($_SESSION['imp']) && intval($_SESSION['imp']) ? intval($_SESSION['
 $is_dev = read_setting('is_dev', 0);
 
 if ($is_dev) {
-	$twig->addExtension(new Twig_Extension_Debug());
+	$twig->addExtension(new \Twig\Extension\DebugExtension());
 } else {
-	$twig = new Twig_Environment($loader, array(
+	$twig = new \Twig\Environment($loader, array(
 	#    'cache' => '../cache',
 	));
 }

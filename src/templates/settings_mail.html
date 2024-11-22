@@ -1,0 +1,102 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+		<form method="post" action=/settings/save/ id=settingform class="form-horizontal">
+			<div class="shadow-sm border row justify-content-center p-4 mb-3">
+				<div class="float-start w-50">
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Disable Email</label>
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=disable_email id=disable_email {% if settings.disable_email %}checked{% endif %}>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Email From Name</label>
+						<div>
+							<input type="text" class="form-control w-75" name=email_fromname id=email_fromname value='{{ settings.email_fromname }}'>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Email From Address</label>
+						<div>
+							<input type="text" class="form-control w-75" name=email_from id=email_from value='{{ settings.email_from }}'>
+						</div>
+					</div>
+				</div>
+				<div class="w-50">
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">SMTP Server</label>
+						<div>
+							<input type="text" class="form-control w-75" name=smtp_server id=smtp_server value='{{ settings.smtp_server }}'>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">SMTP Port</label>
+						<div>
+							<input type="text" class="form-control w-75" name=smtp_port id=smtp_port value='{{ settings.smtp_port }}'>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">SMTP Security</label>
+						<div>
+							<select class="form-control w-75" name=smtp_security id=smtp_security>
+								<option value="">None</option>
+								<option value=tls {% if settings.smtp_security == "tls" %} selected{% endif %}>TLS</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">SMTP Username</label>
+						<div>
+							<input type="text" class="form-control w-75" name=smtp_username id=smtp_username value='{{ settings.smtp_username }}' autocomplete="new-password">
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">SMTP Password</label>
+						<div>
+							<input type="password" class="form-control w-75" name=smtp_password id=smtp_password autocomplete="new-password">
+						</div>
+					</div>
+				</div>
+
+
+			</div>
+
+			<div class="mb-3">
+				<div class="col-sm-offset-2">
+					<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}
+{% block javascript %}
+$(function() {
+	var select = [], chosen = [];
+	$(".chosen-select").each(function(index) {
+		select[index] = $(this);
+		select[index].chosen({ no_results_text: 'Press Enter to add new entry:' });
+		chosen[index] = select[index].data('chosen');
+		chosen[index].search_field.on('keyup', function(e) {
+			if (e.which === 13 && chosen[index].dropdown.find('li.no-results').length > 0) {
+				var option = $("<option>").val(this.value).text(this.value);
+				select[index].prepend(option);
+				select[index].find(option).prop('selected', true);
+				select[index].trigger("chosen:updated");
+			}
+		});
+	});
+});
+
+{% endblock %}

@@ -152,8 +152,18 @@ function check_user_password($username, $pass) {
 	$user = new User();
 	$account = $user->retrieve_by_username($username);
 	if ($user->id && $user->enabled) {
-		if (hash('sha256', $pass) == $user->password) {
-			return true;	
+		if (password_verify(hash_hmac('sha256', $pass, FIRSTKEY), $user->password)) {
+			// Check if password needs rehashing
+			if (password_needs_rehash($user->password, PASSWORD_DEFAULT)) {
+				$user->set_password($pass);
+				$user->save();
+			}
+			return true;
+		// Check for old password hash, rehash if necessary
+		} elseif (hash('sha256', $pass) == $user->password) {
+			$user->set_password($pass);
+			$user->save();
+			return true;
 		}
 	}
 	sleep(1);

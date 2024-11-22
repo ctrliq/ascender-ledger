@@ -3,57 +3,68 @@
 {% block body %}
 <div class="wrapper text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-		<div class="border p-4">
-			<div class="border p-2">
-				<div class="row filters">
-					<div class="col">
-						<label for="hosts" class="col-sm-1 col-form-label text-end pe-3">Hosts</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=hosts id=hosts data-placeholder="Choose a host...">
-								<option></option>
-		{% for i,h in hosts %}
-								<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
-		{% endfor %}
-							</select>
+		<div class="shadow-sm border p-4">
+			<div class="shadow-sm border p-2">
+				<form action="/services/">
+					<div class="row">
+						<div class="col-2">
+								<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
+									<option class="fst-italic" selected disabled>Add a Filter</option>
+									<option value="hosts">Hosts</option>
+									<option value="services">Services</option>
+									<option value="states">State</option>
+									<option value="statuses">Status</option>
+								</select>
 						</div>
-					</div>
-					<div class="col">
-						<label for="facts" class="col-sm-1 col-form-label text-end pe-3">Service</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=service id=service data-placeholder="Choose a service...">
-								<option></option>
-		{% for f in uservices %}
-								<option{% if service == f %} selected{% endif %}>{{ f }}</option>
-		{% endfor %}
-							</select>
-						</div>
-					</div>
-					<div class="col">
-						<label for="type" class="col-sm-1 col-form-label text-end pe-3">State</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=state id=state data-placeholder="Choose a state...">
-								<option></option>
-		{% for t in states %}
-								<option{% if state == t %} selected{% endif %} value="{{ t }}">{{ t | title }}</option>
-		{% endfor %}
-							</select>
-						</div>
-					</div>
-					<div class="col">
-						<label for="type" class="col-sm-1 col-form-label text-end pe-3">Status</label>
-						<div>
-							<select class="form-select form-select-sm chosen-select" name=status id=status data-placeholder="Choose a status...">
-								<option></option>
-		{% for t in statuses %}
-								<option{% if status == t %} selected{% endif %} value="{{ t }}">{{ t | title }}</option>
-		{% endfor %}
-							</select>
-						</div>
-					</div>
 
-					<div class="col col-1 mt-auto">
-						<a href=/services/?clear=1><button type="button" class="btn btn-primary btn-xs">Clear</button></a>
+						<div id=filter_hosts class="col-4" style="display: none">
+								<select class="form-control form-select-sm chosen-select" name="hosts" id="hosts">
+									<option></option>
+			{% for i,h in hosts %}
+									<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
+			{% endfor %}
+								</select>
+						</div>
+
+						<div id=filter_services class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name="services" id="services" data-placeholder="Choose a service...">
+								<option></option>
+			{% for p in uservices %}
+								<option{% if service == p %} selected{% endif %}>{{ p }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<div id=filter_states class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name="states" id="states">
+								<option></option>
+			{% for t in states %}
+								<option {% if state == t %} selected{% endif %}>{{ t }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<div id=filter_statuses class="col-4" style="display: none">
+							<select class="form-control form-select-sm chosen-select" name="statuses" id="statuses">
+								<option></option>
+			{% for t in statuses %}
+								<option {% if status == t %} selected{% endif %}>{{ t }}</option>
+			{% endfor %}
+							</select>
+						</div>
+
+						<div class="col-1 align-text-bottom">
+							<a onclick="addfilters()" href="#"><button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button></a>
+						</div>
 					</div>
+				</form>
+				<br>
+				<div class="col-12">
+					Filters: 
+					{% if host %}<a href=/services/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
+					{% if service %}<a href=/services/?clear=service title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">SERVICE: <i>{{ service }}</i></button></a>{% endif %}
+					{% if state %}<a href=/services/?clear=state title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">STATE: <i>{{ state | title }}</i></button></a>{% endif %}
+					{% if status %}<a href=/services/?clear=status title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">STATUS: <i>{{ status | title }}</i></button></a>{% endif %}
 				</div>
 			</div>
 			<br><br>
@@ -89,12 +100,28 @@
 
 {% endblock %}
 {% block javascriptinc %}
-{% endblock %}
-{% block javascript %}
+	<script>
+	function addfilters () {
+		var filter = $("#addfilter").find(":selected").attr("value");
+		if (filter != undefined) {
+			var func = "change_" + filter + "_filter";
+			eval(func + "()"); 
+		}
+	}
 
-	$(".chosen-select").chosen({ allow_single_deselect:true, sestate_contains: true, width: '100%' });
+	function change_addfilter () {
+		var filter = $("#addfilter").find(":selected").attr("value");
+		$("#filter_hosts").hide();
+		$("#filter_services").hide();
+		$("#filter_states").hide();
+		$("#filter_statuses").hide();
+		if (filter != undefined && filter != "") {
+			$("#filter_" +	 filter).show()
+		}
+	}
 
-	function change_host_filter () {
+
+	function change_hosts_filter () {
 		var host = $("#hosts").find(":selected").attr("id");
 		if (host == undefined) {
 			host = "";
@@ -102,39 +129,56 @@
 		window.location = "/services/?host=" + host;
 	}
 
-	function change_service_filter () {
-		var service = $("#service").find(":selected").val();
+	function change_services_filter () {
+		var service = $("#services").find(":selected").val();
 		if (service == undefined) {
 			service = "";
 		}
 		window.location = "/services/?service=" + service;
 	}
 
-	function change_state_filter () {
-		var state = $("#state").find(":selected").val();
+	function change_states_filter () {
+		var state = $("#states").find(":selected").val();
 		if (state == undefined) {
 			state = "";
 		}
 		window.location = "/services/?state=" + state;
 	}
 
-	function change_status_filter () {
-		var status = $("#status").find(":selected").val();
+	function change_statuses_filter () {
+		var status = $("#statuses").find(":selected").val();
 		if (status == undefined) {
 			status = "";
 		}
 		window.location = "/services/?status=" + status;
 	}
 
-	$("#hosts").change(change_host_filter);
-	$("#service").change(change_service_filter);
-	$("#state").change(change_state_filter);
-	$("#status").change(change_status_filter);
+	$("#addfilter").change(change_addfilter);
+	change_addfilter ();
+	</script>
+{% endblock %}
+{% block javascript %}
+	$(".chosen-select").chosen({ allow_single_deselect:true, sestate_contains: true, width: '100%' });
 
 	$('.datatable-services').DataTable({
 		order: [[1, 'asc']],
 		pageLength: 25,
 		responsive: true,
-		buttons: []
+		dom: '<"html5buttons d-flex justify-content-end"B>lfgtip',
+		buttons: [
+			'copy',
+			'csv',
+			{extend: 'pdf', title: 'Services'},
+			{extend: 'print',
+				customize: function (win){
+					$(win.document.body).addClass('white-bg');
+					$(win.document.body).css('font-size', '10px');
+
+					$(win.document.body).find('table')
+							.addClass('compact')
+							.css('font-size', 'inherit');
+			}
+			}
+		]
 	});
 {% endblock %}
