@@ -10,12 +10,12 @@
     },
     "require": {
         "php": ">=8.0",
-        "ext-openssl": "*",
         "ext-dom": "*",
-        "twig/twig": ">=3.11.2",
-        "composer/composer": "*",
+        "ext-openssl": "*",
         "composer-plugin-api": "*",
+        "composer/composer": "^2.9.8",
         "phpmailer/phpmailer": "*",
-        "sebastian/diff": "*"
+        "sebastian/diff": "*",
+        "twig/twig": ">=3.11.2"
     }
 }
