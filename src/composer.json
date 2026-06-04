@@ -16,6 +16,6 @@
         "composer/composer": "^2.9.8",
         "phpmailer/phpmailer": "*",
         "sebastian/diff": "*",
-        "twig/twig": ">=3.11.2"
+        "twig/twig": "^3.26"
     }
 }
