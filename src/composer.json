@@ -13,7 +13,7 @@
         "ext-dom": "*",
         "ext-openssl": "*",
         "composer-plugin-api": "*",
-        "composer/composer": "^2.9.8",
+        "composer/composer": "^2.10.2",
         "phpmailer/phpmailer": "*",
         "sebastian/diff": "*",
         "twig/twig": "^3.26"
