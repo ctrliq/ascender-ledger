@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 17;
+$new_db_version = 18;
 
 $db_version = read_setting('db_version', 1);
 
@@ -87,6 +87,10 @@ if ($new_db_version != $db_version) {
 			case 15:
 			case 16:
 				db_execute("ALTER TABLE `users` CHANGE `password` `password` varchar(256) NOT NULL AFTER `email`;");
+			case 17:
+				if (!db_column_exists('reports', 'type')) {
+					db_execute("ALTER TABLE `reports` ADD `type` varchar(16) NOT NULL DEFAULT 'facts' AFTER `name`");
+				}
 	
 		}
 	} catch (Exception $e) {

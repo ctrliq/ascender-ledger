@@ -34,7 +34,11 @@ while (!$done) {
 
         $report = new Report($s['report']);
 
-        $data = build_report ($report->id);
+        if ($report->type == 'changes') {
+            $data = build_changes_report($report->id);
+        } else {
+            $data = build_report($report->id);
+        }
         $html = $twig->render('emails/report_email.html', array_merge($twigarr, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd))); 
         send_email($s['emails'], $s['subject'], $html);
         db_execute_prepare('UPDATE `reports_schedules` SET `next` = `next` + `repeat`, `process` = 0 WHERE `id` = ?', array($s['report']));

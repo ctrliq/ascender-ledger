@@ -11,6 +11,7 @@
 		{% endif %}
 	</td>
 	<td><a href="/reports/view/{{ r['id'] }}">{{ r['name'] }}</a></td>
+	<td>{% if r['type'] == 'changes' %}Changes{% else %}Facts{% endif %}</td>
 	<td>{{ users[r['owner']] }}</td>
 	<td>{{ r['created']|date("m/d/Y H:i") }}</td>
 	<td width=30>
