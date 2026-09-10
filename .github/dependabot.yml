@@ -1,0 +1,38 @@
+---
+# Security updates arrive without this file; what it adds is version updates.
+#
+# Docker is left out twice over: the three container files are named
+# <service>-dockerfile, which the docker ecosystem does not match, and all three
+# track rockylinux/rockylinux:9, a floating major with nothing to bump until that
+# major changes.
+#
+# npm is left out too: the only package.json files in the tree belong to the
+# vendored copy of highlight.js under src/js.
+#
+# No groups: key on purpose, so every dependency comes as its own pull request.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    # both uses: are pinned to a SHA, and Dependabot keeps the version comment
+    # next to it in step
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "ci"
+    labels:
+      - dependencies
+      - ci
+
+  - package-ecosystem: composer
+    # composer.json and composer.lock both live in src/
+    directory: /src
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "build"
+    labels:
+      - dependencies
+      - build
