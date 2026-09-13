@@ -37,6 +37,11 @@ if (!isset($server['trusted']) || !$server['trusted']) {
 $time = time();
 if (isset($d['logger_name'])) {
 	switch ($d['logger_name']) {
+		// Both names, because the platform is renaming its Python package from
+		// awx to ascender and the logger name follows it. Nothing here can tell
+		// which side of that a deployment is on, and a name this parser does not
+		// know is not an error anywhere: it is silence.
+		case 'ascender.analytics.job_events':
 		case 'awx.analytics.job_events':
 			// JOB EVENT DATA
 			if (isset($d['event_data']['res']['ansible_facts'])) {
@@ -131,6 +136,7 @@ if (isset($d['logger_name'])) {
 				}
 			}
 			break;
+		case 'ascender.analytics.activity_stream':
 		case 'awx.analytics.activity_stream':
 			// JOB DATA
 			if (isset($d['operation']) && $d['operation'] == 'create' && isset($d['object1']) && $d['object1'] == 'job' && strtolower($d['host']) != 'localhost') {
