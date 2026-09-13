@@ -46,7 +46,7 @@ jobs:
           python-version: ${{ env.py_version }}
 
       - name: Checkout ascender ledger
-        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v2
         with:
           path: ascender-ledger
           ref: main
