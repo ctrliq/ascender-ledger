@@ -38,6 +38,9 @@
 {% block javascript %}
 	$('.datatable-reports').DataTable({
 		order: [[{{ report.sortc }}, '{{ report.sortd }}']],
+{% if report.type == 'changes' %}
+		"columnDefs" : [{"targets":0, "type":"date-us"}],
+{% endif %}
 		pageLength: 50,
 		responsive: true,
 		dom: '<"html5buttons d-flex justify-content-center"B>lTfgitp',

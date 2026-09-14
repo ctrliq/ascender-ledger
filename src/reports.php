@@ -49,43 +49,55 @@ if (isset($_REQUEST['action'])) {
 					exit;
 				case 'deletefilter':
 					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
-						$filter = intval($_GET['filter']);
-						$report->remove_filter($filter);
+						if ($report->type == 'changes') {
+							if (isset($_GET['field'])) {
+								$report->remove_changes_filter($_GET['field']);
+							}
+						} else {
+							$filter = intval($_GET['filter']);
+							$report->remove_filter($filter);
+						}
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'addfilter':
 					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
-						$value = $_POST['value'];
-						$compare = $_POST['compare'];
-						$fact = $_POST['fact'];
-						$report->add_filter($fact, $compare, $value);
+						if ($report->type == 'changes') {
+							if (isset($_POST['field']) && isset($_POST['value'])) {
+								$report->add_changes_filter($_POST['field'], $_POST['value']);
+							}
+						} else {
+							$value = $_POST['value'];
+							$compare = $_POST['compare'];
+							$fact = $_POST['fact'];
+							$report->add_filter($fact, $compare, $value);
+						}
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'moveup':
-					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
+					if (($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) && $report->type != 'changes') {
 						$fact = intval($_GET['fact']);
 						$report->move_column_up($fact);
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'movedown':
-					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
+					if (($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) && $report->type != 'changes') {
 						$fact = intval($_GET['fact']);
 						$report->move_column_down($fact);
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'deletefact':
-					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
+					if (($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) && $report->type != 'changes') {
 						$fact = intval($_GET['fact']);
 						$report->remove_column($fact);
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'addcolumn':
-					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
+					if (($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) && $report->type != 'changes') {
 						$display = $report->clean_column($_POST['display']);
 						if ($display != '') {
 							$facts = (isset($_POST['facts']) ? $_POST['facts'] : array());
@@ -172,11 +184,26 @@ if (isset($_REQUEST['action'])) {
 					}
 					exit;
 				case 'view':
-					$data = build_report ($report->id);
+					if ($report->type == 'changes') {
+						$data = build_changes_report($report->id);
+					} else {
+						$data = build_report($report->id);
+					}
 					echo $twig->render('report.html', array_merge($twigarr, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
 					exit;
 				case 'edit':
 					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
+						if ($report->type == 'changes') {
+							$current = array();
+							foreach ($report->filters as $f) {
+								if (isset($f['field'])) {
+									$current[$f['field']] = $f['value'];
+								}
+							}
+							echo $twig->render('report_changes_edit.html', array_merge($twigarr, array('report' => $report, 'current' => $current,
+									'columns' => $report->columns, 'fields' => changes_report_filter_fields(), 'options' => changes_report_filter_options())));
+							exit;
+						}
 						$allfacts = db_fetch_assocs('SELECT DISTINCT `fact` FROM facts');
 						$facts = array();
 						foreach ($allfacts as $f) {
@@ -193,10 +220,17 @@ if (isset($_REQUEST['action'])) {
 	} else {
 		switch ($_REQUEST['action']) {
 			case 'new':
+				$type = (isset($_REQUEST['type']) ? $_REQUEST['type'] : 'facts');
 				$report = new Report();
 				$report->set_owner($account['id']);
 				$report->set_created(time());
-				$report->set_name('New Report - ' . $account['name']);
+				$report->set_type($type);
+				if ($report->type == 'changes') {
+					$report->set_name('New Changes Report - ' . $account['name']);
+					$report->set_columns(changes_report_columns());
+				} else {
+					$report->set_name('New Report - ' . $account['name']);
+				}
 				$report->save();
 				Header("Location: /reports/edit/" . $report->id . "\n\n");
 				exit;

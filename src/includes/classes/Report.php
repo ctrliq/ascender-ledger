@@ -10,6 +10,7 @@ class Report {
 	var $sortc = 0;
 	var $sortd = 'asc';
 	var $role = '';
+	var $type = 'facts';
 
 	function __construct($id = 0) {
 		if ($id) {
@@ -44,6 +45,14 @@ class Report {
 		$this->created = intval($created);
 	}
 
+	function set_type($type) {
+		if ($type == 'changes') {
+			$this->type = 'changes';
+		} else {
+			$this->type = 'facts';
+		}
+	}
+
 	function set_columns($columns) {
 		$this->columns = $columns;
 	}
@@ -75,6 +84,10 @@ class Report {
 			$this->sortc   = $u['sortc'];
 			$this->sortd   = $u['sortd'];
 			$this->role    = (isset($u['role']) ? $u['role'] : 'view');
+			$this->set_type(isset($u['type']) ? $u['type'] : 'facts');
+			if ($this->type == 'changes') {
+				$this->columns = changes_report_columns();
+			}
 		}
 	}
 
@@ -99,6 +112,53 @@ class Report {
 
 		$this->filters[] = array('fact' => $fact, 'compare' => $compare, 'value' => $value);
 		$this->save();
+	}
+
+	/*
+		Changes reports filter the changes table rather than the facts table, so their filters
+		are a field of the changes view and the value to match, in the same shape the changes
+		page builds from its own filter menus.  One filter per field, as on that page.
+	*/
+	function add_changes_filter($field, $value) {
+		$fields = changes_report_filter_fields();
+
+		if (!isset($fields[$field])) {
+			return false;
+		}
+
+		if (in_array($field, changes_report_numeric_filter_fields())) {
+			$value = intval($value);
+			if ($value < 1) {
+				return false;
+			}
+		} else {
+			$value = $this->clean_filter($value);
+			if ($value === '') {
+				return false;
+			}
+		}
+
+		$filters = $this->strip_changes_filter($field);
+		$filters[] = array('field' => $field, 'value' => $value);
+		$this->filters = $filters;
+		$this->save();
+
+		return true;
+	}
+
+	function remove_changes_filter($field) {
+		$this->filters = $this->strip_changes_filter($field);
+		$this->save();
+	}
+
+	function strip_changes_filter($field) {
+		$kept = array();
+		foreach ($this->filters as $f) {
+			if (!isset($f['field']) || $f['field'] != $field) {
+				$kept[] = $f;
+			}
+		}
+		return $kept;
 	}
 
 	function remove_filter($i) {
@@ -221,11 +281,11 @@ class Report {
 
 	function save() {
 		if ($this->id) {
-			db_execute_prepare('UPDATE `reports` SET `owner` = ?, `name` = ?, `created` = ?, `filters` = ?, `columns` = ?, `sortc` = ?, `sortd` = ? WHERE `id` = ?',
-						array($this->owner, $this->name, $this->created, base64_encode(serialize($this->filters)), base64_encode(serialize($this->columns)), $this->sortc, $this->sortd, $this->id));
+			db_execute_prepare('UPDATE `reports` SET `owner` = ?, `name` = ?, `created` = ?, `filters` = ?, `columns` = ?, `sortc` = ?, `sortd` = ?, `type` = ? WHERE `id` = ?',
+						array($this->owner, $this->name, $this->created, base64_encode(serialize($this->filters)), base64_encode(serialize($this->columns)), $this->sortc, $this->sortd, $this->type, $this->id));
 		} else {
-			$id = db_execute_prepare('INSERT INTO `reports` (`owner`, `name`, `created`, `filters`, `columns`, `sortc`, `sortd`) VALUES (?, ?, ?, ?, ?, ?, ?)',
-						array($this->owner, $this->name, $this->created,  base64_encode(serialize($this->filters)),base64_encode(serialize($this->columns)), $this->sortc, $this->sortd));
+			$id = db_execute_prepare('INSERT INTO `reports` (`owner`, `name`, `created`, `filters`, `columns`, `sortc`, `sortd`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+						array($this->owner, $this->name, $this->created,  base64_encode(serialize($this->filters)),base64_encode(serialize($this->columns)), $this->sortc, $this->sortd, $this->type));
 			$this->id = $id;
 			db_execute_prepare('INSERT INTO `reports_perms` (`report`, `user`, `role`) VALUES (?, ?, ?)',
 						array($this->id, $this->owner, 'owner'));

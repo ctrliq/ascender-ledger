@@ -17,6 +17,7 @@
 			</div>
 		</div>
 		<br><a href=/reports/new/><button type="button" class="btn btn-primary btn-s">Create New Report</button></a>
+		<a href=/reports/new/changes/><button type="button" class="btn btn-primary btn-s">Create New Changes Report</button></a>
 	</div>
 </div>
 
@@ -36,7 +37,7 @@
 	}
 	$('.datatable-reports').DataTable({
 		order: [[1, 'asc']],
-		"columnDefs" : [{"targets":3, "type":"date-us"}],
+		"columnDefs" : [{"targets":4, "type":"date-us"}],
 		pageLength: 25,
 		responsive: true,
 		buttons: []

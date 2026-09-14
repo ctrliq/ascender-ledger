@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS `reports` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `owner` int(11) NOT NULL,
   `name` varchar(256) NOT NULL,
+  `type` varchar(16) NOT NULL DEFAULT 'facts',
   `created` int(11) NOT NULL,
   `filters` text NOT NULL,
   `columns` text NOT NULL,
@@ -116,9 +117,9 @@ INSERT INTO `reports_perms` (`report`, `user`, `role`) VALUES
 (1,	1,	'owner'),
 (2,	1,	'owner');
 
-INSERT INTO `reports` (`id`, `owner`, `name`, `created`, `filters`, `columns`, `sortc`, `sortd`) VALUES
-(1,	1,	'Linux Servers',	1663558186,	'YToxOntpOjA7YTozOntzOjQ6ImZhY3QiO3M6MTQ6ImFuc2libGVfc3lzdGVtIjtzOjc6ImNvbXBhcmUiO3M6MjoiZXEiO3M6NToidmFsdWUiO3M6NToiTGludXgiO319',	'YTo3OntzOjg6Ikhvc3RuYW1lIjtzOjE2OiJhbnNpYmxlX2hvc3RuYW1lIjtzOjEwOiJJUCBBZGRyZXNzIjtzOjI4OiJhbnNpYmxlX2RlZmF1bHRfaXB2NC5hZGRyZXNzIjtzOjY6IkRpc3RybyI7czoyMDoiYW5zaWJsZV9kaXN0cmlidXRpb24iO3M6MTQ6IkRpc3RybyBWZXJzaW9uIjtzOjI4OiJhbnNpYmxlX2Rpc3RyaWJ1dGlvbl92ZXJzaW9uIjtzOjE0OiJQeXRob24gVmVyc2lvbiI7czoyMjoiYW5zaWJsZV9weXRob25fdmVyc2lvbiI7czo0OiJDUFVzIjtzOjIzOiJhbnNpYmxlX3Byb2Nlc3Nvcl92Y3B1cyI7czo2OiJNZW1vcnkiO3M6MTk6ImFuc2libGVfbWVtdG90YWxfbWIiO30=',	0,	'asc'),
-(2,	1,	'Windows Servers',	1664418280,	'YToxOntpOjA7YTozOntzOjQ6ImZhY3QiO3M6MTc6ImFuc2libGVfb3NfZmFtaWx5IjtzOjc6ImNvbXBhcmUiO3M6MjoiZXEiO3M6NToidmFsdWUiO3M6NzoiV2luZG93cyI7fX0=',	'YTo2OntzOjg6Ikhvc3RuYW1lIjtzOjE2OiJhbnNpYmxlX2hvc3RuYW1lIjtzOjEwOiJJUCBBZGRyZXNzIjtzOjIyOiJhbnNpYmxlX2lwX2FkZHJlc3Nlcy4wIjtzOjEwOiJPUyBWZXJzaW9uIjtzOjIwOiJhbnNpYmxlX2Rpc3RyaWJ1dGlvbiI7czoxMDoiUG93ZXJzaGVsbCI7czoyNjoiYW5zaWJsZV9wb3dlcnNoZWxsX3ZlcnNpb24iO3M6NDoiQ1BVcyI7czoyMzoiYW5zaWJsZV9wcm9jZXNzb3JfdmNwdXMiO3M6NjoiTWVtb3J5IjtzOjE5OiJhbnNpYmxlX21lbXRvdGFsX21iIjt9',	0,	'asc');
+INSERT INTO `reports` (`id`, `owner`, `name`, `type`, `created`, `filters`, `columns`, `sortc`, `sortd`) VALUES
+(1,	1,	'Linux Servers',	'facts',	1663558186,	'YToxOntpOjA7YTozOntzOjQ6ImZhY3QiO3M6MTQ6ImFuc2libGVfc3lzdGVtIjtzOjc6ImNvbXBhcmUiO3M6MjoiZXEiO3M6NToidmFsdWUiO3M6NToiTGludXgiO319',	'YTo3OntzOjg6Ikhvc3RuYW1lIjtzOjE2OiJhbnNpYmxlX2hvc3RuYW1lIjtzOjEwOiJJUCBBZGRyZXNzIjtzOjI4OiJhbnNpYmxlX2RlZmF1bHRfaXB2NC5hZGRyZXNzIjtzOjY6IkRpc3RybyI7czoyMDoiYW5zaWJsZV9kaXN0cmlidXRpb24iO3M6MTQ6IkRpc3RybyBWZXJzaW9uIjtzOjI4OiJhbnNpYmxlX2Rpc3RyaWJ1dGlvbl92ZXJzaW9uIjtzOjE0OiJQeXRob24gVmVyc2lvbiI7czoyMjoiYW5zaWJsZV9weXRob25fdmVyc2lvbiI7czo0OiJDUFVzIjtzOjIzOiJhbnNpYmxlX3Byb2Nlc3Nvcl92Y3B1cyI7czo2OiJNZW1vcnkiO3M6MTk6ImFuc2libGVfbWVtdG90YWxfbWIiO30=',	0,	'asc'),
+(2,	1,	'Windows Servers',	'facts',	1664418280,	'YToxOntpOjA7YTozOntzOjQ6ImZhY3QiO3M6MTc6ImFuc2libGVfb3NfZmFtaWx5IjtzOjc6ImNvbXBhcmUiO3M6MjoiZXEiO3M6NToidmFsdWUiO3M6NzoiV2luZG93cyI7fX0=',	'YTo2OntzOjg6Ikhvc3RuYW1lIjtzOjE2OiJhbnNpYmxlX2hvc3RuYW1lIjtzOjEwOiJJUCBBZGRyZXNzIjtzOjIyOiJhbnNpYmxlX2lwX2FkZHJlc3Nlcy4wIjtzOjEwOiJPUyBWZXJzaW9uIjtzOjIwOiJhbnNpYmxlX2Rpc3RyaWJ1dGlvbiI7czoxMDoiUG93ZXJzaGVsbCI7czoyNjoiYW5zaWJsZV9wb3dlcnNoZWxsX3ZlcnNpb24iO3M6NDoiQ1BVcyI7czoyMzoiYW5zaWJsZV9wcm9jZXNzb3JfdmNwdXMiO3M6NjoiTWVtb3J5IjtzOjE5OiJhbnNpYmxlX21lbXRvdGFsX21iIjt9',	0,	'asc');
 
 CREATE TABLE IF NOT EXISTS `reports_schedules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

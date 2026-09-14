@@ -35,6 +35,15 @@ Only changes are recorded. If a job template has Show Changes enabled and the mo
 
 The search box searches the change data itself, so you can ask which automated changes touched `/etc/sudoers`.
 
+### Reports
+
+Both kinds of data can be saved as a report, which is shared with other users and mailed on a schedule.
+
+A facts report picks the facts to show as its columns and selects hosts by comparing their fact values. A changes
+report lists the changes the way the Changes page does, narrowed by the same filters: host, job template, playbook,
+role, module, job type, inventory, project and a search of the change data. It also takes a window in hours, so a
+scheduled report covers the changes of the last night rather than everything ever recorded.
+
 ## Authentication
 
 Ledger ignores data from servers it has not been told to trust, so a new server sends nothing useful until you approve it.

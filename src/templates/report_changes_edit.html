@@ -1,0 +1,115 @@
+{% extends 'layout.html' %}
+{% block body %}
+		<div class="wrapper wrapper-content">
+			<div class="row">
+				<div class="col">
+					<div class="shadow-sm row bd-example">
+						<div class="col-sm-2 text-nowrap">
+							<label class="col-form-label text-end">Report Name</label>
+						</div>
+
+						<div class="form-group col">
+							<form method="post" action=/reports/ id=nameform class="form-horizontal">
+								<input type=hidden name=action value=savename>
+								<input type=hidden name=report value={{ report.id }}>
+								<input type="text" class="form-control form-control-sm" name=name id=name value='{{ report.name }}'>
+						</div>
+
+						<div class="col-sm-2">
+								<input type="submit" class="btn btn-primary btn-s" value=Save>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="col">
+					<div class="shadow-sm row bd-example">
+						<div class="col-sm-2 text-nowrap">
+							<label class="col-form-label text-end">Sort Field</label>
+						</div>
+						<div class="col">
+							<form method="post" action=/reports/ id=sortform class="form-horizontal">
+								<input type=hidden name=action value=savesort>
+								<input type=hidden name=report value={{ report.id }}>
+								<select class="form-control chosen-select" name=sortc id=sortc>
+{% set c = 0 %}
+{% for d,k in columns %}
+									<option value={{ c }} {% if report.sortc == c %}selected{% endif %}>{{ d }}</option>
+{% set c = c + 1 %}
+{% endfor %}
+								</select>
+						</div>
+						<div class="col-sm-2">
+							<select class="form-control form-control-sm" name=sortd id=sortd>
+								<option value='asc' {% if report.sortd == 'asc' %}selected{% endif %}>ASC</option>
+								<option value='desc' {% if report.sortd == 'desc' %}selected{% endif %}>DESC</option>
+							</select>
+						</div>
+						<div class="col">
+							<input type="submit" class="btn btn-primary btn-s" value=Save>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+<br>
+			<div class="row">
+				<div class="col">
+					<div class="shadow-sm row bd-example">
+						<div class="col">
+							<h3>Filters</h3>
+							<p>A changes report lists the same fields as the Changes page, narrowed by the filters set here.
+							Set <b>Last Hours</b> to report on a window rather than on everything recorded, which is what a
+							scheduled report normally wants.</p>
+							<div class="table-responsive">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<th width=20%>Filter</th>
+											<th>Value</th>
+											<th width=90></th>
+										</tr>
+									</thead>
+									<tbody>
+{% for field,label in fields %}
+										<tr>
+											<td>{{ label }}</td>
+											<td>
+												<form method="post" action=/reports/ class="form-horizontal d-flex gap-2">
+													<input type=hidden name=action value=addfilter>
+													<input type=hidden name=report value={{ report.id }}>
+													<input type=hidden name=field value="{{ field }}">
+{% if options[field] is defined %}
+													<select class="form-control form-select form-select-sm chosen-select" name=value id=value_{{ field }}>
+														<option value=""></option>
+{% for value,name in options[field] %}
+														<option value="{{ value }}"{% if current[field] is defined and current[field] == value %} selected{% endif %}>{{ name }}</option>
+{% endfor %}
+													</select>
+{% else %}
+													<input type="text" class="form-control form-control-sm" name=value id=value_{{ field }} value="{{ current[field]|default('') }}">
+{% endif %}
+													<input type="submit" class="btn btn-primary btn-xs" value=Set>
+												</form>
+											</td>
+											<td nowrap>
+{% if current[field] is defined %}
+												<a href="{{ server }}?action=deletefilter&report={{ report.id }}&field={{ field }}" class='btn btn-danger btn-xs' type='button' name=deletefilter id=deletefilter><i class="fa fa-trash"></i></a>
+{% endif %}
+											</td>
+										</tr>
+{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+{% endblock %}
+{% block javascriptinc %}
+{% endblock %}
+{% block javascript %}
+$(".chosen-select").chosen({ search_contains: true });
+{% endblock %}
