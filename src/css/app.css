@@ -100,8 +100,9 @@ body {
     width: 100%;
 }
 
-.chosen-container {
-    min-width: 100%;
+.select2-container--bootstrap-5 .select2-selection {
+    min-height: calc(1.5em + .5rem + 2px);
+    font-size: .875rem;
 }
 
 .nav-link.active {
@@ -134,4 +135,9 @@ body {
 .accordion-button:focus {
     box-shadow: none;
     border-color: rgba(0,0,0,.125);
+}
+
+/* Fact names and values wrap rather than widening the table; a name keeps enough room to read */
+.ledger-col-name {
+    min-width: 12rem;
 }

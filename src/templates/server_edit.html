@@ -4,30 +4,37 @@
 <div class="wrapper text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff; width: 50%">
 		<div class="shadow-sm bd-example col-sm-3">
-			<form method="post" action="/servers/save/{{ server.id }}" id=serverform class="form-horizontal">
+			<form method="post" action="/servers/save/{{ server.id }}" id="serverform" class="form-horizontal">
 					<div class="mb-3">
 						<label class="form-label">Server Name</label>
 						<div>
-							<input type="text" class="form-control" value='{{ server.name }}' disabled>
+							<input type="text" class="form-control" value="{{ server.name }}" disabled>
 						</div>
 					</div>
 					<div class="mb-3">
-						<label class="form-label">Server IP</label>
+						<label class="form-label">Install UUID</label>
 						<div>
-							<input type="text" class="form-control" value='{{ server.ip }}' disabled>
+							<input type="text" class="form-control font-monospace" value="{{ server.uuid }}" disabled>
 						</div>
 					</div>
 					<div class="mb-3">
-						<label class="form-label">Server URL (used for job template link)</label>
+						<label class="form-label">Last Address</label>
 						<div>
-							<input type="text" class="form-control" name=url id=url value='{{ server.url }}' placeholder="https://{{ server.name }}">
+							<input type="text" class="form-control" value="{{ server.ip }}" disabled>
+						</div>
+					</div>
+					<div class="mb-3">
+						<label class="form-label" for="url">Server URL (used for job template link)</label>
+						<div>
+							<input type="text" class="form-control{% if app_error == 'url' %} is-invalid{% endif %}" name="url" id="url" value="{{ server.url }}" placeholder="https://{{ server.name }}">
+							<div class="form-text">An http:// or https:// address.  Filled in from Ascender's own URL setting when it sends one.</div>
 						</div>
 					</div>
 					<div class="hr-line-dashed"></div>
 					<div class="mb-3">
 						<div class="col-sm-offset-2">
-							<a href=/ class="btn btn-white" name=cancel>Cancel</a>
-							<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
+							<a href="/servers/" class="btn btn-white" name="cancel">Cancel</a>
+							<button class="btn btn-primary" type="submit" name="save" id="save">Save</button>
 						</div>
 					</div>
 			</form>

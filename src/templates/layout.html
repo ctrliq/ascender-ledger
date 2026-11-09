@@ -4,13 +4,15 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="csrf-token" content="{{ csrf_token }}">
 	<title>Ascender Ledger</title>
 	<link rel="stylesheet" type="text/css" href="/css/bootstrap/bootstrap-5.2.3.min.css" />
 	<link rel="stylesheet" type="text/css" href="/css/font-awesome-5.7.2/all.css" />
 	<link rel="stylesheet" type="text/css" href="/css/bootstrap/dataTables.bootstrap.5-1.12.1.min.css" />
 	<link rel="stylesheet" type="text/css" href="/css/bootstrap/buttons.bootstrap5-2.2.3.min.css" />
-	<link rel="stylesheet" type="text/css" href="/css/chosen-1.8.7/chosen.min.css" />
-	<link href="/css/app.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="/css/select2-4.0.13/select2.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/select2-4.0.13/select2-bootstrap-5-theme.min.css" />
+	<link href="/css/app.css?v={{ version }}" rel="stylesheet">
 	<style>
 	{% block css %}{% endblock %}
 	</style>
@@ -33,7 +35,7 @@
 		<a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3 text-white text-decoration-none">
 			<span class="fs-4 d-sm-inline"><img src="/img/AscenderLedger_logo_rev.svg" class="img-fluid" style="min-height: 30px; height: auto"></span>
 		</a>
-		<div class="topnav navbar-nav justify-content-end ms-auto" tole="navigation">
+		<div class="topnav navbar-nav justify-content-end ms-auto" role="navigation">
 			<div class="nav-item text-nowrap">
 				<li class="nav-item dropdown ms-auto">
 					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -123,7 +125,8 @@
 	</div>
 
 	<script src="/js/bootstrap-5.2.3/bootstrap.bundle.min.js"></script>
-	<script src="/js/chosen-1.8.7/chosen.jquery.min.js"></script>
+	<script src="/js/select2-4.0.13/select2.full.min.js"></script>
+	<script src="/js/ledger.js?v={{ version }}"></script>
 
 <!-- Custom and plugin javascript -->
 {% block javascriptinc %}{% endblock %}

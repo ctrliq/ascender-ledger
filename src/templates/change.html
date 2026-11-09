@@ -13,7 +13,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr><td>Date</td><td>{{ (change.time - 21600)|date("m/d/Y H:i")  }}</td></tr>
+						<tr><td>Date</td><td>{{ change.time|date("m/d/Y H:i") }}</td></tr>
 						{% if job.actor %}
 						<tr><td>User</td><td>{{ job.actor }}</td></tr>
 						{% endif %}
@@ -29,9 +29,9 @@
 						{% if job.inventory %}
 						<tr><td>Inventory</td><td>{{ (job.inventory | split('-'))[0] }}</td></tr>
 						{% endif %}
-						<tr><td>Host</td><td>{{ hosts[change.host] }}</td></tr>
+						<tr><td>Host</td><td>{{ hostname }}</td></tr>
 						{% if job.name %}
-						<tr><td>Job Template</td><td><a href='{% if aserver.url %}{{ aserver.url }}{% else %}https://{{ job.host }}{% endif %}/#/jobs/playbook/{{ change.job }}' target=_new{{ change.job }}>{{ job.name }}</a></td></tr>
+						<tr><td>Job Template</td><td><a href="{% if aserver.url %}{{ aserver.url }}{% else %}https://{{ job.host }}{% endif %}/#/jobs/playbook/{{ change.job }}" target="_new{{ change.job }}" rel="noopener noreferrer">{{ job.name }}</a></td></tr>
 						{% endif %}
 						{% if job.execution_environment %}
 						<tr><td>Execution Environment</td><td>{{ (job.execution_environment | split('-'))[0] }}</td></tr>

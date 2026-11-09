@@ -2,38 +2,30 @@
 
 include_once('includes/global.php');
 
-if (!$account['view_facts'] && !$account['super']) {
-    header("Location: /\n\n");
-    exit;
+if (empty($account['view_facts']) && empty($account['super'])) {
+	header("Location: /\n\n");
+	exit;
 }
 
-$hosts = reindex_arr_by_id(db_fetch_assocs("SELECT * FROM `hosts` ORDER BY `hostname`"));
-$ufacts = reindex_col(db_fetch_assocs("SELECT DISTINCT `fact` FROM `facts` ORDER BY `fact` ASC"), 'fact');
-$types = reindex_col(db_fetch_assocs("SELECT DISTINCT `type` FROM `facts` ORDER BY `type` ASC"), 'type');
+/*
+	A fleet can store millions of facts under hundreds of thousands of names, so neither the
+	facts nor the list of names are ever loaded whole.  The table is filled a page at a time by
+	the DataTables request below, and the host and fact pickers search the server as you type.
+*/
 
-$filters = array();
-$host = '';
-$fact = '';
-$type = '';
-$search = '';
+// The filter menus are only needed to draw the page, not for each page of table rows
+$types = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `type` FROM `facts` ORDER BY `type` ASC"), 'type');
 
 if (isset($_GET['clear'])) {
-	if ($_GET['clear'] == 'host') {
-		unset($_SESSION['facts_host']);
+	if (in_array($_GET['clear'], array('host', 'fact', 'type', 'search'), true)) {
+		unset($_SESSION['facts_' . $_GET['clear']]);
 	}
-	if ($_GET['clear'] == 'fact') {
-		unset($_SESSION['facts_fact']);
-	}
-	if ($_GET['clear'] == 'type') {
-		unset($_SESSION['facts_type']);
-	}
-	if ($_GET['clear'] == 'search') {
-		unset($_SESSION['facts_search']);
-	}
+	header("Location: /facts/");
+	exit;
 }
 
 if (isset($_GET['host'])) {
-	if (intval($_GET['host']) == $_GET['host'] && isset($hosts[$_GET['host']])) {
+	if (host_name($_GET['host']) != '') {
 		$_SESSION['facts_host'] = intval($_GET['host']);
 	} else {
 		unset($_SESSION['facts_host']);
@@ -42,9 +34,10 @@ if (isset($_GET['host'])) {
 	exit;
 }
 
-if (isset($_GET['fact'])) {
-	if (in_array($_GET['fact'], $ufacts)) {
-		$_SESSION['facts_fact'] = sql_clean_fact($_GET['fact']);
+if (isset($_GET['fact']) && is_string($_GET['fact'])) {
+	$f = sql_clean_fact($_GET['fact']);
+	if ($f != '') {
+		$_SESSION['facts_fact'] = $f;
 	} else {
 		unset($_SESSION['facts_fact']);
 	}
@@ -52,9 +45,9 @@ if (isset($_GET['fact'])) {
 	exit;
 }
 
-if (isset($_GET['type'])) {
-	if (in_array($_GET['type'], $types)) {
-		$_SESSION['facts_type'] = sql_clean_fact($_GET['type']);
+if (isset($_GET['type']) && is_string($_GET['type'])) {
+	if (in_array($_GET['type'], $types, true)) {
+		$_SESSION['facts_type'] = $_GET['type'];
 	} else {
 		unset($_SESSION['facts_type']);
 	}
@@ -62,49 +55,76 @@ if (isset($_GET['type'])) {
 	exit;
 }
 
-if (isset($_GET['search'])) {
-	if ($_GET['search'] == '') {
+if (isset($_GET['search']) && is_string($_GET['search']) && !dt_is_request()) {
+	$s = trim(substr($_GET['search'], 0, 128));
+	if ($s == '') {
 		unset($_SESSION['facts_search']);
 	} else {
-		$_SESSION['facts_search'] = sql_clean_csearch($_GET['search']);
+		$_SESSION['facts_search'] = $s;
 	}
+	header("Location: /facts/");
+	exit;
 }
 
-// Create filters
-if (isset($_SESSION['facts_host']) && $_SESSION['facts_host'] != '') {
-	$filters[] = " `host` = " . intval($_SESSION['facts_host']);
-	$host = intval($_SESSION['facts_host']);
-}
+$host   = (isset($_SESSION['facts_host']) ? intval($_SESSION['facts_host']) : 0);
+$fact   = (isset($_SESSION['facts_fact']) ? $_SESSION['facts_fact'] : '');
+$type   = (isset($_SESSION['facts_type']) ? $_SESSION['facts_type'] : '');
+$search = (isset($_SESSION['facts_search']) ? $_SESSION['facts_search'] : '');
 
-if (isset($_SESSION['facts_fact']) && $_SESSION['facts_fact'] != '') {
-	$filters[] = " `fact` = '" . sql_clean_fact($_SESSION['facts_fact']) . "'";
-	$fact = sql_clean_fact($_SESSION['facts_fact']);
-}
+if (dt_is_request()) {
+	$where = array();
+	$params = array();
 
-if (isset($_SESSION['facts_type']) && $_SESSION['facts_type'] != '') {
-	$filters[] = " `type` = '" . sql_clean_fact($_SESSION['facts_type']) . "'";
-	$type = sql_clean_fact($_SESSION['facts_type']);
-}
-
-if (isset($_SESSION['facts_search']) && $_SESSION['facts_search'] != '') {
-	$s = sql_clean_csearch($_SESSION['facts_search']);
-	$c = explode(' ', $s);
-	foreach ($c as $s) {
-		$filters[] = " `data` LIKE '%$s%'";
+	if ($host) {
+		$where[] = '`f`.`host` = ?';
+		$params[] = $host;
 	}
-	$search = $_SESSION['facts_search'];
+	if ($fact != '') {
+		$where[] = '`f`.`fact` = ?';
+		$params[] = $fact;
+	}
+	if ($type != '') {
+		$where[] = '`f`.`type` = ?';
+		$params[] = $type;
+	}
+	if ($search != '') {
+		foreach (preg_split('/\s+/', $search) as $s) {
+			if ($s != '') {
+				$where[] = '`f`.`data` LIKE ?';
+				$params[] = '%' . dt_like_escape($s) . '%';
+			}
+		}
+	}
+
+	dt_serve(
+		'`f`.`host`, `h`.`hostname`, `f`.`fact`, `f`.`data`, `f`.`type`',
+		'FROM `facts` AS `f` LEFT JOIN `hosts` AS `h` ON `h`.`id` = `f`.`host`',
+		$where,
+		$params,
+		array(
+			0 => array('`h`.`hostname`', '`f`.`fact`'),
+			1 => array('`f`.`fact`', '`f`.`host`'),
+			3 => array('`f`.`type`', '`f`.`fact`'),
+		),
+		'`f`.`fact`, `f`.`host`',
+		array('`h`.`hostname`', '`f`.`fact`', '`f`.`data`'),
+		function ($r) {
+			return array(
+				'host_id'  => intval($r['host']),
+				'hostname' => $r['hostname'],
+				'fact'     => $r['fact'],
+				'data'     => $r['data'],
+				'type'     => $r['type'],
+			);
+		}
+	);
 }
 
-$h = array();
-foreach ($hosts as $h2) {
-	$h[$h2['id']] = $h2['hostname'];
-}
-if (!empty($filters)) {
-	$filters = "WHERE " . implode(' AND ', $filters);
-} else {
-	$filters = '';
-}
-
-$facts = db_fetch_assocs("SELECT * FROM `facts` $filters ORDER BY `fact` ASC" . ($filters == '' ? ' LIMIT 0,500' : ''));
-
-echo $twig->render('facts.html', array_merge($twigarr, array('types' => $types, 'type' => $type, 'facts' => $facts, 'ufacts' => $ufacts, 'hosts' => $h, 'host' => $host, 'fact' => $fact, 'search' => $search)));
+echo $twig->render('facts.html', array_merge($twigarr, array(
+	'types'    => $types,
+	'type'     => $type,
+	'host'     => $host,
+	'hostname' => host_name($host),
+	'fact'     => $fact,
+	'search'   => $search,
+)));

@@ -2,9 +2,19 @@
 {% block body %}
 <div class="wrapper text-bg-light">
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-{% if account.super and untrusted %}
-		<div class="bd-example d-flex justify-content-center" style="margin-bottom: 10px; background-color: rgb(255,255,233)">
-			<h4><a href='/servers/' style="text-decoration: none">There {{  untrusted > 1 ? 'are' : 'is' }} {{ untrusted }} untrusted Server{{  untrusted > 1 ? 's' : '' }}</a></h4>
+{% if token_off %}
+		<div class="bd-example" style="margin-bottom: 10px; background-color: rgb(255,255,233)">
+			Ledger is accepting data from anything that can reach it.  Give Ascender the Authorization Token, then turn on
+			<b>Require Token Authorization</b> under <a href="/settings/general/">Settings &rarr; General</a>.
+			<a href="/servers/">Servers</a> shows which servers are already sending it.
+		</div>
+{% endif %}
+{% if rejected %}
+		<div class="bd-example" style="margin-bottom: 10px; background-color: rgb(255,255,233)">
+			<h5 class="mb-1">Ledger is refusing data from {{ rejected.ip }}: {{ rejected.reason }}</h5>
+			Last refused {{ rejected.time|date("m/d/Y H:i T") }}.  In Ascender, under Settings &rarr; Logging, set the Logging Aggregator Type to
+			<code>ledger</code> and the Logging Aggregator Password / Token to the Authorization Token shown under
+			<a href="/settings/general/">Settings &rarr; General</a>.
 		</div>
 {% endif %}
 		<div class=" border row justify-content-center p-3 mx-0 mb-3">

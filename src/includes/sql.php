@@ -7,8 +7,9 @@
  */
 //error_reporting(E_ALL);
 
-global $totalqueries;
+global $totalqueries, $settings_cache;
 $totalqueries = 0;
+$settings_cache = array();
 
 if (file_exists('includes/config.php')) {
 	require_once('includes/config.php');
@@ -18,8 +19,12 @@ if (file_exists('includes/config.php')) {
 }
 
 try {
-	$db = new \PDO("mysql:host=$sql_server;port=$port;dbname=$mydb;charset=utf8", $sql_user, $sql_pass);
+	$db = new \PDO("mysql:host=$sql_server;port=$port;dbname=$mydb;charset=utf8", $sql_user, $sql_pass, array(
+		\PDO::ATTR_ERRMODE          => \PDO::ERRMODE_EXCEPTION,
+		\PDO::ATTR_EMULATE_PREPARES => false,
+	));
 } catch(PDOException $e) {
+	error_log('Ledger: could not connect to the database: ' . $e->getMessage());
 	echo "Could not connect to the database\n";
 	exit;
 }
@@ -46,6 +51,17 @@ function sql_clean_url($text) {
 	$text = htmlspecialchars($text);
 	$text = preg_replace("/[^a-zA-Z0-9\-_\.\/:]/", "", $text);
 	return $text;
+}
+
+/**
+ * True for an absolute http:// or https:// URL, the only kinds Ledger links to
+ */
+function valid_http_url($url) {
+	if (!is_string($url) || $url == '' || filter_var($url, FILTER_VALIDATE_URL) === false) {
+		return false;
+	}
+	$scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+	return ($scheme == 'http' || $scheme == 'https');
 }
 
 function sql_clean_name($text) {
@@ -120,6 +136,16 @@ function db_table_exists ($table) {
 function db_column_exists ($table, $column) {
 	return (db_fetch_cell("SHOW columns FROM `$table` LIKE '$column'", 'Field') ? true : false);
 }
+function db_index_exists ($table, $index, $unique_only = false) {
+	$rows = db_fetch_assocs_prepare('SELECT `NON_UNIQUE` FROM `information_schema`.`STATISTICS`
+		WHERE `TABLE_SCHEMA` = DATABASE() AND `TABLE_NAME` = ? AND `INDEX_NAME` = ?', array($table, $index));
+	foreach ($rows as $r) {
+		if (!$unique_only || !$r['NON_UNIQUE']) {
+			return true;
+		}
+	}
+	return false;
+}
 
 /**
  * Executes a SQL query, return last insert id
@@ -149,22 +175,84 @@ function db_execute($query) {
  * @return int 
  */
 function db_execute_prepare($query, $data) {
-	global $db;
-	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES,false); 
+	$stmt = db_prepare_cached($query);
+	$i = $stmt->execute($data);
 
-	$stmt = $db->prepare($query);
-
-	if (!$stmt) {
-		echo "\nPDO::errorInfo():\n";
-		print_r($db->errorInfo());
-		return 0;
-	} else {
-		$i = $stmt->execute($data);
-		if ($db->lastInsertId()) {
-			return $db->lastInsertId();
+	// lastInsertId() is per connection, so only report it for the statements that set it.
+	// Otherwise an UPDATE run after any INSERT would hand back that earlier row's id.
+	if (preg_match('/^\s*(INSERT|REPLACE)\b/i', $query)) {
+		$id = $GLOBALS['db']->lastInsertId();
+		if ($id) {
+			return $id;
 		}
-		return $i;
 	}
+	return $i;
+}
+
+/**
+ * Prepares a statement once per request and reuses it
+ *
+ * The parser runs the same INSERT for every fact of a host, which can be thousands of
+ * statements per event.  Preparing each of them again is a round trip to the server for
+ * nothing, so statements are kept for the life of the request.
+ *
+ * @param string $query
+ * @return PDOStatement
+ */
+function db_prepare_cached($query) {
+	global $db;
+	static $cache = array();
+
+	if (!isset($cache[$query])) {
+		if (count($cache) > 200) {
+			$cache = array();
+		}
+		$cache[$query] = $db->prepare($query);
+	}
+	return $cache[$query];
+}
+
+function db_begin() {
+	global $db;
+	if (!$db->inTransaction()) {
+		$db->beginTransaction();
+	}
+}
+
+function db_commit() {
+	global $db;
+	if ($db->inTransaction()) {
+		$db->commit();
+	}
+}
+
+function db_rollback() {
+	global $db;
+	if ($db->inTransaction()) {
+		$db->rollBack();
+	}
+}
+
+/**
+ * Counts the rows a query would return, giving up at $cap
+ *
+ * An exact COUNT(*) over the facts table of a large fleet reads every row, and the pages only
+ * need it to size their pagination.  Counting at most $cap + 1 rows keeps every page request
+ * bounded, at the price of reporting "more than $cap" rather than the exact figure.
+ *
+ * @param string $from_where  everything after SELECT ... (FROM, JOINs and WHERE)
+ * @param array  $params
+ * @param int    $cap
+ * @return array  array(count, capped)
+ */
+function db_count_capped($from_where, $params, $cap = 100000) {
+	$cap = intval($cap);
+	$count = db_fetch_cell_prepare("SELECT COUNT(*) AS `total` FROM (SELECT 1 $from_where LIMIT " . ($cap + 1) . ") AS `rs`", 'total', $params);
+	$count = intval($count);
+	if ($count > $cap) {
+		return array($cap, true);
+	}
+	return array($count, false);
 }
 
 /**
@@ -189,10 +277,10 @@ function db_fetch_assoc($query) {
 }
 
 function db_fetch_assoc_prepare($query, $data) {
-	global $db;
-	$stmt = $db->prepare($query);
+	$stmt = db_prepare_cached($query);
 	$stmt->execute($data);
 	$results = $stmt->fetch(\PDO::FETCH_ASSOC);
+	$stmt->closeCursor();
 	return $results;
 }
 
@@ -230,15 +318,9 @@ function db_fetch_assocs($query) {
  * @return array or false if failed
  */
 function db_fetch_assocs_prepare($query, $data) {
-	global $db;
-	$stmt = $db->prepare($query);
-	if ($stmt) {
-		$stmt->execute($data);
-		$results = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-	} else {
-		$results = false;
-	}
-	return $results;
+	$stmt = db_prepare_cached($query);
+	$stmt->execute($data);
+	return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 }
 
 /**
@@ -261,10 +343,10 @@ function db_fetch_cell($query, $cell) {
 }
 
 function db_fetch_cell_prepare($query, $cell, $data) {
-	global $db;
-	$stmt = $db->prepare($query);
+	$stmt = db_prepare_cached($query);
 	$stmt->execute($data);
 	$results = $stmt->fetch(\PDO::FETCH_ASSOC);
+	$stmt->closeCursor();
 	if (!isset($results[$cell])) return false;
 	return $results[$cell];
 }
@@ -280,15 +362,47 @@ function db_fetch_cell_prepare($query, $cell, $data) {
  * @return string or false if failed
  */
 function read_setting($name, $default = false) {
+	global $settings_cache;
 	$name = sql_clean_setting($name);
+
+	if (isset($settings_cache[$name])) {
+		return $settings_cache[$name];
+	}
+
 	$value = db_fetch_cell_prepare('SELECT `value` FROM `settings` WHERE `setting` = ?', 'value', array($name));
 	if ($value === false) {
 		if ($default !== false) {
-			db_execute_prepare('INSERT INTO `settings` (`setting`, `value`) VALUES (?, ?)', array($name, $default));
+			db_execute_prepare('INSERT IGNORE INTO `settings` (`setting`, `value`) VALUES (?, ?)', array($name, $default));
 			$value = $default;
 		}
 	}
+	if ($value !== false) {
+		$settings_cache[$name] = $value;
+	}
 	return $value;
+}
+
+/**
+ * Writes a setting, creating it if it does not exist yet
+ *
+ * @param string $name
+ * @param string $value
+ */
+function write_setting($name, $value) {
+	global $settings_cache;
+	$name = sql_clean_setting($name);
+	db_execute_prepare('INSERT INTO `settings` (`setting`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)', array($name, $value));
+	$settings_cache[$name] = $value;
+}
+
+/**
+ * A new random token for the parser's Authorization header, in UUID form
+ */
+function generate_auth_token() {
+	$b = random_bytes(16);
+	$b[6] = chr((ord($b[6]) & 0x0f) | 0x40);
+	$b[8] = chr((ord($b[8]) & 0x3f) | 0x80);
+	return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($b), 4));
 }
 
 function secured_encrypt($data) {

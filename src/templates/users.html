@@ -34,7 +34,7 @@
 						<td>{% if u.super %}Yes{% else %}No{% endif %}</td>
 						<td style="display:none;">{% if u.super %}Admin{% else %}User{% endif %}</td>
 						<td width="30">
-                            <a href='/users/delete/{{ u['id'] }}' class="btn btn-danger btn-xs dltlink"  type="button" name=delete id=delete><i class="fa fa-trash"></i></a>
+                            {% if u.id != account.id %}<a href="/users/delete/{{ u.id }}?csrf_token={{ csrf_token|url_encode }}" class="btn btn-danger btn-xs dltlink" data-confirm="Are you sure you want to delete this User?" title="Delete"><i class="fa fa-trash"></i></a>{% endif %}
                         </td>
 					</tr>
 {% endfor %}
@@ -81,14 +81,4 @@
 		buttons: []
 	});
 
-    var classname = document.getElementsByClassName("dltlink");
-	for (var i = 0; i < classname.length; i++) {
-		classname[i].addEventListener('click',
-			function(event) {
-				var t = confirm("Are you sure you want to delete this User?");
-				if (!t) {
-					event.preventDefault();
-				}
-			}, false);
-	}
 {% endblock %}

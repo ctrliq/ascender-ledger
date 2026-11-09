@@ -2,39 +2,48 @@
 
 {% block body %}
 <div class="wrapper text-bg-light">
-{% if msg %}<font color=green><center>{{ msg }}</center></font><br>{% endif %}
-{% if error %}<font color=red><center>{{ error }}</center></font><br>{% endif %}
 	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+		<div class="alert alert-light border py-2">
+{% if require_auth_token == '1' %}
+			Ascender servers send data with the Authorization Token from <a href="/settings/general/">Settings &rarr; General</a>, and are listed here once they do.
+{% else %}
+			<b>Token authorization is off</b>: Ledger accepts data from anything that can reach it.  Give each Ascender server the
+			Authorization Token from <a href="/settings/general/">Settings &rarr; General</a>; once every server below shows <b>Valid</b>,
+			turn on Require Token Authorization there.
+{% endif %}
+{% if rejected %}
+			<br><span class="text-danger">Data was last refused on {{ rejected.time|date("m/d/Y H:i T") }} from {{ rejected.ip }}: {{ rejected.reason }}.</span>
+{% endif %}
+		</div>
 		<div class="shadow-sm border table-responsive p-4">
 			<table class="table table-striped datatable-servers w-100">
 				<thead>
 					<tr>
 						<th></th>
 						<th>Name</th>
-						<th>IP Address</th>
+						<th>Install UUID</th>
+						<th>Last Address</th>
 						<th>URL</th>
-						<th>Trusted</th>
+						<th>Last Seen</th>
+						<th>Token</th>
 						<th></th>
 					</tr>
 				</thead>
 				<tbody>
 {% for u in servers %}
 					<tr>
-						<td width="80" nowrap>
-                            <a href='/servers/edit/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-edit"></i></a>
-	{% if u.trusted %}
-                            <a href='/servers/trust/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fas fa-lock"></i></a>
-	{% else %}
-                            <a href='/servers/trust/{{ u['id'] }}' class="btn btn-warning btn-xs"  type="button" name=edit id=edit><i class="fas fa-lock-open"></i></a>
-	{% endif %}
-                        </td>
+						<td width="30" nowrap>
+							<a href="/servers/edit/{{ u.id }}" class="btn btn-primary btn-xs" title="Edit"><i class="fas fa-edit"></i></a>
+						</td>
 						<td nowrap>{{ u.name }}</td>
+						<td nowrap class="font-monospace">{{ u.uuid }}</td>
 						<td nowrap>{{ u.ip }}</td>
 						<td nowrap>{{ u.url }}</td>
-						<td>{% if u.trusted %}Yes{% else %}No{% endif %}</td>
+						<td nowrap data-order="{{ u.lastseen }}">{% if u.lastseen %}{{ u.lastseen|date("m/d/Y H:i") }}{% endif %}</td>
+						<td nowrap>{% if not u.lastseen %}{% elseif u.auth_ok %}<span class="text-success">Valid</span>{% else %}<span class="text-danger">Missing or wrong</span>{% endif %}</td>
 						<td width="30">
-                            <a href='/servers/delete/{{ u['id'] }}' class="btn btn-danger btn-xs dltlink"  type="button" name=delete id=delete><i class="fa fa-trash"></i></a>
-                        </td>
+							<a href="/servers/delete/{{ u.id }}?csrf_token={{ csrf_token|url_encode }}" class="btn btn-danger btn-xs dltlink" data-confirm="Are you sure you want to delete this Server?" title="Delete"><i class="fa fa-trash"></i></a>
+						</td>
 					</tr>
 {% endfor %}
 				</tbody>
@@ -44,8 +53,6 @@
 </div>
 
 {% endblock %}
-{% block javascriptinc %}
-{% endblock %}
 {% block javascript %}
 	$('.datatable-servers').DataTable({
 		order: [[1, 'asc']],
@@ -53,15 +60,4 @@
 		responsive: true,
 		buttons: []
 	});
-
-    var classname = document.getElementsByClassName("dltlink");
-	for (var i = 0; i < classname.length; i++) {
-		classname[i].addEventListener('click',
-			function(event) {
-				var t = confirm("Are you sure you want to delete this Server?");
-				if (!t) {
-					event.preventDefault();
-				}
-			}, false);
-	}
 {% endblock %}

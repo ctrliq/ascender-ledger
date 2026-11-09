@@ -11,6 +11,7 @@ class User {
 	var $view_facts = 1;
 	var $registered = 0;
 	var $code = '';
+	var $code_expires = 0;
 	var $super = 0;
 
 	function __construct($id = 0) {
@@ -27,7 +28,11 @@ class User {
 
 	function retrieve_by_code($code) {
 		$code = $this->clean_code($code);
-		$u = db_fetch_assoc_prepare('SELECT * FROM `users` WHERE `code` = ?', array($code));
+		if ($code == '') {
+			return false;
+		}
+		// Codes issued before they could expire (code_expires 0) keep working as they did
+		$u = db_fetch_assoc_prepare('SELECT * FROM `users` WHERE `code` = ? AND (`code_expires` = 0 OR `code_expires` > ?)', array($code, time()));
 		$this->pop_class($u);
 		return $u;
 	}
@@ -39,8 +44,12 @@ class User {
 		return $u;
 	}
 
-	function set_code($code) {
-		$this->code = $this->clean_username($code);
+	/*
+		A sign-in code for an invite or a password reset, valid for $ttl seconds.  '' clears it.
+	*/
+	function set_code($code, $ttl = 0) {
+		$this->code = $this->clean_code($code);
+		$this->code_expires = ($this->code != '' && $ttl > 0 ? time() + intval($ttl) : 0);
 	}
 
 	function set_name($name) {
@@ -82,16 +91,17 @@ class User {
 	}
 
 
+	// Form fields can arrive as arrays (name[]=x); those clean to nothing rather than "Array"
 	function clean_name($text) {
-		return preg_replace('/[^A-Za-z\- ]/', '', $text);
+		return (is_scalar($text) ? preg_replace('/[^A-Za-z\- ]/', '', (string) $text) : '');
 	}
 
 	function clean_username($text) {
-		return preg_replace('/[^A-Za-z0-9\.@\-\+]/', '', $text);
+		return (is_scalar($text) ? preg_replace('/[^A-Za-z0-9\.@\-\+]/', '', (string) $text) : '');
 	}
 
 	function clean_code($text) {
-		return preg_replace('/[^A-Za-z0-9]/', '', $text);
+		return (is_scalar($text) ? preg_replace('/[^A-Za-z0-9]/', '', (string) $text) : '');
 	}
 
 
@@ -105,6 +115,7 @@ class User {
 			$this->username = $u['username'];
 			$this->password = $u['password'];
 			$this->code = $u['code'];
+			$this->code_expires = (isset($u['code_expires']) ? intval($u['code_expires']) : 0);
 			$this->super = $u['super'];
 			$this->view_changes = $u['view_changes'];
 			$this->view_facts = $u['view_facts'];
@@ -121,11 +132,11 @@ class User {
 
 	function save() {
 		if ($this->id) {
-			db_execute_prepare('UPDATE `users` SET `name` = ?, `email` = ?, `username` = ?, `password` = ?, `enabled` = ?, `registered` = ?, `code` = ?, `super` = ?, `view_changes` = ?, `view_facts` = ? WHERE `id` = ?',
-						array($this->name, $this->email, $this->username, $this->password, $this->enabled, $this->registered, $this->code, $this->super, $this->view_changes, $this->view_facts, $this->id));
+			db_execute_prepare('UPDATE `users` SET `name` = ?, `email` = ?, `username` = ?, `password` = ?, `enabled` = ?, `registered` = ?, `code` = ?, `code_expires` = ?, `super` = ?, `view_changes` = ?, `view_facts` = ? WHERE `id` = ?',
+						array($this->name, $this->email, $this->username, $this->password, $this->enabled, $this->registered, $this->code, $this->code_expires, $this->super, $this->view_changes, $this->view_facts, $this->id));
 		} else {
-			db_execute_prepare('INSERT INTO `users` (`name`, `email`, `username`, `password`, `enabled`, `registered`, `code`, `super`, `view_changes`, `view_facts`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-						array($this->name, $this->email, $this->username, $this->password, $this->enabled, $this->registered, $this->code, $this->super, $this->view_changes, $this->view_facts));
+			db_execute_prepare('INSERT INTO `users` (`name`, `email`, `username`, `password`, `enabled`, `registered`, `code`, `code_expires`, `super`, `view_changes`, `view_facts`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+						array($this->name, $this->email, $this->username, $this->password, $this->enabled, $this->registered, $this->code, $this->code_expires, $this->super, $this->view_changes, $this->view_facts));
 		}
 	}
 }

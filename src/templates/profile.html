@@ -19,7 +19,7 @@
 						<input type="text" class="form-control" name=email id=email value='{{ account.email }}' disabled>
 					</div>
 				</div>
-{% if account.code %}
+{% if code_login %}
 				<div class="mb-3">
 					<label class="form-label"></label>
 					<div class="col">
@@ -78,7 +78,7 @@
 	function check_pass () {
 		var p1 = $("#newpass").val();
 		var p2 = $("#newpass2").val();
-{% if account.code == "" %}
+{% if not code_login %}
 		var p3 = $("#cpass").val();
 
 		if (p1.length > 0 && p3.length < 1) {

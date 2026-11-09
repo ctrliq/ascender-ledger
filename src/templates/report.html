@@ -37,7 +37,7 @@
 {% endblock %}
 {% block javascript %}
 	$('.datatable-reports').DataTable({
-		order: [[{{ report.sortc }}, '{{ report.sortd }}']],
+		order: [[{{ report.sortc|default(0) + 0 }}, '{{ report.sortd == 'desc' ? 'desc' : 'asc' }}']],
 {% if report.type == 'changes' %}
 		"columnDefs" : [{"targets":0, "type":"date-us"}],
 {% endif %}
@@ -47,8 +47,8 @@
 		buttons: [
 			'copy',
 			'csv',
-			{extend: 'excel', title: '{{ report.name }}'},
-			{extend: 'pdf', title: '{{ report.name }}'},
+			{extend: 'excel', title: '{{ report.name|e('js') }}'},
+			{extend: 'pdf', title: '{{ report.name|e('js') }}'},
 			{extend: 'print',
 				customize: function (win){
 					$(win.document.body).addClass('white-bg');
