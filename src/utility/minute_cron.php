@@ -40,12 +40,13 @@ function schedule_owner_allowed($s, $report) {
 // A claim older than this belongs to a run that died part way (out of memory, killed), and is taken over
 define('SCHEDULE_CLAIM_TIMEOUT', 900);
 
-$r = random_int(1000, 1000000000);
 $t = time() - 1;
 
 $done = false;
 
 while (!$done) {
+	// A new token for each claim, so a schedule left claimed after a failure is not picked up again by this run
+	$r = random_int(1000, 1000000000);
 	// We will grab 1 report at a time. Try to avoid race conditions in case of multiple web servers processing
 	db_execute_prepare("UPDATE `reports_schedules` SET `process` = ?, `claimed` = ? WHERE `next` < ? AND (`process` = 0 OR `claimed` < ?) AND `enabled` = 1 LIMIT 1",
 		array($r, time(), $t, time() - SCHEDULE_CLAIM_TIMEOUT));
@@ -75,7 +76,16 @@ while (!$done) {
 				send_email(array_map('trim', explode(',', $s['emails'])), $s['subject'], $html);
 			}
 		} catch (Exception $e) {
-			error_log('Ledger: scheduled report ' . $s['id'] . ' failed: ' . $e->getMessage());
+			/*
+				A failed run (the database was unavailable, say) keeps its claim, so it is tried
+				again when the claim times out, until the next run is due; then it is skipped,
+				so a report that always fails is not retried forever.
+			*/
+			if (time() < intval($s['next']) + $repeat) {
+				error_log('Ledger: scheduled report ' . $s['id'] . ' failed, and will be retried in ' . (SCHEDULE_CLAIM_TIMEOUT / 60) . ' minutes: ' . $e->getMessage());
+				continue;
+			}
+			error_log('Ledger: scheduled report ' . $s['id'] . ' failed, and is skipped until its next run: ' . $e->getMessage());
 		}
 
 		db_execute_prepare('UPDATE `reports_schedules` SET `next` = ?, `process` = 0, `claimed` = 0 WHERE `id` = ? AND `process` = ?', array($next, $s['id'], $r));

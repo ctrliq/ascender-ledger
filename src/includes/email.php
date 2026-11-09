@@ -38,11 +38,17 @@ function add_email_queue($to, $from, $fromname, $subject, $message) {
 			array($to, $from, $fromname, $subject, $message, time()));
 }
 
+/*
+	Sends what is waiting in the queue.  A scheduled report is queued once per recipient and
+	can be megabytes, so the queue is listed without the bodies, and each body is loaded only
+	while that one message is sent.
+*/
 function process_mail_queue($newonly = false) {
+	$cols = '`id`, `to`, `subject`, `status`, `attempts`, `last_attempt`, `error`';
 	if ($newonly) {
-		$emails = db_fetch_assocs('SELECT * FROM `mail_queue` WHERE `status` = 0');
+		$emails = db_fetch_assocs("SELECT $cols FROM `mail_queue` WHERE `status` = 0 ORDER BY `id`");
 	} else {
-		$emails = db_fetch_assocs('SELECT * FROM `mail_queue`');
+		$emails = db_fetch_assocs("SELECT $cols FROM `mail_queue` ORDER BY `id`");
 	}
 
 	if (!empty($emails)) {
@@ -52,7 +58,11 @@ function process_mail_queue($newonly = false) {
 				log_email($e['to'], $e['subject'], 'Gave up after ' . $e['attempts'] . ' attempts: ' . $e['error']);
 				db_execute_prepare('DELETE FROM `mail_queue` WHERE `id` = ?', array($e['id']));
 			} elseif ($e['status'] == 0 || ($e['last_attempt'] + ((2 ** max(0, $e['attempts'] - 1)) * 300) < time())) {
-				process_queue_email($e);
+				$full = db_fetch_assoc_prepare('SELECT * FROM `mail_queue` WHERE `id` = ?', array($e['id']));
+				if (isset($full['id'])) {
+					process_queue_email($full);
+				}
+				unset($full);
 			}
 		}
 	}
