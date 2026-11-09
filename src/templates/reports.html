@@ -2,8 +2,8 @@
 
 {% block body %}
 
-<div class="wrapper  text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
 		<div class="shadow-sm border p-4">
 			<div class="table-responsive">
 				<table class="table table-striped datatable-reports border-secondary">
@@ -27,7 +27,6 @@
 {% block javascript %}
 	$('.datatable-reports').DataTable({
 		order: [[1, 'asc']],
-		"columnDefs" : [{"targets":4, "type":"date-us"}],
 		pageLength: 25,
 		responsive: true,
 		buttons: []

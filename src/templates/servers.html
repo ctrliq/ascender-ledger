@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
 		<div class="alert alert-light border py-2">
 {% if require_auth_token == '1' %}
 			Ascender servers send data with the Authorization Token from <a href="/settings/general/">Settings &rarr; General</a>, and are listed here once they do.
@@ -36,9 +36,9 @@
 							<a href="/servers/edit/{{ u.id }}" class="btn btn-primary btn-xs" title="Edit"><i class="fas fa-edit"></i></a>
 						</td>
 						<td nowrap>{{ u.name }}</td>
-						<td nowrap class="font-monospace">{{ u.uuid }}</td>
+						<td class="font-monospace text-break">{{ u.uuid }}</td>
 						<td nowrap>{{ u.ip }}</td>
-						<td nowrap>{{ u.url }}</td>
+						<td class="text-break">{{ u.url }}</td>
 						<td nowrap data-order="{{ u.lastseen }}">{% if u.lastseen %}{{ u.lastseen|date("m/d/Y H:i") }}{% endif %}</td>
 						<td nowrap>{% if not u.lastseen %}{% elseif u.auth_ok %}<span class="text-success">Valid</span>{% else %}<span class="text-danger">Missing or wrong</span>{% endif %}</td>
 						<td width="30">

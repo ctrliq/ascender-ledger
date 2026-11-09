@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Ascender Ledger</title>
+	<link rel="icon" type="image/png" sizes="192x192" href="/img/android-chrome-192x192.png">
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap-5.3.8/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/font-awesome-6.7.2/css/all.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/themes/ciq/app.css?v={{ version }}" />
+	<link rel="stylesheet" type="text/css" href="/css/app.css?v={{ version }}" />
+</head>
+<body class="gray-bg2">
+<div class="row d-flex justify-content-stretch flex-wrap col-12">
+	<div class="gray-bg1 mx-auto text-white rounded p-5 border position-absolute top-50 start-50 translate-middle login">
+		<div class="text-center">
+			<img src="/img/AscenderLedger_logo_rev.svg" alt="Ascender Ledger" class="d-inline-block" style="height: 56px">
+		</div>
+		<div class="p-4">
+{% block body %}{% endblock %}
+		</div>
+	</div>
+</div>
+</body>
+</html>

@@ -73,7 +73,7 @@
 					<div class="mb-3">
 						<label class="form-label fs-6 fw-bold" for="hosts_retention">Hosts Retention (Days)</label>
 						<div>
-							<select class="form-control w-75" name="hosts_retention" id="hosts_retention">
+							<select class="form-select w-75" name="hosts_retention" id="hosts_retention">
 								{% for i in range(30, 360, 30) %}
 								<option{% if settings.hosts_retention == i %} selected{% endif %}>{{ i }}</option>
 								{% endfor %}
@@ -84,7 +84,7 @@
 					<div class="mb-3">
 						<label class="form-label fs-6 fw-bold" for="facts_retention">Facts Retention (Days)</label>
 						<div>
-							<select class="form-control w-75" name="facts_retention" id="facts_retention">
+							<select class="form-select w-75" name="facts_retention" id="facts_retention">
 								{% for i in range(30, 360, 30) %}
 								<option{% if settings.facts_retention == i %} selected{% endif %}>{{ i }}</option>
 								{% endfor %}
@@ -95,7 +95,7 @@
 					<div class="mb-3">
 						<label class="form-label fs-6 fw-bold" for="changes_retention">Changes Retention (Days)</label>
 						<div>
-							<select class="form-control w-75" name="changes_retention" id="changes_retention">
+							<select class="form-select w-75" name="changes_retention" id="changes_retention">
 								{% for i in range(30, 360, 30) %}
 								<option{% if settings.changes_retention == i %} selected{% endif %}>{{ i }}</option>
 								{% endfor %}
@@ -106,7 +106,7 @@
 					<div class="mb-3">
 						<label class="form-label fs-6 fw-bold" for="packages_retention">Packages Retention (Days)</label>
 						<div>
-							<select class="form-control w-75" name="packages_retention" id="packages_retention">
+							<select class="form-select w-75" name="packages_retention" id="packages_retention">
 								{% for i in range(30, 360, 30) %}
 								<option{% if settings.packages_retention == i %} selected{% endif %}>{{ i }}</option>
 								{% endfor %}

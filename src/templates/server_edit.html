@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff; width: 50%">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight" style="width: 50%">
 		<div class="shadow-sm bd-example col-sm-3">
 			<form method="post" action="/servers/save/{{ server.id }}" id="serverform" class="form-horizontal">
 					<div class="mb-3">
@@ -33,7 +33,7 @@
 					<div class="hr-line-dashed"></div>
 					<div class="mb-3">
 						<div class="col-sm-offset-2">
-							<a href="/servers/" class="btn btn-white" name="cancel">Cancel</a>
+							<a href="/servers/" class="btn btn-secondary" name="cancel">Cancel</a>
 							<button class="btn btn-primary" type="submit" name="save" id="save">Save</button>
 						</div>
 					</div>

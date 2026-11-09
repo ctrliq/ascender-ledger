@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff; width: 50%">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight" style="width: 50%">
 		<div class="shadow-sm bd-example">
 			<form method="post" action=/users/save/{{ user.id }} id=saform class="form-horizontal" enctype="multipart/form-data">
 				<input type=hidden name=action value=save>
@@ -27,7 +27,7 @@
 				<div class="mb-3">
 	                    <label for="enabled" class="col-sm-3 form-label">Enabled</label>
 					<div class="col">
-						<select class="form-control" name=enabled id=enabled>
+						<select class="form-select" name=enabled id=enabled>
 							<option value="1">Yes</option>
 							<option value="0"{% if not user.enabled %} selected{% endif %}>No</option>
 						</select>
@@ -37,7 +37,7 @@
 				<div class="mb-3">
 	                    <label for="type" class="col-sm-3 form-label">Type</label>
 					<div class="col">
-						<select class="form-control" name=super id=super>
+						<select class="form-select" name=super id=super>
 							<option value="0">Standard</option>
 							<option value="1"{% if user.super %} selected{% endif %}>Admin</option>
 						</select>
@@ -46,7 +46,7 @@
 				<div class="mb-3">
 	                    <label for="view_changes" class="col-sm-3 form-label">View Changes</label>
 					<div class="col">
-						<select class="form-control" name=view_changes id=view_changes>
+						<select class="form-select" name=view_changes id=view_changes>
 							<option value="1">Yes</option>
 							<option value="0"{% if not user.view_changes %} selected{% endif %}>No</option>
 						</select>
@@ -56,7 +56,7 @@
 				<div class="mb-3">
 	                    <label for="view_facts" class="col-sm-3 form-label">View Facts</label>
 					<div class="col">
-						<select class="form-control" name=view_facts id=view_facts>
+						<select class="form-select" name=view_facts id=view_facts>
 							<option value="1">Yes</option>
 							<option value="0"{% if not user.view_facts %} selected{% endif %}>No</option>
 						</select>
@@ -67,19 +67,19 @@
 				<div class="mb-3">
                     <label class="col-sm-3 form-label"></label>
 					<div class="col-sm-8">
-                        <font color=red><b>You must change your password</b></font>
+                        <span class="text-danger"><b>You must change your password</b></span>
                     </div>
 				</div>
 {% endif %}
                 <div class="mb-3">
                     <label for="newpass" class="col-sm-3 form-label">Change Password</label>
-					<div class="col-sm-4"><input type="password" class="form-control" name=newpass id=newpass value='' autocomplete="new-password"><div name=passmatch id=passmin style="display: none;"><font color=red>Passwords must be a minimum of 8 characters</font></div></div>
-					<div class="col-sm-4"><input type="password" class="form-control" name=newpass2 id=newpass2 value='' autocomplete="new-password"><div name=passmatch id=passmatch style="display: none;"><font color=red>Passwords must match</font></div></div>
+					<div class="col-sm-4"><input type="password" class="form-control" name=newpass id=newpass value='' autocomplete="new-password"><div name=passmatch id=passmin style="display: none;"><span class="text-danger">Passwords must be a minimum of 8 characters</span></div></div>
+					<div class="col-sm-4"><input type="password" class="form-control" name=newpass2 id=newpass2 value='' autocomplete="new-password"><div name=passmatch id=passmatch style="display: none;"><span class="text-danger">Passwords must match</span></div></div>
 				</div>
 				<div class="hr-line-dashed"></div>
 				<div class="mb-3">
 					<div class="col-sm-4 col-sm-offset-2">
-						<a href="/users/" class="btn btn-white" name=cancel>Cancel</a>
+						<a href="/users/" class="btn btn-secondary" name=cancel>Cancel</a>
 						<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
 					</div>
 				</div>
@@ -91,7 +91,7 @@
 {% endblock %}
 
 {% block javascriptinc %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pwstrength-bootstrap/3.1.1/pwstrength-bootstrap.min.js" integrity="sha512-VMd5IUFVM9MRhGzKSpKVZu/Rm4Wm3i8dC6eYqEtOcTaG1vn5RmwUWFiYfh4nagbeQRhQuSnHULnZ9B+st2rZ0g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="/js/pwstrength-bootstrap-3.1.1/pwstrength-bootstrap.min.js"></script>
 {% endblock %}
 {% block javascript %}
 	function check_pass () {

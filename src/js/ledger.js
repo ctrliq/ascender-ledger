@@ -35,7 +35,7 @@
 		$(scope || document).find('select.ledger-select').each(function () {
 			var el = $(this);
 			el.select2({
-				theme: 'bootstrap-5',
+				theme: 'bootstrap',
 				width: '100%',
 				allowClear: !el.prop('multiple') && !el.data('noclear'),
 				placeholder: el.data('placeholder') || '',
@@ -47,7 +47,7 @@
 		$(scope || document).find('select.ledger-lookup').each(function () {
 			var el = $(this);
 			el.select2({
-				theme: 'bootstrap-5',
+				theme: 'bootstrap',
 				width: '100%',
 				allowClear: !el.prop('multiple'),
 				placeholder: el.data('placeholder') || 'Type to search...',
@@ -111,6 +111,20 @@
 	};
 
 	/*
+		Every table puts its search box and row count at the top left, as Ascender Ledger Pro
+		does.  A table with export buttons puts them at the top right (layout.topEnd).
+	*/
+	$.extend(true, $.fn.dataTable.defaults, {
+		layout: {
+			topStart: {
+				search: { text: 'Search' },
+				pageLength: { text: 'Rows&nbsp;&nbsp;_MENU_' }
+			},
+			topEnd: null
+		}
+	});
+
+	/*
 		A DataTable whose rows come from the server a page at a time.  Every column is shown
 		as text unless it has its own render function.  The server stops counting rows at a
 		cap, so the info line says "more than" rather than giving a wrong total.
@@ -136,8 +150,7 @@
 					return 'Showing ' + start + ' to ' + end + ' of more than ' + total.toLocaleString() + ' entries (narrow the filters to see an exact count)';
 				}
 				return pre;
-			},
-			language: { searchPlaceholder: 'Search in table' }
+			}
 		}, options, { columns: cols }));
 	};
 

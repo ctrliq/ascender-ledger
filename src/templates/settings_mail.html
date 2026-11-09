@@ -50,7 +50,7 @@
 					<div class="mb-3">
 						<label class="form-label fs-6 fw-bold">SMTP Security</label>
 						<div>
-							<select class="form-control w-75" name=smtp_security id=smtp_security>
+							<select class="form-select w-75" name=smtp_security id=smtp_security>
 								<option value="">None</option>
 								<option value=tls {% if settings.smtp_security == "tls" %} selected{% endif %}>TLS</option>
 							</select>

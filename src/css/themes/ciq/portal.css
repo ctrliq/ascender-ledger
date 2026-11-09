@@ -1,0 +1,1879 @@
+html,
+body {
+  font-family:var(--quantic-font-family-body),sans-serif;
+  color:var(--quantic-text-tertiary);
+  background-color:var(--quantic-bg-primary);
+  font-family:var(--quantic-font-family-body);
+  font-size:var(--quantic-font-size-body-md, 1rem);
+  line-height:var(--quantic-line-height-body-md, 1.5rem)
+}
+*,
+*:before,
+*:after {
+  box-sizing:border-box
+}
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
+  margin:0;
+  padding:0
+}
+body {
+  min-height:100vh;
+  text-rendering:optimizeSpeed;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale
+}
+ul,
+ol {
+  list-style:none
+}
+img,
+picture,
+svg {
+  max-width:100%;
+  display:block
+}
+input,
+button,
+textarea,
+select {
+  font:inherit
+}
+@media(prefers-reduced-motion:reduce) {
+  html:focus-within {
+    scroll-behavior:auto
+  }
+  *,
+  *:before,
+  *:after {
+    animation-duration:.01ms;
+    animation-iteration-count:1;
+    transition-duration:.01ms;
+    scroll-behavior:auto
+  }
+}
+input,
+textarea,
+select {
+  border:1px solid;
+  padding:.25em .5em;
+  margin:0
+}
+button {
+  background:none;
+  border:none;
+  cursor:pointer;
+  padding:0
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height:1.33
+}
+a {
+  text-decoration:none;
+  color:inherit
+}
+table {
+  border-collapse:collapse;
+  border-spacing:0
+}
+code,
+pre,
+kbd {
+  font-family:monospace
+}
+html {
+  -webkit-text-size-adjust:100%;
+  -moz-text-size-adjust:100%;
+  text-size-adjust:100%
+}
+.sr-only {
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border-width:0
+}
+
+html,
+body {
+  height:100%
+}
+
+:focus-visible {
+  outline:2px solid currentColor;
+  outline-offset:2px
+}
+
+html {
+  scrollbar-width:thin;
+  scroll-behavior:smooth
+}
+
+a,
+button {
+  touch-action:manipulation
+}
+
+html[data-bs-theme="dark"] {
+  --quantic-avatar-styles-bg-neutral: #e0e0e0;
+  --quantic-avatar-styles-bg-neutral-rgb: 224 224 224;
+  --quantic-screen-mockup-border: #373a41;
+  --quantic-screen-mockup-border-rgb: 55 58 65;
+  --quantic-slider-handle-bg: #12a66f;
+  --quantic-slider-handle-bg-rgb: 18 166 111;
+  --quantic-slider-handle-border: #13161b;
+  --quantic-slider-handle-border-rgb: 19 22 27;
+  --quantic-toggle-button-fg-disabled: #61656c;
+  --quantic-toggle-button-fg-disabled-rgb: 97 101 108;
+  --quantic-toggle-border: rgba(255, 255, 255, 0);
+  --quantic-fg-secondary: #cecfd2;
+  --quantic-fg-secondary-rgb: 206 207 210;
+  --quantic-fg-secondary-hover: #ececed;
+  --quantic-fg-secondary-hover-rgb: 236 236 237;
+  --quantic-fg-tertiary: #94979c;
+  --quantic-fg-tertiary-rgb: 148 151 156;
+  --quantic-fg-tertiary-hover: #cecfd2;
+  --quantic-fg-tertiary-hover-rgb: 206 207 210;
+  --quantic-fg-quaternary: #61656c;
+  --quantic-fg-quaternary-rgb: 97 101 108;
+  --quantic-fg-quaternary-hover: #85888e;
+  --quantic-fg-quaternary-hover-rgb: 133 136 142;
+  --quantic-fg-white: #ffffff;
+  --quantic-fg-white-rgb: 255 255 255;
+  --quantic-fg-disabled: #85888e;
+  --quantic-fg-disabled-rgb: 133 136 142;
+  --quantic-fg-disabled-subtle: #61656c;
+  --quantic-fg-disabled-subtle-rgb: 97 101 108;
+  --quantic-fg-brand-primary: #12a66f;
+  --quantic-fg-brand-primary-rgb: 18 166 111;
+  --quantic-fg-brand-primary-alt: #cecfd2;
+  --quantic-fg-brand-primary-alt-rgb: 206 207 210;
+  --quantic-fg-brand-secondary: #0b8759;
+  --quantic-fg-brand-secondary-rgb: 11 135 89;
+  --quantic-fg-brand-secondary-alt: #61656c;
+  --quantic-fg-brand-secondary-alt-rgb: 97 101 108;
+  --quantic-fg-brand-secondary-hover: #85888e;
+  --quantic-fg-brand-secondary-hover-rgb: 133 136 142;
+  --quantic-fg-error-primary: #f04438;
+  --quantic-fg-error-primary-rgb: 240 68 56;
+  --quantic-fg-error-secondary: #f97066;
+  --quantic-fg-error-secondary-rgb: 249 112 102;
+  --quantic-fg-warning-primary: #f79009;
+  --quantic-fg-warning-primary-rgb: 247 144 9;
+  --quantic-fg-warning-secondary: #fdb022;
+  --quantic-fg-warning-secondary-rgb: 253 176 34;
+  --quantic-fg-success-primary: #17b26a;
+  --quantic-fg-success-primary-rgb: 23 178 106;
+  --quantic-fg-success-secondary: #47cd89;
+  --quantic-fg-success-secondary-rgb: 71 205 137;
+
+  --quantic-bg-warning-primary: #4e1d09;
+  --quantic-border-error: #f97066;
+  --quantic-border-primary: #373a41;
+  --quantic-border-secondary: #22262f;
+  --quantic-border-tertiary: #22262f;
+  --quantic-bg-primary: #13161b;
+  --quantic-bg-primary-hover: #22262f;
+  --quantic-bg-primary-rgb: 19 22 27;
+  --quantic-bg-primary-alt: #1a1e25;
+  --quantic-bg-primary-alt-rgb: 26 30 37;
+  --quantic-bg-primary-hover: #22262f;
+  --quantic-bg-primary-hover-rgb: 34 38 47;
+  --quantic-bg-primary-solid: #1a1e25;
+  --quantic-bg-primary-solid-rgb: 26 30 37;
+  --quantic-bg-success-primary: #053321;
+  --quantic-bg-success-secondary: #079455;
+  --quantic-bg-tertiary: #373a41;
+  --quantic-bg-secondary: #1a1e25;
+  --quantic-bg-secondary-rgb: 26 30 37;
+  --quantic-bg-secondary-alt: #13161b;
+  --quantic-bg-secondary-alt-rgb: 19 22 27;
+  --quantic-bg-secondary-hover: #22262f;
+  --quantic-bg-secondary-hover-rgb: 34 38 47;
+  --quantic-bg-secondary-subtle: #13161b;
+  --quantic-bg-secondary-subtle-rgb: 19 22 27;
+  --quantic-bg-secondary-solid: #61656c;
+  --quantic-bg-secondary-solid-rgb: 97 101 108;
+  --quantic-bg-tertiary: #373a41;
+  --quantic-bg-tertiary-rgb: 55 58 65;
+  --quantic-bg-quaternary: #373a41;
+  --quantic-bg-quaternary-rgb: 55 58 65;
+  --quantic-bg-active: #22262f;
+  --quantic-bg-active-rgb: 34 38 47;
+  --quantic-bg-disabled: #22262f;
+  --quantic-bg-disabled-rgb: 34 38 47;
+  --quantic-bg-disabled-subtle: #13161b;
+  --quantic-bg-disabled-subtle-rgb: 19 22 27;
+  --quantic-bg-overlay: #22262f;
+  --quantic-bg-overlay-rgb: 34 38 47;
+  --quantic-bg-brand-primary: #12a66f;
+  --quantic-bg-brand-primary-rgb: 18 166 111;
+  --quantic-bg-brand-primary-hover: #17c484;
+  --quantic-bg-brand-primary-hover-rgb: 23 196 132;
+  --quantic-bg-brand-primary-alt: #1a1e25;
+  --quantic-bg-brand-primary-alt-rgb: 26 30 37;
+  --quantic-bg-brand-secondary: #097049;
+  --quantic-bg-brand-secondary-rgb: 9 112 73;
+  --quantic-bg-brand-solid: #12a66f;
+  --quantic-bg-brand-solid-rgb: 18 166 111;
+  --quantic-bg-brand-solid-hover: #0b8759;
+  --quantic-bg-brand-solid-hover-rgb: 11 135 89;
+  --quantic-bg-brand-section: #1a1e25;
+  --quantic-bg-brand-section-rgb: 26 30 37;
+  --quantic-bg-brand-section-subtle: #13161b;
+  --quantic-bg-brand-section-subtle-rgb: 19 22 27;
+  --quantic-bg-error-primary: #55160c;
+  --quantic-bg-error-primary-rgb: 85 22 12;
+  --quantic-bg-error-secondary: #d92d20;
+  --quantic-bg-error-secondary-rgb: 217 45 32;
+  --quantic-bg-error-solid: #d92d20;
+  --quantic-bg-error-solid-rgb: 217 45 32;
+  --quantic-bg-warning-primary: #4e1d09;
+  --quantic-bg-warning-primary-rgb: 78 29 9;
+  --quantic-bg-warning-secondary: #dc6803;
+  --quantic-bg-warning-secondary-rgb: 220 104 3;
+  --quantic-bg-warning-solid: #dc6803;
+  --quantic-bg-warning-solid-rgb: 220 104 3;
+  --quantic-bg-success-primary: #053321;
+  --quantic-bg-success-primary-rgb: 5 51 33;
+  --quantic-bg-success-secondary: #079455;
+  --quantic-bg-success-secondary-rgb: 7 148 85;
+  --quantic-bg-success-solid: #079455;
+  --quantic-bg-success-solid-rgb: 7 148 85;
+}
+
+html[data-bs-theme="light"] {
+  --quantic-bg-brand-primary: #1F1F1F;
+  --quantic-bg-brand-primary-hover: #1F1F1F;
+  --quantic-bg-brand-secondary-hover: #1F1F1F;
+  --quantic-bg-error-primary: #55160c;
+  --quantic-bg-primary: snow;
+  --quantic-bg-secondary: #1F1F1F;
+  --quantic-bg-success-primary: #2F2F2F;
+  --quantic-bg-success-secondary: #2F2F2F;
+  --quantic-bg-tertiary: #3F3F3F;
+  --quantic-bg-warning-primary: #3F1100;
+  --quantic-border-error: #3F0000;
+  --quantic-border-primary: snow;
+  --quantic-border-secondary: #22262f55;
+  --quantic-border-tertiary: snow;
+  --quantic-text-error-primary: red;
+  --quantic-text-info: grey;
+  --quantic-text-primary: black;
+  --quantic-text-primary-on-brand: black;
+  --quantic-text-secondary: snow;
+  --quantic-text-success: snow;
+  --quantic-text-success-primary: green;
+  --quantic-text-success-secondary: green;
+  --quantic-text-tertiary: green;
+  --quantic-text-warning-primary: orange;
+
+/*
+  --quantic-text-primary: #f7f7f7;
+  --quantic-text-primary-rgb: 247 247 247;
+  --quantic-text-primary-on-brand: #13161b;
+  --quantic-text-primary-on-brand-rgb: 19 22 27;
+  --quantic-text-secondary: #cecfd2;
+  --quantic-text-secondary-rgb: 206 207 210;
+  --quantic-text-secondary-hover: #ececed;
+  --quantic-text-secondary-hover-rgb: 236 236 237;
+  --quantic-text-secondary-on-brand: #cecfd2;
+  --quantic-text-secondary-on-brand-rgb: 206 207 210;
+  --quantic-text-tertiary: #94979c;
+  --quantic-text-tertiary-rgb: 148 151 156;
+  --quantic-text-tertiary-hover: #cecfd2;
+  --quantic-text-tertiary-hover-rgb: 206 207 210;
+  --quantic-text-tertiary-on-brand: #94979c;
+  --quantic-text-tertiary-on-brand-rgb: 148 151 156;
+  --quantic-text-quaternary: #94979c;
+  --quantic-text-quaternary-rgb: 148 151 156;
+  --quantic-text-quaternary-on-brand: #94979c;
+  --quantic-text-quaternary-on-brand-rgb: 148 151 156;
+  --quantic-text-white: #ffffff;
+  --quantic-text-white-rgb: 255 255 255;
+  --quantic-text-disabled: #85888e;
+  --quantic-text-disabled-rgb: 133 136 142;
+  --quantic-text-placeholder: #85888e;
+  --quantic-text-placeholder-rgb: 133 136 142;
+  --quantic-text-placeholder-subtle: #373a41;
+  --quantic-text-placeholder-subtle-rgb: 55 58 65;
+  --quantic-text-brand-primary: #f7f7f7;
+  --quantic-text-brand-primary-rgb: 247 247 247;
+  --quantic-text-brand-secondary: #cecfd2;
+  --quantic-text-brand-secondary-rgb: 206 207 210;
+  --quantic-text-brand-secondary-hover: #ececed;
+  --quantic-text-brand-secondary-hover-rgb: 236 236 237;
+  --quantic-text-brand-tertiary: #94979c;
+  --quantic-text-brand-tertiary-rgb: 148 151 156;
+  --quantic-text-brand-tertiary-alt: #f7f7f7;
+  --quantic-text-brand-tertiary-alt-rgb: 247 247 247;
+  --quantic-text-error-primary: #f97066;
+  --quantic-text-error-primary-rgb: 249 112 102;
+  --quantic-text-error-primary-hover: #fda29b;
+  --quantic-text-error-primary-hover-rgb: 253 162 155;
+  --quantic-text-warning-primary: #fdb022;
+  --quantic-text-warning-primary-rgb: 253 176 34;
+  --quantic-text-success-primary: #47cd89;
+  --quantic-text-success-primary-rgb: 71 205 137;
+  --quantic-text-logo-green: #0b8759;
+  --quantic-text-logo-green-rgb: 11 135 89;
+  --quantic-text-logo-neutral: #d5d7da;
+  --quantic-text-logo-neutral-rgb: 213 215 218;
+*/
+
+  /* original quantic colors picked by engineering
+  --quantic-bg-primary: snow;
+  --quantic-bg-primary-hover: #22262f;
+  --quantic-bg-secondary-hover: #22262f;
+  --quantic-bg-success-primary: #053321;
+  --quantic-bg-success-secondary: #079455;
+  --quantic-bg-tertiary: #373a41;
+  --quantic-bg-warning-primary: #4e1d09;
+  --quantic-border-error: #f97066;
+  --quantic-border-primary: #373a41;
+  --quantic-border-secondary: #22262f;
+  --quantic-border-tertiary: #22262f;
+  */
+
+  /* not used in app.css presently */
+  --quantic-avatar-styles-bg-neutral: #e0e0e0;
+  --quantic-avatar-styles-bg-neutral-rgb: 224 224 224;
+  --quantic-screen-mockup-border: #373a41;
+  --quantic-screen-mockup-border-rgb: 55 58 65;
+  --quantic-slider-handle-bg: #12a66f;
+  --quantic-slider-handle-bg-rgb: 18 166 111;
+  --quantic-slider-handle-border: #13161b;
+  --quantic-slider-handle-border-rgb: 19 22 27;
+  --quantic-toggle-button-fg-disabled: #61656c;
+  --quantic-toggle-button-fg-disabled-rgb: 97 101 108;
+  --quantic-toggle-border: rgba(255, 255, 255, 0);
+  --quantic-fg-secondary: #cecfd2;
+  --quantic-fg-secondary-rgb: 206 207 210;
+  --quantic-fg-secondary-hover: #ececed;
+  --quantic-fg-secondary-hover-rgb: 236 236 237;
+  --quantic-fg-tertiary: #94979c;
+  --quantic-fg-tertiary-rgb: 148 151 156;
+  --quantic-fg-tertiary-hover: #cecfd2;
+  --quantic-fg-tertiary-hover-rgb: 206 207 210;
+  --quantic-fg-quaternary: #61656c;
+  --quantic-fg-quaternary-rgb: 97 101 108;
+  --quantic-fg-quaternary-hover: #85888e;
+  --quantic-fg-quaternary-hover-rgb: 133 136 142;
+  --quantic-fg-white: #ffffff;
+  --quantic-fg-white-rgb: 255 255 255;
+  --quantic-fg-disabled: #85888e;
+  --quantic-fg-disabled-rgb: 133 136 142;
+  --quantic-fg-disabled-subtle: #61656c;
+  --quantic-fg-disabled-subtle-rgb: 97 101 108;
+  --quantic-fg-brand-primary: #12a66f;
+  --quantic-fg-brand-primary-rgb: 18 166 111;
+  --quantic-fg-brand-primary-alt: #cecfd2;
+  --quantic-fg-brand-primary-alt-rgb: 206 207 210;
+  --quantic-fg-brand-secondary: #0b8759;
+  --quantic-fg-brand-secondary-rgb: 11 135 89;
+  --quantic-fg-brand-secondary-alt: #61656c;
+  --quantic-fg-brand-secondary-alt-rgb: 97 101 108;
+  --quantic-fg-brand-secondary-hover: #85888e;
+  --quantic-fg-brand-secondary-hover-rgb: 133 136 142;
+  --quantic-fg-error-primary: #f04438;
+  --quantic-fg-error-primary-rgb: 240 68 56;
+  --quantic-fg-error-secondary: #f97066;
+  --quantic-fg-error-secondary-rgb: 249 112 102;
+  --quantic-fg-warning-primary: #f79009;
+  --quantic-fg-warning-primary-rgb: 247 144 9;
+  --quantic-fg-warning-secondary: #fdb022;
+  --quantic-fg-warning-secondary-rgb: 253 176 34;
+  --quantic-fg-success-primary: #17b26a;
+  --quantic-fg-success-primary-rgb: 23 178 106;
+  --quantic-fg-success-secondary: #47cd89;
+  --quantic-fg-success-secondary-rgb: 71 205 137;
+  --quantic-bg-primary-rgb: 19 22 27;
+  --quantic-bg-primary-alt: #1a1e25;
+  --quantic-bg-primary-alt-rgb: 26 30 37;
+  --quantic-bg-primary-hover-rgb: 34 38 47;
+  --quantic-bg-primary-solid: #1a1e25;
+  --quantic-bg-primary-solid-rgb: 26 30 37;
+  --quantic-bg-secondary: #1a1e25;
+  --quantic-bg-secondary-rgb: 26 30 37;
+  --quantic-bg-secondary-alt: #13161b;
+  --quantic-bg-secondary-alt-rgb: 19 22 27;
+  --quantic-bg-secondary-hover-rgb: 34 38 47;
+  --quantic-bg-secondary-subtle: #13161b;
+  --quantic-bg-secondary-subtle-rgb: 19 22 27;
+  --quantic-bg-secondary-solid: #61656c;
+  --quantic-bg-secondary-solid-rgb: 97 101 108;
+  --quantic-bg-tertiary-rgb: 55 58 65;
+  --quantic-bg-quaternary: #373a41;
+  --quantic-bg-quaternary-rgb: 55 58 65;
+  --quantic-bg-active: #22262f;
+  --quantic-bg-active-rgb: 34 38 47;
+  --quantic-bg-disabled: #61656c;
+  --quantic-bg-disabled-rgb: 34 38 47;
+  --quantic-bg-disabled-subtle: #13161b;
+  --quantic-bg-disabled-subtle-rgb: 19 22 27;
+  --quantic-bg-overlay: #22262f;
+  --quantic-bg-overlay-rgb: 34 38 47;
+  --quantic-bg-brand-primary: #12a66f;
+  --quantic-bg-brand-primary-rgb: 18 166 111;
+  --quantic-bg-brand-primary-hover: #17c484;
+  --quantic-bg-brand-primary-hover-rgb: 23 196 132;
+  --quantic-bg-brand-primary-alt: #1a1e25;
+  --quantic-bg-brand-primary-alt-rgb: 26 30 37;
+  --quantic-bg-brand-secondary: #097049;
+  --quantic-bg-brand-secondary-rgb: 9 112 73;
+  --quantic-bg-brand-solid: #12a66f;
+  --quantic-bg-brand-solid-rgb: 18 166 111;
+  --quantic-bg-brand-solid-hover: #0b8759;
+  --quantic-bg-brand-solid-hover-rgb: 11 135 89;
+  --quantic-bg-brand-section: #1a1e25;
+  --quantic-bg-brand-section-rgb: 26 30 37;
+  --quantic-bg-brand-section-subtle: #13161b;
+  --quantic-bg-brand-section-subtle-rgb: 19 22 27;
+  --quantic-bg-error-primary-rgb: 85 22 12;
+  --quantic-bg-error-secondary: #d92d20;
+  --quantic-bg-error-secondary-rgb: 217 45 32;
+  --quantic-bg-error-solid: #d92d20;
+  --quantic-bg-error-solid-rgb: 217 45 32;
+  --quantic-bg-warning-primary-rgb: 78 29 9;
+  --quantic-bg-warning-secondary: #dc6803;
+  --quantic-bg-warning-secondary-rgb: 220 104 3;
+  --quantic-bg-warning-solid: #dc6803;
+  --quantic-bg-warning-solid-rgb: 220 104 3;
+  --quantic-bg-success-primary-rgb: 5 51 33;
+  --quantic-bg-success-secondary-rgb: 7 148 85;
+  --quantic-bg-success-solid: #079455;
+  --quantic-bg-success-solid-rgb: 7 148 85;
+}
+
+:root {
+  --quantic-breakpoint-mobile: 36rem;
+  --quantic-breakpoint-tablet-portrait: 48rem;
+  --quantic-breakpoint-tablet-landscape: 62rem;
+  --quantic-breakpoint-desktop: 75rem;
+  --quantic-breakpoint-large-desktop: 87.5rem;
+  --quantic-container-padding-mobile: 1rem;
+  --quantic-container-padding-desktop: 2rem;
+  --quantic-container-max-width-desktop: 80rem;
+  --quantic-color-base-white: #ffffff;
+  --quantic-color-base-white-rgb: 255 255 255;
+  --quantic-color-base-black: #000000;
+  --quantic-color-base-black-rgb: 0 0 0;
+  --quantic-color-base-transparent: rgba(255, 255, 255, 0);
+  --quantic-color-gray-light-mode-25: #fdfdfd;
+  --quantic-color-gray-light-mode-50: #fafafa;
+  --quantic-color-gray-light-mode-100: #f5f5f5;
+  --quantic-color-gray-light-mode-200: #e9eaeb;
+  --quantic-color-gray-light-mode-300: #d5d7da;
+  --quantic-color-gray-light-mode-400: #a4a7ae;
+  --quantic-color-gray-light-mode-500: #717680;
+  --quantic-color-gray-light-mode-600: #535862;
+  --quantic-color-gray-light-mode-700: #414651;
+  --quantic-color-gray-light-mode-800: #252b37;
+  --quantic-color-gray-light-mode-900: #181d27;
+  --quantic-color-gray-light-mode-950: #0a0d12;
+  --quantic-color-gray-light-mode-25-rgb: 253 253 253;
+  --quantic-color-gray-light-mode-50-rgb: 250 250 250;
+  --quantic-color-gray-light-mode-100-rgb: 245 245 245;
+  --quantic-color-gray-light-mode-200-rgb: 233 234 235;
+  --quantic-color-gray-light-mode-300-rgb: 213 215 218;
+  --quantic-color-gray-light-mode-400-rgb: 164 167 174;
+  --quantic-color-gray-light-mode-500-rgb: 113 118 128;
+  --quantic-color-gray-light-mode-600-rgb: 83 88 98;
+  --quantic-color-gray-light-mode-700-rgb: 65 70 81;
+  --quantic-color-gray-light-mode-800-rgb: 37 43 55;
+  --quantic-color-gray-light-mode-900-rgb: 24 29 39;
+  --quantic-color-gray-light-mode-950-rgb: 10 13 18;
+  --quantic-color-gray-dark-mode-25: #fafafa;
+  --quantic-color-gray-dark-mode-50: #f7f7f7;
+  --quantic-color-gray-dark-mode-100: #f0f0f1;
+  --quantic-color-gray-dark-mode-200: #ececed;
+  --quantic-color-gray-dark-mode-300: #cecfd2;
+  --quantic-color-gray-dark-mode-400: #94979c;
+  --quantic-color-gray-dark-mode-500: #85888e;
+  --quantic-color-gray-dark-mode-600: #61656c;
+  --quantic-color-gray-dark-mode-700: #373a41;
+  --quantic-color-gray-dark-mode-800: #22262f;
+  --quantic-color-gray-dark-mode-850: #1a1e25;
+  --quantic-color-gray-dark-mode-900: #13161b;
+  --quantic-color-gray-dark-mode-950: #0c0e12;
+  --quantic-color-gray-dark-mode-25-rgb: 250 250 250;
+  --quantic-color-gray-dark-mode-50-rgb: 247 247 247;
+  --quantic-color-gray-dark-mode-100-rgb: 240 240 241;
+  --quantic-color-gray-dark-mode-200-rgb: 236 236 237;
+  --quantic-color-gray-dark-mode-300-rgb: 206 207 210;
+  --quantic-color-gray-dark-mode-400-rgb: 148 151 156;
+  --quantic-color-gray-dark-mode-500-rgb: 133 136 142;
+  --quantic-color-gray-dark-mode-600-rgb: 97 101 108;
+  --quantic-color-gray-dark-mode-700-rgb: 55 58 65;
+  --quantic-color-gray-dark-mode-800-rgb: 34 38 47;
+  --quantic-color-gray-dark-mode-850-rgb: 26 30 37;
+  --quantic-color-gray-dark-mode-900-rgb: 19 22 27;
+  --quantic-color-gray-dark-mode-950-rgb: 12 14 18;
+  --quantic-color-gray-dark-mode-alpha-25: rgba(255, 255, 255, .98);
+  --quantic-color-gray-dark-mode-alpha-50: rgba(255, 255, 255, .96);
+  --quantic-color-gray-dark-mode-alpha-100: rgba(255, 255, 255, .94);
+  --quantic-color-gray-dark-mode-alpha-200: rgba(255, 255, 255, .92);
+  --quantic-color-gray-dark-mode-alpha-300: rgba(255, 255, 255, .8);
+  --quantic-color-gray-dark-mode-alpha-400: rgba(255, 255, 255, .56);
+  --quantic-color-gray-dark-mode-alpha-500: rgba(255, 255, 255, .5);
+  --quantic-color-gray-dark-mode-alpha-600: rgba(255, 255, 255, .35);
+  --quantic-color-gray-dark-mode-alpha-700: rgba(255, 255, 255, .16);
+  --quantic-color-gray-dark-mode-alpha-800: rgba(255, 255, 255, .08);
+  --quantic-color-gray-dark-mode-alpha-900: rgba(255, 255, 255, .04);
+  --quantic-color-gray-dark-mode-alpha-950: rgba(255, 255, 255, 0);
+  --quantic-color-brand-25: #e9fdf1;
+  --quantic-color-brand-50: #cbfce1;
+  --quantic-color-brand-100: #52fbb2;
+  --quantic-color-brand-200: #2be099;
+  --quantic-color-brand-300: #17c484;
+  --quantic-color-brand-400: #12a66f;
+  --quantic-color-brand-500: #0b8759;
+  --quantic-color-brand-600: #097049;
+  --quantic-color-brand-700: #045134;
+  --quantic-color-brand-800: #053722;
+  --quantic-color-brand-900: #052315;
+  --quantic-color-brand-950: #04140c;
+  --quantic-color-brand-25-rgb: 233 253 241;
+  --quantic-color-brand-50-rgb: 203 252 225;
+  --quantic-color-brand-100-rgb: 82 251 178;
+  --quantic-color-brand-200-rgb: 43 224 153;
+  --quantic-color-brand-300-rgb: 23 196 132;
+  --quantic-color-brand-400-rgb: 18 166 111;
+  --quantic-color-brand-500-rgb: 11 135 89;
+  --quantic-color-brand-600-rgb: 9 112 73;
+  --quantic-color-brand-700-rgb: 4 81 52;
+  --quantic-color-brand-800-rgb: 5 55 34;
+  --quantic-color-brand-900-rgb: 5 35 21;
+  --quantic-color-brand-950-rgb: 4 20 12;
+  --quantic-color-error-25: #fffbfa;
+  --quantic-color-error-50: #fef3f2;
+  --quantic-color-error-100: #fee4e2;
+  --quantic-color-error-200: #fecdca;
+  --quantic-color-error-300: #fda29b;
+  --quantic-color-error-400: #f97066;
+  --quantic-color-error-500: #f04438;
+  --quantic-color-error-600: #d92d20;
+  --quantic-color-error-700: #b42318;
+  --quantic-color-error-800: #912018;
+  --quantic-color-error-900: #7a271a;
+  --quantic-color-error-950: #55160c;
+  --quantic-color-error-25-rgb: 255 251 250;
+  --quantic-color-error-50-rgb: 254 243 242;
+  --quantic-color-error-100-rgb: 254 228 226;
+  --quantic-color-error-200-rgb: 254 205 202;
+  --quantic-color-error-300-rgb: 253 162 155;
+  --quantic-color-error-400-rgb: 249 112 102;
+  --quantic-color-error-500-rgb: 240 68 56;
+  --quantic-color-error-600-rgb: 217 45 32;
+  --quantic-color-error-700-rgb: 180 35 24;
+  --quantic-color-error-800-rgb: 145 32 24;
+  --quantic-color-error-900-rgb: 122 39 26;
+  --quantic-color-error-950-rgb: 85 22 12;
+  --quantic-color-warning-25: #fffcf5;
+  --quantic-color-warning-50: #fffaeb;
+  --quantic-color-warning-100: #fef0c7;
+  --quantic-color-warning-200: #fedf89;
+  --quantic-color-warning-300: #fec84b;
+  --quantic-color-warning-400: #fdb022;
+  --quantic-color-warning-500: #f79009;
+  --quantic-color-warning-600: #dc6803;
+  --quantic-color-warning-700: #b54708;
+  --quantic-color-warning-800: #93370d;
+  --quantic-color-warning-900: #7a2e0e;
+  --quantic-color-warning-950: #4e1d09;
+  --quantic-color-warning-25-rgb: 255 252 245;
+  --quantic-color-warning-50-rgb: 255 250 235;
+  --quantic-color-warning-100-rgb: 254 240 199;
+  --quantic-color-warning-200-rgb: 254 223 137;
+  --quantic-color-warning-300-rgb: 254 200 75;
+  --quantic-color-warning-400-rgb: 253 176 34;
+  --quantic-color-warning-500-rgb: 247 144 9;
+  --quantic-color-warning-600-rgb: 220 104 3;
+  --quantic-color-warning-700-rgb: 181 71 8;
+  --quantic-color-warning-800-rgb: 147 55 13;
+  --quantic-color-warning-900-rgb: 122 46 14;
+  --quantic-color-warning-950-rgb: 78 29 9;
+  --quantic-color-success-25: #f6fef9;
+  --quantic-color-success-50: #ecfdf3;
+  --quantic-color-success-100: #dcfae6;
+  --quantic-color-success-200: #abefc6;
+  --quantic-color-success-300: #75e0a7;
+  --quantic-color-success-400: #47cd89;
+  --quantic-color-success-500: #17b26a;
+  --quantic-color-success-600: #079455;
+  --quantic-color-success-700: #067647;
+  --quantic-color-success-800: #085d3a;
+  --quantic-color-success-900: #074d31;
+  --quantic-color-success-950: #053321;
+  --quantic-color-success-25-rgb: 246 254 249;
+  --quantic-color-success-50-rgb: 236 253 243;
+  --quantic-color-success-100-rgb: 220 250 230;
+  --quantic-color-success-200-rgb: 171 239 198;
+  --quantic-color-success-300-rgb: 117 224 167;
+  --quantic-color-success-400-rgb: 71 205 137;
+  --quantic-color-success-500-rgb: 23 178 106;
+  --quantic-color-success-600-rgb: 7 148 85;
+  --quantic-color-success-700-rgb: 6 118 71;
+  --quantic-color-success-800-rgb: 8 93 58;
+  --quantic-color-success-900-rgb: 7 77 49;
+  --quantic-color-success-950-rgb: 5 51 33;
+  --quantic-color-gray-blue-25: #fcfcfd;
+  --quantic-color-gray-blue-50: #f8f9fc;
+  --quantic-color-gray-blue-100: #eaecf5;
+  --quantic-color-gray-blue-200: #d5d9eb;
+  --quantic-color-gray-blue-300: #b3b8db;
+  --quantic-color-gray-blue-400: #717bbc;
+  --quantic-color-gray-blue-500: #4e5ba6;
+  --quantic-color-gray-blue-600: #3e4784;
+  --quantic-color-gray-blue-700: #363f72;
+  --quantic-color-gray-blue-800: #293056;
+  --quantic-color-gray-blue-900: #101323;
+  --quantic-color-gray-blue-950: #0d0f1c;
+  --quantic-color-gray-blue-25-rgb: 252 252 253;
+  --quantic-color-gray-blue-50-rgb: 248 249 252;
+  --quantic-color-gray-blue-100-rgb: 234 236 245;
+  --quantic-color-gray-blue-200-rgb: 213 217 235;
+  --quantic-color-gray-blue-300-rgb: 179 184 219;
+  --quantic-color-gray-blue-400-rgb: 113 123 188;
+  --quantic-color-gray-blue-500-rgb: 78 91 166;
+  --quantic-color-gray-blue-600-rgb: 62 71 132;
+  --quantic-color-gray-blue-700-rgb: 54 63 114;
+  --quantic-color-gray-blue-800-rgb: 41 48 86;
+  --quantic-color-gray-blue-900-rgb: 16 19 35;
+  --quantic-color-gray-blue-950-rgb: 13 15 28;
+  --quantic-color-gray-cool-25: #fcfcfd;
+  --quantic-color-gray-cool-50: #f9f9fb;
+  --quantic-color-gray-cool-100: #eff1f5;
+  --quantic-color-gray-cool-200: #dcdfea;
+  --quantic-color-gray-cool-300: #b9c0d4;
+  --quantic-color-gray-cool-400: #7d89b0;
+  --quantic-color-gray-cool-500: #5d6b98;
+  --quantic-color-gray-cool-600: #4a5578;
+  --quantic-color-gray-cool-700: #404968;
+  --quantic-color-gray-cool-800: #30374f;
+  --quantic-color-gray-cool-900: #111322;
+  --quantic-color-gray-cool-950: #0e101b;
+  --quantic-color-gray-cool-25-rgb: 252 252 253;
+  --quantic-color-gray-cool-50-rgb: 249 249 251;
+  --quantic-color-gray-cool-100-rgb: 239 241 245;
+  --quantic-color-gray-cool-200-rgb: 220 223 234;
+  --quantic-color-gray-cool-300-rgb: 185 192 212;
+  --quantic-color-gray-cool-400-rgb: 125 137 176;
+  --quantic-color-gray-cool-500-rgb: 93 107 152;
+  --quantic-color-gray-cool-600-rgb: 74 85 120;
+  --quantic-color-gray-cool-700-rgb: 64 73 104;
+  --quantic-color-gray-cool-800-rgb: 48 55 79;
+  --quantic-color-gray-cool-900-rgb: 17 19 34;
+  --quantic-color-gray-cool-950-rgb: 14 16 27;
+  --quantic-color-gray-modern-25: #fcfcfd;
+  --quantic-color-gray-modern-50: #f8fafc;
+  --quantic-color-gray-modern-100: #eef2f6;
+  --quantic-color-gray-modern-200: #e3e8ef;
+  --quantic-color-gray-modern-300: #cdd5df;
+  --quantic-color-gray-modern-400: #9aa4b2;
+  --quantic-color-gray-modern-500: #697586;
+  --quantic-color-gray-modern-600: #4b5565;
+  --quantic-color-gray-modern-700: #364152;
+  --quantic-color-gray-modern-800: #202939;
+  --quantic-color-gray-modern-900: #121926;
+  --quantic-color-gray-modern-950: #0d121c;
+  --quantic-color-gray-modern-25-rgb: 252 252 253;
+  --quantic-color-gray-modern-50-rgb: 248 250 252;
+  --quantic-color-gray-modern-100-rgb: 238 242 246;
+  --quantic-color-gray-modern-200-rgb: 227 232 239;
+  --quantic-color-gray-modern-300-rgb: 205 213 223;
+  --quantic-color-gray-modern-400-rgb: 154 164 178;
+  --quantic-color-gray-modern-500-rgb: 105 117 134;
+  --quantic-color-gray-modern-600-rgb: 75 85 101;
+  --quantic-color-gray-modern-700-rgb: 54 65 82;
+  --quantic-color-gray-modern-800-rgb: 32 41 57;
+  --quantic-color-gray-modern-900-rgb: 18 25 38;
+  --quantic-color-gray-modern-950-rgb: 13 18 28;
+  --quantic-color-gray-neutral-25: #fcfcfd;
+  --quantic-color-gray-neutral-50: #f9fafb;
+  --quantic-color-gray-neutral-100: #f3f4f6;
+  --quantic-color-gray-neutral-200: #e5e7eb;
+  --quantic-color-gray-neutral-300: #d2d6db;
+  --quantic-color-gray-neutral-400: #9da4ae;
+  --quantic-color-gray-neutral-500: #6c737f;
+  --quantic-color-gray-neutral-600: #4d5761;
+  --quantic-color-gray-neutral-700: #384250;
+  --quantic-color-gray-neutral-800: #1f2a37;
+  --quantic-color-gray-neutral-900: #111927;
+  --quantic-color-gray-neutral-950: #0d121c;
+  --quantic-color-gray-neutral-25-rgb: 252 252 253;
+  --quantic-color-gray-neutral-50-rgb: 249 250 251;
+  --quantic-color-gray-neutral-100-rgb: 243 244 246;
+  --quantic-color-gray-neutral-200-rgb: 229 231 235;
+  --quantic-color-gray-neutral-300-rgb: 210 214 219;
+  --quantic-color-gray-neutral-400-rgb: 157 164 174;
+  --quantic-color-gray-neutral-500-rgb: 108 115 127;
+  --quantic-color-gray-neutral-600-rgb: 77 87 97;
+  --quantic-color-gray-neutral-700-rgb: 56 66 80;
+  --quantic-color-gray-neutral-800-rgb: 31 42 55;
+  --quantic-color-gray-neutral-900-rgb: 17 25 39;
+  --quantic-color-gray-neutral-950-rgb: 13 18 28;
+  --quantic-color-gray-iron-25: #fcfcfc;
+  --quantic-color-gray-iron-50: #fafafa;
+  --quantic-color-gray-iron-100: #f4f4f5;
+  --quantic-color-gray-iron-200: #e4e4e7;
+  --quantic-color-gray-iron-300: #d1d1d6;
+  --quantic-color-gray-iron-400: #a0a0ab;
+  --quantic-color-gray-iron-500: #70707b;
+  --quantic-color-gray-iron-600: #51525c;
+  --quantic-color-gray-iron-700: #3f3f46;
+  --quantic-color-gray-iron-800: #26272b;
+  --quantic-color-gray-iron-900: #1a1a1e;
+  --quantic-color-gray-iron-950: #131316;
+  --quantic-color-gray-iron-25-rgb: 252 252 252;
+  --quantic-color-gray-iron-50-rgb: 250 250 250;
+  --quantic-color-gray-iron-100-rgb: 244 244 245;
+  --quantic-color-gray-iron-200-rgb: 228 228 231;
+  --quantic-color-gray-iron-300-rgb: 209 209 214;
+  --quantic-color-gray-iron-400-rgb: 160 160 171;
+  --quantic-color-gray-iron-500-rgb: 112 112 123;
+  --quantic-color-gray-iron-600-rgb: 81 82 92;
+  --quantic-color-gray-iron-700-rgb: 63 63 70;
+  --quantic-color-gray-iron-800-rgb: 38 39 43;
+  --quantic-color-gray-iron-900-rgb: 26 26 30;
+  --quantic-color-gray-iron-950-rgb: 19 19 22;
+  --quantic-color-gray-true-25: #fcfcfc;
+  --quantic-color-gray-true-50: #f7f7f7;
+  --quantic-color-gray-true-100: #f5f5f5;
+  --quantic-color-gray-true-200: #e5e5e5;
+  --quantic-color-gray-true-300: #d6d6d6;
+  --quantic-color-gray-true-400: #a3a3a3;
+  --quantic-color-gray-true-500: #737373;
+  --quantic-color-gray-true-600: #525252;
+  --quantic-color-gray-true-700: #424242;
+  --quantic-color-gray-true-800: #292929;
+  --quantic-color-gray-true-900: #141414;
+  --quantic-color-gray-true-950: #0f0f0f;
+  --quantic-color-gray-true-25-rgb: 252 252 252;
+  --quantic-color-gray-true-50-rgb: 247 247 247;
+  --quantic-color-gray-true-100-rgb: 245 245 245;
+  --quantic-color-gray-true-200-rgb: 229 229 229;
+  --quantic-color-gray-true-300-rgb: 214 214 214;
+  --quantic-color-gray-true-400-rgb: 163 163 163;
+  --quantic-color-gray-true-500-rgb: 115 115 115;
+  --quantic-color-gray-true-600-rgb: 82 82 82;
+  --quantic-color-gray-true-700-rgb: 66 66 66;
+  --quantic-color-gray-true-800-rgb: 41 41 41;
+  --quantic-color-gray-true-900-rgb: 20 20 20;
+  --quantic-color-gray-true-950-rgb: 15 15 15;
+  --quantic-color-gray-warm-25: #fdfdfc;
+  --quantic-color-gray-warm-50: #fafaf9;
+  --quantic-color-gray-warm-100: #f5f5f4;
+  --quantic-color-gray-warm-200: #e7e5e4;
+  --quantic-color-gray-warm-300: #d7d3d0;
+  --quantic-color-gray-warm-400: #a9a29d;
+  --quantic-color-gray-warm-500: #79716b;
+  --quantic-color-gray-warm-600: #57534e;
+  --quantic-color-gray-warm-700: #44403c;
+  --quantic-color-gray-warm-800: #292524;
+  --quantic-color-gray-warm-900: #1c1917;
+  --quantic-color-gray-warm-950: #171412;
+  --quantic-color-gray-warm-25-rgb: 253 253 252;
+  --quantic-color-gray-warm-50-rgb: 250 250 249;
+  --quantic-color-gray-warm-100-rgb: 245 245 244;
+  --quantic-color-gray-warm-200-rgb: 231 229 228;
+  --quantic-color-gray-warm-300-rgb: 215 211 208;
+  --quantic-color-gray-warm-400-rgb: 169 162 157;
+  --quantic-color-gray-warm-500-rgb: 121 113 107;
+  --quantic-color-gray-warm-600-rgb: 87 83 78;
+  --quantic-color-gray-warm-700-rgb: 68 64 60;
+  --quantic-color-gray-warm-800-rgb: 41 37 36;
+  --quantic-color-gray-warm-900-rgb: 28 25 23;
+  --quantic-color-gray-warm-950-rgb: 23 20 18;
+  --quantic-color-moss-25: #fafdf7;
+  --quantic-color-moss-50: #f5fbee;
+  --quantic-color-moss-100: #e6f4d7;
+  --quantic-color-moss-200: #ceeab0;
+  --quantic-color-moss-300: #acdc79;
+  --quantic-color-moss-400: #86cb3c;
+  --quantic-color-moss-500: #669f2a;
+  --quantic-color-moss-600: #4f7a21;
+  --quantic-color-moss-700: #3f621a;
+  --quantic-color-moss-800: #335015;
+  --quantic-color-moss-900: #2b4212;
+  --quantic-color-moss-950: #1a280b;
+  --quantic-color-moss-25-rgb: 250 253 247;
+  --quantic-color-moss-50-rgb: 245 251 238;
+  --quantic-color-moss-100-rgb: 230 244 215;
+  --quantic-color-moss-200-rgb: 206 234 176;
+  --quantic-color-moss-300-rgb: 172 220 121;
+  --quantic-color-moss-400-rgb: 134 203 60;
+  --quantic-color-moss-500-rgb: 102 159 42;
+  --quantic-color-moss-600-rgb: 79 122 33;
+  --quantic-color-moss-700-rgb: 63 98 26;
+  --quantic-color-moss-800-rgb: 51 80 21;
+  --quantic-color-moss-900-rgb: 43 66 18;
+  --quantic-color-moss-950-rgb: 26 40 11;
+  --quantic-color-green-light-25: #fafef5;
+  --quantic-color-green-light-50: #f3fee7;
+  --quantic-color-green-light-100: #e3fbcc;
+  --quantic-color-green-light-200: #d0f8ab;
+  --quantic-color-green-light-300: #a6ef67;
+  --quantic-color-green-light-400: #85e13a;
+  --quantic-color-green-light-500: #66c61c;
+  --quantic-color-green-light-600: #4ca30d;
+  --quantic-color-green-light-700: #3b7c0f;
+  --quantic-color-green-light-800: #326212;
+  --quantic-color-green-light-900: #2b5314;
+  --quantic-color-green-light-950: #15290a;
+  --quantic-color-green-light-25-rgb: 250 254 245;
+  --quantic-color-green-light-50-rgb: 243 254 231;
+  --quantic-color-green-light-100-rgb: 227 251 204;
+  --quantic-color-green-light-200-rgb: 208 248 171;
+  --quantic-color-green-light-300-rgb: 166 239 103;
+  --quantic-color-green-light-400-rgb: 133 225 58;
+  --quantic-color-green-light-500-rgb: 102 198 28;
+  --quantic-color-green-light-600-rgb: 76 163 13;
+  --quantic-color-green-light-700-rgb: 59 124 15;
+  --quantic-color-green-light-800-rgb: 50 98 18;
+  --quantic-color-green-light-900-rgb: 43 83 20;
+  --quantic-color-green-light-950-rgb: 21 41 10;
+  --quantic-color-green-25: #e9fdf1;
+  --quantic-color-green-50: #cbfce1;
+  --quantic-color-green-100: #52fbb2;
+  --quantic-color-green-200: #2be099;
+  --quantic-color-green-300: #17c484;
+  --quantic-color-green-400: #12a66f;
+  --quantic-color-green-500: #0b8759;
+  --quantic-color-green-600: #097049;
+  --quantic-color-green-700: #045134;
+  --quantic-color-green-800: #053722;
+  --quantic-color-green-900: #052315;
+  --quantic-color-green-950: #04140c;
+  --quantic-color-green-25-rgb: 233 253 241;
+  --quantic-color-green-50-rgb: 203 252 225;
+  --quantic-color-green-100-rgb: 82 251 178;
+  --quantic-color-green-200-rgb: 43 224 153;
+  --quantic-color-green-300-rgb: 23 196 132;
+  --quantic-color-green-400-rgb: 18 166 111;
+  --quantic-color-green-500-rgb: 11 135 89;
+  --quantic-color-green-600-rgb: 9 112 73;
+  --quantic-color-green-700-rgb: 4 81 52;
+  --quantic-color-green-800-rgb: 5 55 34;
+  --quantic-color-green-900-rgb: 5 35 21;
+  --quantic-color-green-950-rgb: 4 20 12;
+  --quantic-color-teal-25: #f6fefc;
+  --quantic-color-teal-50: #f0fdf9;
+  --quantic-color-teal-100: #ccfbef;
+  --quantic-color-teal-200: #99f6e0;
+  --quantic-color-teal-300: #5fe9d0;
+  --quantic-color-teal-400: #2ed3b7;
+  --quantic-color-teal-500: #15b79e;
+  --quantic-color-teal-600: #0e9384;
+  --quantic-color-teal-700: #107569;
+  --quantic-color-teal-800: #125d56;
+  --quantic-color-teal-900: #134e48;
+  --quantic-color-teal-950: #0a2926;
+  --quantic-color-teal-25-rgb: 246 254 252;
+  --quantic-color-teal-50-rgb: 240 253 249;
+  --quantic-color-teal-100-rgb: 204 251 239;
+  --quantic-color-teal-200-rgb: 153 246 224;
+  --quantic-color-teal-300-rgb: 95 233 208;
+  --quantic-color-teal-400-rgb: 46 211 183;
+  --quantic-color-teal-500-rgb: 21 183 158;
+  --quantic-color-teal-600-rgb: 14 147 132;
+  --quantic-color-teal-700-rgb: 16 117 105;
+  --quantic-color-teal-800-rgb: 18 93 86;
+  --quantic-color-teal-900-rgb: 19 78 72;
+  --quantic-color-teal-950-rgb: 10 41 38;
+  --quantic-color-cyan-25: #f5feff;
+  --quantic-color-cyan-50: #ecfdff;
+  --quantic-color-cyan-100: #cff9fe;
+  --quantic-color-cyan-200: #a5f0fc;
+  --quantic-color-cyan-300: #67e3f9;
+  --quantic-color-cyan-400: #22ccee;
+  --quantic-color-cyan-500: #06aed4;
+  --quantic-color-cyan-600: #088ab2;
+  --quantic-color-cyan-700: #0e7090;
+  --quantic-color-cyan-800: #155b75;
+  --quantic-color-cyan-900: #164c63;
+  --quantic-color-cyan-950: #0d2d3a;
+  --quantic-color-cyan-25-rgb: 245 254 255;
+  --quantic-color-cyan-50-rgb: 236 253 255;
+  --quantic-color-cyan-100-rgb: 207 249 254;
+  --quantic-color-cyan-200-rgb: 165 240 252;
+  --quantic-color-cyan-300-rgb: 103 227 249;
+  --quantic-color-cyan-400-rgb: 34 204 238;
+  --quantic-color-cyan-500-rgb: 6 174 212;
+  --quantic-color-cyan-600-rgb: 8 138 178;
+  --quantic-color-cyan-700-rgb: 14 112 144;
+  --quantic-color-cyan-800-rgb: 21 91 117;
+  --quantic-color-cyan-900-rgb: 22 76 99;
+  --quantic-color-cyan-950-rgb: 13 45 58;
+  --quantic-color-blue-light-25: #f5fbff;
+  --quantic-color-blue-light-50: #f0f9ff;
+  --quantic-color-blue-light-100: #e0f2fe;
+  --quantic-color-blue-light-200: #b9e6fe;
+  --quantic-color-blue-light-300: #7cd4fd;
+  --quantic-color-blue-light-400: #36bffa;
+  --quantic-color-blue-light-500: #0ba5ec;
+  --quantic-color-blue-light-600: #0086c9;
+  --quantic-color-blue-light-700: #026aa2;
+  --quantic-color-blue-light-800: #065986;
+  --quantic-color-blue-light-900: #0b4a6f;
+  --quantic-color-blue-light-950: #062c41;
+  --quantic-color-blue-light-25-rgb: 245 251 255;
+  --quantic-color-blue-light-50-rgb: 240 249 255;
+  --quantic-color-blue-light-100-rgb: 224 242 254;
+  --quantic-color-blue-light-200-rgb: 185 230 254;
+  --quantic-color-blue-light-300-rgb: 124 212 253;
+  --quantic-color-blue-light-400-rgb: 54 191 250;
+  --quantic-color-blue-light-500-rgb: 11 165 236;
+  --quantic-color-blue-light-600-rgb: 0 134 201;
+  --quantic-color-blue-light-700-rgb: 2 106 162;
+  --quantic-color-blue-light-800-rgb: 6 89 134;
+  --quantic-color-blue-light-900-rgb: 11 74 111;
+  --quantic-color-blue-light-950-rgb: 6 44 65;
+  --quantic-color-blue-25: #f5faff;
+  --quantic-color-blue-50: #eff8ff;
+  --quantic-color-blue-100: #d1e9ff;
+  --quantic-color-blue-200: #b2ddff;
+  --quantic-color-blue-300: #84caff;
+  --quantic-color-blue-400: #53b1fd;
+  --quantic-color-blue-500: #2e90fa;
+  --quantic-color-blue-600: #1570ef;
+  --quantic-color-blue-700: #175cd3;
+  --quantic-color-blue-800: #1849a9;
+  --quantic-color-blue-900: #194185;
+  --quantic-color-blue-950: #102a56;
+  --quantic-color-blue-25-rgb: 245 250 255;
+  --quantic-color-blue-50-rgb: 239 248 255;
+  --quantic-color-blue-100-rgb: 209 233 255;
+  --quantic-color-blue-200-rgb: 178 221 255;
+  --quantic-color-blue-300-rgb: 132 202 255;
+  --quantic-color-blue-400-rgb: 83 177 253;
+  --quantic-color-blue-500-rgb: 46 144 250;
+  --quantic-color-blue-600-rgb: 21 112 239;
+  --quantic-color-blue-700-rgb: 23 92 211;
+  --quantic-color-blue-800-rgb: 24 73 169;
+  --quantic-color-blue-900-rgb: 25 65 133;
+  --quantic-color-blue-950-rgb: 16 42 86;
+  --quantic-color-blue-dark-25: #f5f8ff;
+  --quantic-color-blue-dark-50: #eff4ff;
+  --quantic-color-blue-dark-100: #d1e0ff;
+  --quantic-color-blue-dark-200: #b2ccff;
+  --quantic-color-blue-dark-300: #84adff;
+  --quantic-color-blue-dark-400: #528bff;
+  --quantic-color-blue-dark-500: #2970ff;
+  --quantic-color-blue-dark-600: #155eef;
+  --quantic-color-blue-dark-700: #004eeb;
+  --quantic-color-blue-dark-800: #0040c1;
+  --quantic-color-blue-dark-900: #00359e;
+  --quantic-color-blue-dark-950: #002266;
+  --quantic-color-blue-dark-25-rgb: 245 248 255;
+  --quantic-color-blue-dark-50-rgb: 239 244 255;
+  --quantic-color-blue-dark-100-rgb: 209 224 255;
+  --quantic-color-blue-dark-200-rgb: 178 204 255;
+  --quantic-color-blue-dark-300-rgb: 132 173 255;
+  --quantic-color-blue-dark-400-rgb: 82 139 255;
+  --quantic-color-blue-dark-500-rgb: 41 112 255;
+  --quantic-color-blue-dark-600-rgb: 21 94 239;
+  --quantic-color-blue-dark-700-rgb: 0 78 235;
+  --quantic-color-blue-dark-800-rgb: 0 64 193;
+  --quantic-color-blue-dark-900-rgb: 0 53 158;
+  --quantic-color-blue-dark-950-rgb: 0 34 102;
+  --quantic-color-indigo-25: #f5f8ff;
+  --quantic-color-indigo-50: #eef4ff;
+  --quantic-color-indigo-100: #e0eaff;
+  --quantic-color-indigo-200: #c7d7fe;
+  --quantic-color-indigo-300: #a4bcfd;
+  --quantic-color-indigo-400: #8098f9;
+  --quantic-color-indigo-500: #6172f3;
+  --quantic-color-indigo-600: #444ce7;
+  --quantic-color-indigo-700: #3538cd;
+  --quantic-color-indigo-800: #2d31a6;
+  --quantic-color-indigo-900: #2d3282;
+  --quantic-color-indigo-950: #1f235b;
+  --quantic-color-indigo-25-rgb: 245 248 255;
+  --quantic-color-indigo-50-rgb: 238 244 255;
+  --quantic-color-indigo-100-rgb: 224 234 255;
+  --quantic-color-indigo-200-rgb: 199 215 254;
+  --quantic-color-indigo-300-rgb: 164 188 253;
+  --quantic-color-indigo-400-rgb: 128 152 249;
+  --quantic-color-indigo-500-rgb: 97 114 243;
+  --quantic-color-indigo-600-rgb: 68 76 231;
+  --quantic-color-indigo-700-rgb: 53 56 205;
+  --quantic-color-indigo-800-rgb: 45 49 166;
+  --quantic-color-indigo-900-rgb: 45 50 130;
+  --quantic-color-indigo-950-rgb: 31 35 91;
+  --quantic-color-violet-25: #fbfaff;
+  --quantic-color-violet-50: #f5f3ff;
+  --quantic-color-violet-100: #ece9fe;
+  --quantic-color-violet-200: #ddd6fe;
+  --quantic-color-violet-300: #c3b5fd;
+  --quantic-color-violet-400: #a48afb;
+  --quantic-color-violet-500: #875bf7;
+  --quantic-color-violet-600: #7839ee;
+  --quantic-color-violet-700: #6927da;
+  --quantic-color-violet-800: #5720b7;
+  --quantic-color-violet-900: #491c96;
+  --quantic-color-violet-950: #2e125e;
+  --quantic-color-violet-25-rgb: 251 250 255;
+  --quantic-color-violet-50-rgb: 245 243 255;
+  --quantic-color-violet-100-rgb: 236 233 254;
+  --quantic-color-violet-200-rgb: 221 214 254;
+  --quantic-color-violet-300-rgb: 195 181 253;
+  --quantic-color-violet-400-rgb: 164 138 251;
+  --quantic-color-violet-500-rgb: 135 91 247;
+  --quantic-color-violet-600-rgb: 120 57 238;
+  --quantic-color-violet-700-rgb: 105 39 218;
+  --quantic-color-violet-800-rgb: 87 32 183;
+  --quantic-color-violet-900-rgb: 73 28 150;
+  --quantic-color-violet-950-rgb: 46 18 94;
+  --quantic-color-purple-25: #fafaff;
+  --quantic-color-purple-50: #f4f3ff;
+  --quantic-color-purple-100: #ebe9fe;
+  --quantic-color-purple-200: #d9d6fe;
+  --quantic-color-purple-300: #bdb4fe;
+  --quantic-color-purple-400: #9b8afb;
+  --quantic-color-purple-500: #7a5af8;
+  --quantic-color-purple-600: #6938ef;
+  --quantic-color-purple-700: #5925dc;
+  --quantic-color-purple-800: #4a1fb8;
+  --quantic-color-purple-900: #3e1c96;
+  --quantic-color-purple-950: #27115f;
+  --quantic-color-purple-25-rgb: 250 250 255;
+  --quantic-color-purple-50-rgb: 244 243 255;
+  --quantic-color-purple-100-rgb: 235 233 254;
+  --quantic-color-purple-200-rgb: 217 214 254;
+  --quantic-color-purple-300-rgb: 189 180 254;
+  --quantic-color-purple-400-rgb: 155 138 251;
+  --quantic-color-purple-500-rgb: 122 90 248;
+  --quantic-color-purple-600-rgb: 105 56 239;
+  --quantic-color-purple-700-rgb: 89 37 220;
+  --quantic-color-purple-800-rgb: 74 31 184;
+  --quantic-color-purple-900-rgb: 62 28 150;
+  --quantic-color-purple-950-rgb: 39 17 95;
+  --quantic-color-fuchsia-25: #fefaff;
+  --quantic-color-fuchsia-50: #fdf4ff;
+  --quantic-color-fuchsia-100: #fbe8ff;
+  --quantic-color-fuchsia-200: #f6d0fe;
+  --quantic-color-fuchsia-300: #eeaafd;
+  --quantic-color-fuchsia-400: #e478fa;
+  --quantic-color-fuchsia-500: #d444f1;
+  --quantic-color-fuchsia-600: #ba24d5;
+  --quantic-color-fuchsia-700: #9f1ab1;
+  --quantic-color-fuchsia-800: #821890;
+  --quantic-color-fuchsia-900: #6f1877;
+  --quantic-color-fuchsia-950: #47104c;
+  --quantic-color-fuchsia-25-rgb: 254 250 255;
+  --quantic-color-fuchsia-50-rgb: 253 244 255;
+  --quantic-color-fuchsia-100-rgb: 251 232 255;
+  --quantic-color-fuchsia-200-rgb: 246 208 254;
+  --quantic-color-fuchsia-300-rgb: 238 170 253;
+  --quantic-color-fuchsia-400-rgb: 228 120 250;
+  --quantic-color-fuchsia-500-rgb: 212 68 241;
+  --quantic-color-fuchsia-600-rgb: 186 36 213;
+  --quantic-color-fuchsia-700-rgb: 159 26 177;
+  --quantic-color-fuchsia-800-rgb: 130 24 144;
+  --quantic-color-fuchsia-900-rgb: 111 24 119;
+  --quantic-color-fuchsia-950-rgb: 71 16 76;
+  --quantic-color-pink-25: #fef6fb;
+  --quantic-color-pink-50: #fdf2fa;
+  --quantic-color-pink-100: #fce7f6;
+  --quantic-color-pink-200: #fcceee;
+  --quantic-color-pink-300: #faa7e0;
+  --quantic-color-pink-400: #f670c7;
+  --quantic-color-pink-500: #ee46bc;
+  --quantic-color-pink-600: #dd2590;
+  --quantic-color-pink-700: #c11574;
+  --quantic-color-pink-800: #9e165f;
+  --quantic-color-pink-900: #851651;
+  --quantic-color-pink-950: #4e0d30;
+  --quantic-color-pink-25-rgb: 254 246 251;
+  --quantic-color-pink-50-rgb: 253 242 250;
+  --quantic-color-pink-100-rgb: 252 231 246;
+  --quantic-color-pink-200-rgb: 252 206 238;
+  --quantic-color-pink-300-rgb: 250 167 224;
+  --quantic-color-pink-400-rgb: 246 112 199;
+  --quantic-color-pink-500-rgb: 238 70 188;
+  --quantic-color-pink-600-rgb: 221 37 144;
+  --quantic-color-pink-700-rgb: 193 21 116;
+  --quantic-color-pink-800-rgb: 158 22 95;
+  --quantic-color-pink-900-rgb: 133 22 81;
+  --quantic-color-pink-950-rgb: 78 13 48;
+  --quantic-color-rose-25: #fff5f6;
+  --quantic-color-rose-50: #fff1f3;
+  --quantic-color-rose-100: #ffe4e8;
+  --quantic-color-rose-200: #fecdd6;
+  --quantic-color-rose-300: #fea3b4;
+  --quantic-color-rose-400: #fd6f8e;
+  --quantic-color-rose-500: #f63d68;
+  --quantic-color-rose-600: #e31b54;
+  --quantic-color-rose-700: #c01048;
+  --quantic-color-rose-800: #a11043;
+  --quantic-color-rose-900: #89123e;
+  --quantic-color-rose-950: #510b24;
+  --quantic-color-rose-25-rgb: 255 245 246;
+  --quantic-color-rose-50-rgb: 255 241 243;
+  --quantic-color-rose-100-rgb: 255 228 232;
+  --quantic-color-rose-200-rgb: 254 205 214;
+  --quantic-color-rose-300-rgb: 254 163 180;
+  --quantic-color-rose-400-rgb: 253 111 142;
+  --quantic-color-rose-500-rgb: 246 61 104;
+  --quantic-color-rose-600-rgb: 227 27 84;
+  --quantic-color-rose-700-rgb: 192 16 72;
+  --quantic-color-rose-800-rgb: 161 16 67;
+  --quantic-color-rose-900-rgb: 137 18 62;
+  --quantic-color-rose-950-rgb: 81 11 36;
+  --quantic-color-orange-dark-25: #fff9f5;
+  --quantic-color-orange-dark-50: #fff4ed;
+  --quantic-color-orange-dark-100: #ffe6d5;
+  --quantic-color-orange-dark-200: #ffd6ae;
+  --quantic-color-orange-dark-300: #ff9c66;
+  --quantic-color-orange-dark-400: #ff692e;
+  --quantic-color-orange-dark-500: #ff4405;
+  --quantic-color-orange-dark-600: #e62e05;
+  --quantic-color-orange-dark-700: #bc1b06;
+  --quantic-color-orange-dark-800: #97180c;
+  --quantic-color-orange-dark-900: #771a0d;
+  --quantic-color-orange-dark-950: #57130a;
+  --quantic-color-orange-dark-25-rgb: 255 249 245;
+  --quantic-color-orange-dark-50-rgb: 255 244 237;
+  --quantic-color-orange-dark-100-rgb: 255 230 213;
+  --quantic-color-orange-dark-200-rgb: 255 214 174;
+  --quantic-color-orange-dark-300-rgb: 255 156 102;
+  --quantic-color-orange-dark-400-rgb: 255 105 46;
+  --quantic-color-orange-dark-500-rgb: 255 68 5;
+  --quantic-color-orange-dark-600-rgb: 230 46 5;
+  --quantic-color-orange-dark-700-rgb: 188 27 6;
+  --quantic-color-orange-dark-800-rgb: 151 24 12;
+  --quantic-color-orange-dark-900-rgb: 119 26 13;
+  --quantic-color-orange-dark-950-rgb: 87 19 10;
+  --quantic-color-orange-25: #fefaf5;
+  --quantic-color-orange-50: #fef6ee;
+  --quantic-color-orange-100: #fdead7;
+  --quantic-color-orange-200: #f9dbaf;
+  --quantic-color-orange-300: #f7b27a;
+  --quantic-color-orange-400: #f38744;
+  --quantic-color-orange-500: #ef6820;
+  --quantic-color-orange-600: #e04f16;
+  --quantic-color-orange-700: #b93815;
+  --quantic-color-orange-800: #932f19;
+  --quantic-color-orange-900: #772917;
+  --quantic-color-orange-950: #511c10;
+  --quantic-color-orange-25-rgb: 254 250 245;
+  --quantic-color-orange-50-rgb: 254 246 238;
+  --quantic-color-orange-100-rgb: 253 234 215;
+  --quantic-color-orange-200-rgb: 249 219 175;
+  --quantic-color-orange-300-rgb: 247 178 122;
+  --quantic-color-orange-400-rgb: 243 135 68;
+  --quantic-color-orange-500-rgb: 239 104 32;
+  --quantic-color-orange-600-rgb: 224 79 22;
+  --quantic-color-orange-700-rgb: 185 56 21;
+  --quantic-color-orange-800-rgb: 147 47 25;
+  --quantic-color-orange-900-rgb: 119 41 23;
+  --quantic-color-orange-950-rgb: 81 28 16;
+  --quantic-color-yellow-25: #fefdf0;
+  --quantic-color-yellow-50: #fefbe8;
+  --quantic-color-yellow-100: #fef7c3;
+  --quantic-color-yellow-200: #feee95;
+  --quantic-color-yellow-300: #fde272;
+  --quantic-color-yellow-400: #fac515;
+  --quantic-color-yellow-500: #eaaa08;
+  --quantic-color-yellow-600: #ca8504;
+  --quantic-color-yellow-700: #a15c07;
+  --quantic-color-yellow-800: #854a0e;
+  --quantic-color-yellow-900: #713b12;
+  --quantic-color-yellow-950: #542c0d;
+  --quantic-color-yellow-25-rgb: 254 253 240;
+  --quantic-color-yellow-50-rgb: 254 251 232;
+  --quantic-color-yellow-100-rgb: 254 247 195;
+  --quantic-color-yellow-200-rgb: 254 238 149;
+  --quantic-color-yellow-300-rgb: 253 226 114;
+  --quantic-color-yellow-400-rgb: 250 197 21;
+  --quantic-color-yellow-500-rgb: 234 170 8;
+  --quantic-color-yellow-600-rgb: 202 133 4;
+  --quantic-color-yellow-700-rgb: 161 92 7;
+  --quantic-color-yellow-800-rgb: 133 74 14;
+  --quantic-color-yellow-900-rgb: 113 59 18;
+  --quantic-color-yellow-950-rgb: 84 44 13;
+  --quantic-spacing-0: 0;
+  --quantic-spacing-1: .25rem;
+  --quantic-spacing-2: .5rem;
+  --quantic-spacing-3: .75rem;
+  --quantic-spacing-4: 1rem;
+  --quantic-spacing-5: 1.25rem;
+  --quantic-spacing-6: 1.5rem;
+  --quantic-spacing-8: 2rem;
+  --quantic-spacing-10: 2.5rem;
+  --quantic-spacing-12: 3rem;
+  --quantic-spacing-15: 3.75rem;
+  --quantic-spacing-16: 4rem;
+  --quantic-spacing-20: 5rem;
+  --quantic-spacing-24: 6rem;
+  --quantic-spacing-32: 8rem;
+  --quantic-spacing-40: 10rem;
+  --quantic-spacing-48: 12rem;
+  --quantic-spacing-56: 14rem;
+  --quantic-spacing-64: 16rem;
+  --quantic-spacing-80: 20rem;
+  --quantic-spacing-96: 24rem;
+  --quantic-spacing-120: 30rem;
+  --quantic-spacing-140: 35rem;
+  --quantic-spacing-160: 40rem;
+  --quantic-spacing-180: 45rem;
+  --quantic-spacing-192: 48rem;
+  --quantic-spacing-256: 64rem;
+  --quantic-spacing-320: 80rem;
+  --quantic-spacing-360: 90rem;
+  --quantic-spacing-400: 100rem;
+  --quantic-spacing-480: 120rem;
+  --quantic-spacing-0-5: .125rem;
+  --quantic-spacing-1-5: .375rem;
+  --quantic-radius-xxs: .125rem;
+  --quantic-radius-xs: .25rem;
+  --quantic-radius-sm: .375rem;
+  --quantic-radius-md: .5rem;
+  --quantic-radius-lg: .625rem;
+  --quantic-radius-xl: .75rem;
+  --quantic-radius-2xl: 1rem;
+  --quantic-radius-3xl: 1.25rem;
+  --quantic-radius-4xl: 1.5rem;
+  --quantic-radius-full: 624.9375rem;
+  --quantic-spacing-none: 0;
+  --quantic-spacing-xxs: .125rem;
+  --quantic-spacing-xs: .25rem;
+  --quantic-spacing-sm: .375rem;
+  --quantic-spacing-md: .5rem;
+  --quantic-spacing-lg: .75rem;
+  --quantic-spacing-xl: 1rem;
+  --quantic-spacing-2xl: 1.25rem;
+  --quantic-spacing-3xl: 1.5rem;
+  --quantic-spacing-4xl: 2rem;
+  --quantic-spacing-5xl: 2.5rem;
+  --quantic-spacing-6xl: 3rem;
+  --quantic-spacing-7xl: 4rem;
+  --quantic-spacing-8xl: 5rem;
+  --quantic-spacing-9xl: 6rem;
+  --quantic-spacing-10xl: 8rem;
+  --quantic-spacing-11xl: 10rem;
+  --quantic-font-family-display: Satoshi, -apple-system, BlinkMacSystemFont, Segoe UI , Helvetica, Arial, sans-serif;
+  --quantic-font-family-body: Inter, -apple-system, BlinkMacSystemFont, Segoe UI , Helvetica, Arial, sans-serif;
+  --quantic-font-weight-regular: 400;
+  --quantic-font-weight-regular-italic: 400;
+  --quantic-font-weight-medium: 500;
+  --quantic-font-weight-medium-italic: 400;
+  --quantic-font-weight-semibold: 600;
+  --quantic-font-weight-semibold-italic: 400;
+  --quantic-font-weight-bold: 700;
+  --quantic-font-weight-bold-italic: 400;
+  --quantic-font-size-body-xs: .75rem;
+  --quantic-line-height-body-xs: 1.125rem;
+  --quantic-line-height-body-sm: 1.25rem;
+  --quantic-line-height-body-md: 1.5rem;
+  --quantic-line-height-body-lg: 1.75rem;
+  --quantic-line-height-body-xl: 1.875rem;
+  --quantic-line-height-display-xs: 2rem;
+  --quantic-line-height-display-sm: 2.375rem;
+  --quantic-line-height-display-md: 2.75rem;
+  --quantic-line-height-display-lg: 3.75rem;
+  --quantic-line-height-display-xl: 4.5rem;
+  --quantic-line-height-display-2xl: 5.625rem;
+  --quantic-font-size-body-sm: .875rem;
+  --quantic-font-size-body-md: 1rem;
+  --quantic-font-size-body-lg: 1.125rem;
+  --quantic-font-size-body-xl: 1.25rem;
+  --quantic-font-size-display-xs: 1.5rem;
+  --quantic-font-size-display-sm: 1.875rem;
+  --quantic-font-size-display-md: 2.25rem;
+  --quantic-font-size-display-lg: 3rem;
+  --quantic-font-size-display-xl: 3.75rem;
+  --quantic-font-size-display-2xl: 4.5rem;
+  --quantic-width-xxs: 20rem;
+  --quantic-width-xs: 24rem;
+  --quantic-width-sm: 30rem;
+  --quantic-width-md: 35rem;
+  --quantic-width-lg: 40rem;
+  --quantic-width-xl: 48rem;
+  --quantic-width-2xl: 64rem;
+  --quantic-width-3xl: 80rem;
+  --quantic-width-4xl: 90rem;
+  --quantic-width-5xl: 100rem;
+  --quantic-width-6xl: 120rem;
+  --quantic-width-paragraph-max: 45rem;
+  --quantic-text-primary: #f7f7f7;
+  --quantic-text-primary-rgb: 247 247 247;
+  --quantic-text-primary-on-brand: #13161b;
+  --quantic-text-primary-on-brand-rgb: 19 22 27;
+  --quantic-text-secondary: #cecfd2;
+  --quantic-text-secondary-rgb: 206 207 210;
+  --quantic-text-secondary-hover: #ececed;
+  --quantic-text-secondary-hover-rgb: 236 236 237;
+  --quantic-text-secondary-on-brand: #cecfd2;
+  --quantic-text-secondary-on-brand-rgb: 206 207 210;
+  --quantic-text-tertiary: #94979c;
+  --quantic-text-tertiary-rgb: 148 151 156;
+  --quantic-text-tertiary-hover: #cecfd2;
+  --quantic-text-tertiary-hover-rgb: 206 207 210;
+  --quantic-text-tertiary-on-brand: #94979c;
+  --quantic-text-tertiary-on-brand-rgb: 148 151 156;
+  --quantic-text-quaternary: #94979c;
+  --quantic-text-quaternary-rgb: 148 151 156;
+  --quantic-text-quaternary-on-brand: #94979c;
+  --quantic-text-quaternary-on-brand-rgb: 148 151 156;
+  --quantic-text-white: #ffffff;
+  --quantic-text-white-rgb: 255 255 255;
+  --quantic-text-disabled: #85888e;
+  --quantic-text-disabled-rgb: 133 136 142;
+  --quantic-text-placeholder: #85888e;
+  --quantic-text-placeholder-rgb: 133 136 142;
+  --quantic-text-placeholder-subtle: #373a41;
+  --quantic-text-placeholder-subtle-rgb: 55 58 65;
+  --quantic-text-brand-primary: #f7f7f7;
+  --quantic-text-brand-primary-rgb: 247 247 247;
+  --quantic-text-brand-secondary: #cecfd2;
+  --quantic-text-brand-secondary-rgb: 206 207 210;
+  --quantic-text-brand-secondary-hover: #ececed;
+  --quantic-text-brand-secondary-hover-rgb: 236 236 237;
+  --quantic-text-brand-tertiary: #94979c;
+  --quantic-text-brand-tertiary-rgb: 148 151 156;
+  --quantic-text-brand-tertiary-alt: #f7f7f7;
+  --quantic-text-brand-tertiary-alt-rgb: 247 247 247;
+  --quantic-text-error-primary: #f97066;
+  --quantic-text-error-primary-rgb: 249 112 102;
+  --quantic-text-error-primary-hover: #fda29b;
+  --quantic-text-error-primary-hover-rgb: 253 162 155;
+  --quantic-text-warning-primary: #fdb022;
+  --quantic-text-warning-primary-rgb: 253 176 34;
+  --quantic-text-success-primary: #47cd89;
+  --quantic-text-success-primary-rgb: 71 205 137;
+  --quantic-text-logo-green: #0b8759;
+  --quantic-text-logo-green-rgb: 11 135 89;
+  --quantic-text-logo-neutral: #d5d7da;
+  --quantic-text-logo-neutral-rgb: 213 215 218;
+  --quantic-border-primary-rgb: 55 58 65;
+  --quantic-border-secondary-rgb: 34 38 47;
+  --quantic-border-secondary-alt: #373a41;
+  --quantic-border-secondary-alt-rgb: 55 58 65;
+  --quantic-border-tertiary-rgb: 34 38 47;
+  --quantic-border-disabled: #373a41;
+  --quantic-border-disabled-rgb: 55 58 65;
+  --quantic-border-disabled-subtle: #22262f;
+  --quantic-border-disabled-subtle-rgb: 34 38 47;
+  --quantic-border-brand: #12a66f;
+  --quantic-border-brand-rgb: 18 166 111;
+  --quantic-border-brand-alt: #373a41;
+  --quantic-border-brand-alt-rgb: 55 58 65;
+  --quantic-border-error-rgb: 249 112 102;
+  --quantic-border-error-subtle: #f04438;
+  --quantic-border-error-subtle-rgb: 240 68 56;
+  --quantic-fg-primary: #ffffff;
+  --quantic-fg-primary-rgb: 255 255 255;
+  --quantic-alpha-white-10: rgba(12, 14, 18, .1);
+  --quantic-alpha-white-20: rgba(12, 14, 18, .2);
+  --quantic-alpha-white-30: rgba(12, 14, 18, .3);
+  --quantic-alpha-white-40: rgba(12, 14, 18, .4);
+  --quantic-alpha-white-50: rgba(12, 14, 18, .5);
+  --quantic-alpha-white-60: rgba(12, 14, 18, .6);
+  --quantic-alpha-white-70: rgba(12, 14, 18, .7);
+  --quantic-alpha-white-80: rgba(12, 14, 18, .8);
+  --quantic-alpha-white-90: rgba(12, 14, 18, .9);
+  --quantic-alpha-white-100: #0c0e12;
+  --quantic-alpha-white-100-rgb: 12 14 18;
+  --quantic-alpha-black-10: rgba(255, 255, 255, .1);
+  --quantic-alpha-black-20: rgba(255, 255, 255, .2);
+  --quantic-alpha-black-30: rgba(255, 255, 255, .3);
+  --quantic-alpha-black-40: rgba(255, 255, 255, .4);
+  --quantic-alpha-black-50: rgba(255, 255, 255, .5);
+  --quantic-alpha-black-60: rgba(255, 255, 255, .6);
+  --quantic-alpha-black-70: rgba(255, 255, 255, .7);
+  --quantic-alpha-black-80: rgba(255, 255, 255, .8);
+  --quantic-alpha-black-90: rgba(255, 255, 255, .9);
+  --quantic-alpha-black-100: #ffffff;
+  --quantic-alpha-black-100-rgb: 255 255 255;
+  --quantic-utility-gray-50: #13161b;
+  --quantic-utility-gray-50-rgb: 19 22 27;
+  --quantic-app-store-badge-border: #ffffff;
+  --quantic-app-store-badge-border-rgb: 255 255 255;
+  --quantic-button-primary-icon: #04140c;
+  --quantic-button-primary-icon-rgb: 4 20 12;
+  --quantic-button-primary-icon-hover: #04140c;
+  --quantic-button-primary-icon-hover-rgb: 4 20 12;
+  --quantic-button-destructive-primary-icon: #fda29b;
+  --quantic-button-destructive-primary-icon-rgb: 253 162 155;
+  --quantic-button-destructive-primary-icon-hover: #fecdca;
+  --quantic-button-destructive-primary-icon-hover-rgb: 254 205 202;
+  --quantic-button-tertiary: rgba(19, 22, 27, .5);
+  --quantic-button-tertiary-hover: #1a1e25;
+  --quantic-button-tertiary-hover-rgb: 26 30 37;
+  --quantic-footer-button-fg: #cecfd2;
+  --quantic-footer-button-fg-rgb: 206 207 210;
+  --quantic-footer-button-fg-hover: #f0f0f1;
+  --quantic-footer-button-fg-hover-rgb: 240 240 241;
+  --quantic-icon-fg-brand: #94979c;
+  --quantic-icon-fg-brand-rgb: 148 151 156;
+  --quantic-icon-fg-brand-on-brand: #94979c;
+  --quantic-icon-fg-brand-on-brand-rgb: 148 151 156;
+  --quantic-featured-icon-light-fg-brand: #2be099;
+  --quantic-featured-icon-light-fg-brand-rgb: 43 224 153;
+  --quantic-featured-icon-light-fg-gray: #ececed;
+  --quantic-featured-icon-light-fg-gray-rgb: 236 236 237;
+  --quantic-featured-icon-light-fg-error: #fecdca;
+  --quantic-featured-icon-light-fg-error-rgb: 254 205 202;
+  --quantic-featured-icon-light-fg-warning: #fedf89;
+  --quantic-featured-icon-light-fg-warning-rgb: 254 223 137;
+  --quantic-featured-icon-light-fg-success: #abefc6;
+  --quantic-featured-icon-light-fg-success-rgb: 171 239 198;
+  --quantic-toggle-slim-border-pressed: rgba(255, 255, 255, 0);
+  --quantic-toggle-slim-border-pressed-hover: rgba(255, 255, 255, 0);
+  --quantic-tooltip-supporting-text: #cecfd2;
+  --quantic-tooltip-supporting-text-rgb: 206 207 210;
+  --quantic-text-editor-icon-fg: #94979c;
+  --quantic-text-editor-icon-fg-rgb: 148 151 156;
+  --quantic-text-editor-icon-fg-active: #ffffff;
+  --quantic-text-editor-icon-fg-active-rgb: 255 255 255;
+  --quantic-utility-gray-100: #22262f;
+  --quantic-utility-gray-100-rgb: 34 38 47;
+  --quantic-utility-gray-200: #373a41;
+  --quantic-utility-gray-200-rgb: 55 58 65;
+  --quantic-utility-gray-300: #373a41;
+  --quantic-utility-gray-300-rgb: 55 58 65;
+  --quantic-utility-gray-400: #61656c;
+  --quantic-utility-gray-400-rgb: 97 101 108;
+  --quantic-utility-gray-500: #85888e;
+  --quantic-utility-gray-500-rgb: 133 136 142;
+  --quantic-utility-gray-600: #94979c;
+  --quantic-utility-gray-600-rgb: 148 151 156;
+  --quantic-utility-gray-700: #cecfd2;
+  --quantic-utility-gray-700-rgb: 206 207 210;
+  --quantic-utility-gray-800: #ececed;
+  --quantic-utility-gray-800-rgb: 236 236 237;
+  --quantic-utility-gray-900: #f0f0f1;
+  --quantic-utility-gray-900-rgb: 240 240 241;
+  --quantic-utility-brand-50: #04140c;
+  --quantic-utility-brand-50-rgb: 4 20 12;
+  --quantic-utility-brand-50-alt: #13161b;
+  --quantic-utility-brand-50-alt-rgb: 19 22 27;
+  --quantic-utility-brand-100: #052315;
+  --quantic-utility-brand-100-rgb: 5 35 21;
+  --quantic-utility-brand-100-alt: #22262f;
+  --quantic-utility-brand-100-alt-rgb: 34 38 47;
+  --quantic-utility-brand-200: #053722;
+  --quantic-utility-brand-200-rgb: 5 55 34;
+  --quantic-utility-brand-200-alt: #373a41;
+  --quantic-utility-brand-200-alt-rgb: 55 58 65;
+  --quantic-utility-brand-300: #045134;
+  --quantic-utility-brand-300-rgb: 4 81 52;
+  --quantic-utility-brand-300-alt: #373a41;
+  --quantic-utility-brand-300-alt-rgb: 55 58 65;
+  --quantic-utility-brand-400: #097049;
+  --quantic-utility-brand-400-rgb: 9 112 73;
+  --quantic-utility-brand-400-alt: #61656c;
+  --quantic-utility-brand-400-alt-rgb: 97 101 108;
+  --quantic-utility-brand-500: #0b8759;
+  --quantic-utility-brand-500-rgb: 11 135 89;
+  --quantic-utility-brand-500-alt: #85888e;
+  --quantic-utility-brand-500-alt-rgb: 133 136 142;
+  --quantic-utility-brand-600: #12a66f;
+  --quantic-utility-brand-600-rgb: 18 166 111;
+  --quantic-utility-brand-600-alt: #94979c;
+  --quantic-utility-brand-600-alt-rgb: 148 151 156;
+  --quantic-utility-brand-700: #17c484;
+  --quantic-utility-brand-700-rgb: 23 196 132;
+  --quantic-utility-brand-700-alt: #cecfd2;
+  --quantic-utility-brand-700-alt-rgb: 206 207 210;
+  --quantic-utility-brand-800: #2be099;
+  --quantic-utility-brand-800-rgb: 43 224 153;
+  --quantic-utility-brand-800-alt: #ececed;
+  --quantic-utility-brand-800-alt-rgb: 236 236 237;
+  --quantic-utility-brand-900: #52fbb2;
+  --quantic-utility-brand-900-rgb: 82 251 178;
+  --quantic-utility-brand-900-alt: #f0f0f1;
+  --quantic-utility-brand-900-alt-rgb: 240 240 241;
+  --quantic-utility-error-50: #55160c;
+  --quantic-utility-error-50-rgb: 85 22 12;
+  --quantic-utility-error-100: #7a271a;
+  --quantic-utility-error-100-rgb: 122 39 26;
+  --quantic-utility-error-200: #912018;
+  --quantic-utility-error-200-rgb: 145 32 24;
+  --quantic-utility-error-300: #b42318;
+  --quantic-utility-error-300-rgb: 180 35 24;
+  --quantic-utility-error-400: #d92d20;
+  --quantic-utility-error-400-rgb: 217 45 32;
+  --quantic-utility-error-500: #f04438;
+  --quantic-utility-error-500-rgb: 240 68 56;
+  --quantic-utility-error-600: #f97066;
+  --quantic-utility-error-600-rgb: 249 112 102;
+  --quantic-utility-error-700: #fda29b;
+  --quantic-utility-error-700-rgb: 253 162 155;
+  --quantic-utility-warning-50: #4e1d09;
+  --quantic-utility-warning-50-rgb: 78 29 9;
+  --quantic-utility-warning-100: #7a2e0e;
+  --quantic-utility-warning-100-rgb: 122 46 14;
+  --quantic-utility-warning-200: #93370d;
+  --quantic-utility-warning-200-rgb: 147 55 13;
+  --quantic-utility-warning-300: #b54708;
+  --quantic-utility-warning-300-rgb: 181 71 8;
+  --quantic-utility-warning-400: #dc6803;
+  --quantic-utility-warning-400-rgb: 220 104 3;
+  --quantic-utility-warning-500: #f79009;
+  --quantic-utility-warning-500-rgb: 247 144 9;
+  --quantic-utility-warning-600: #fdb022;
+  --quantic-utility-warning-600-rgb: 253 176 34;
+  --quantic-utility-warning-700: #fec84b;
+  --quantic-utility-warning-700-rgb: 254 200 75;
+  --quantic-utility-success-50: #053321;
+  --quantic-utility-success-50-rgb: 5 51 33;
+  --quantic-utility-success-100: #074d31;
+  --quantic-utility-success-100-rgb: 7 77 49;
+  --quantic-utility-success-200: #085d3a;
+  --quantic-utility-success-200-rgb: 8 93 58;
+  --quantic-utility-success-300: #067647;
+  --quantic-utility-success-300-rgb: 6 118 71;
+  --quantic-utility-success-400: #079455;
+  --quantic-utility-success-400-rgb: 7 148 85;
+  --quantic-utility-success-500: #17b26a;
+  --quantic-utility-success-500-rgb: 23 178 106;
+  --quantic-utility-success-600: #47cd89;
+  --quantic-utility-success-600-rgb: 71 205 137;
+  --quantic-utility-success-700: #75e0a7;
+  --quantic-utility-success-700-rgb: 117 224 167;
+  --quantic-utility-gray-blue-50: #0d0f1c;
+  --quantic-utility-gray-blue-50-rgb: 13 15 28;
+  --quantic-utility-gray-blue-100: #101323;
+  --quantic-utility-gray-blue-100-rgb: 16 19 35;
+  --quantic-utility-gray-blue-200: #293056;
+  --quantic-utility-gray-blue-200-rgb: 41 48 86;
+  --quantic-utility-gray-blue-300: #363f72;
+  --quantic-utility-gray-blue-300-rgb: 54 63 114;
+  --quantic-utility-gray-blue-400: #3e4784;
+  --quantic-utility-gray-blue-400-rgb: 62 71 132;
+  --quantic-utility-gray-blue-500: #4e5ba6;
+  --quantic-utility-gray-blue-500-rgb: 78 91 166;
+  --quantic-utility-gray-blue-600: #717bbc;
+  --quantic-utility-gray-blue-600-rgb: 113 123 188;
+  --quantic-utility-gray-blue-700: #b3b8db;
+  --quantic-utility-gray-blue-700-rgb: 179 184 219;
+  --quantic-utility-green-50: #04140c;
+  --quantic-utility-green-50-rgb: 4 20 12;
+  --quantic-utility-green-100: #052315;
+  --quantic-utility-green-100-rgb: 5 35 21;
+  --quantic-utility-green-200: #053722;
+  --quantic-utility-green-200-rgb: 5 55 34;
+  --quantic-utility-green-300: #045134;
+  --quantic-utility-green-300-rgb: 4 81 52;
+  --quantic-utility-green-400: #097049;
+  --quantic-utility-green-400-rgb: 9 112 73;
+  --quantic-utility-green-500: #0b8759;
+  --quantic-utility-green-500-rgb: 11 135 89;
+  --quantic-utility-green-600: #12a66f;
+  --quantic-utility-green-600-rgb: 18 166 111;
+  --quantic-utility-green-700: #17c484;
+  --quantic-utility-green-700-rgb: 23 196 132;
+  --quantic-utility-blue-light-50: #062c41;
+  --quantic-utility-blue-light-50-rgb: 6 44 65;
+  --quantic-utility-blue-light-100: #0b4a6f;
+  --quantic-utility-blue-light-100-rgb: 11 74 111;
+  --quantic-utility-blue-light-200: #065986;
+  --quantic-utility-blue-light-200-rgb: 6 89 134;
+  --quantic-utility-blue-light-300: #026aa2;
+  --quantic-utility-blue-light-300-rgb: 2 106 162;
+  --quantic-utility-blue-light-400: #0086c9;
+  --quantic-utility-blue-light-400-rgb: 0 134 201;
+  --quantic-utility-blue-light-500: #0ba5ec;
+  --quantic-utility-blue-light-500-rgb: 11 165 236;
+  --quantic-utility-blue-light-600: #36bffa;
+  --quantic-utility-blue-light-600-rgb: 54 191 250;
+  --quantic-utility-blue-light-700: #7cd4fd;
+  --quantic-utility-blue-light-700-rgb: 124 212 253;
+  --quantic-utility-blue-50: #102a56;
+  --quantic-utility-blue-50-rgb: 16 42 86;
+  --quantic-utility-blue-100: #194185;
+  --quantic-utility-blue-100-rgb: 25 65 133;
+  --quantic-utility-blue-200: #1849a9;
+  --quantic-utility-blue-200-rgb: 24 73 169;
+  --quantic-utility-blue-300: #175cd3;
+  --quantic-utility-blue-300-rgb: 23 92 211;
+  --quantic-utility-blue-400: #1570ef;
+  --quantic-utility-blue-400-rgb: 21 112 239;
+  --quantic-utility-blue-500: #2e90fa;
+  --quantic-utility-blue-500-rgb: 46 144 250;
+  --quantic-utility-blue-600: #53b1fd;
+  --quantic-utility-blue-600-rgb: 83 177 253;
+  --quantic-utility-blue-700: #84caff;
+  --quantic-utility-blue-700-rgb: 132 202 255;
+  --quantic-utility-blue-dark-50: #002266;
+  --quantic-utility-blue-dark-50-rgb: 0 34 102;
+  --quantic-utility-blue-dark-100: #00359e;
+  --quantic-utility-blue-dark-100-rgb: 0 53 158;
+  --quantic-utility-blue-dark-200: #0040c1;
+  --quantic-utility-blue-dark-200-rgb: 0 64 193;
+  --quantic-utility-blue-dark-300: #004eeb;
+  --quantic-utility-blue-dark-300-rgb: 0 78 235;
+  --quantic-utility-blue-dark-400: #155eef;
+  --quantic-utility-blue-dark-400-rgb: 21 94 239;
+  --quantic-utility-blue-dark-500: #2970ff;
+  --quantic-utility-blue-dark-500-rgb: 41 112 255;
+  --quantic-utility-blue-dark-600: #528bff;
+  --quantic-utility-blue-dark-600-rgb: 82 139 255;
+  --quantic-utility-blue-dark-700: #84adff;
+  --quantic-utility-blue-dark-700-rgb: 132 173 255;
+  --quantic-utility-indigo-50: #1f235b;
+  --quantic-utility-indigo-50-rgb: 31 35 91;
+  --quantic-utility-indigo-100: #2d3282;
+  --quantic-utility-indigo-100-rgb: 45 50 130;
+  --quantic-utility-indigo-200: #2d31a6;
+  --quantic-utility-indigo-200-rgb: 45 49 166;
+  --quantic-utility-indigo-300: #3538cd;
+  --quantic-utility-indigo-300-rgb: 53 56 205;
+  --quantic-utility-indigo-400: #444ce7;
+  --quantic-utility-indigo-400-rgb: 68 76 231;
+  --quantic-utility-indigo-500: #6172f3;
+  --quantic-utility-indigo-500-rgb: 97 114 243;
+  --quantic-utility-indigo-600: #8098f9;
+  --quantic-utility-indigo-600-rgb: 128 152 249;
+  --quantic-utility-indigo-700: #a4bcfd;
+  --quantic-utility-indigo-700-rgb: 164 188 253;
+  --quantic-utility-purple-50: #27115f;
+  --quantic-utility-purple-50-rgb: 39 17 95;
+  --quantic-utility-purple-100: #3e1c96;
+  --quantic-utility-purple-100-rgb: 62 28 150;
+  --quantic-utility-purple-200: #4a1fb8;
+  --quantic-utility-purple-200-rgb: 74 31 184;
+  --quantic-utility-purple-300: #5925dc;
+  --quantic-utility-purple-300-rgb: 89 37 220;
+  --quantic-utility-purple-400: #6938ef;
+  --quantic-utility-purple-400-rgb: 105 56 239;
+  --quantic-utility-purple-500: #7a5af8;
+  --quantic-utility-purple-500-rgb: 122 90 248;
+  --quantic-utility-purple-600: #9b8afb;
+  --quantic-utility-purple-600-rgb: 155 138 251;
+  --quantic-utility-purple-700: #bdb4fe;
+  --quantic-utility-purple-700-rgb: 189 180 254;
+  --quantic-utility-fuchsia-50: #47104c;
+  --quantic-utility-fuchsia-50-rgb: 71 16 76;
+  --quantic-utility-fuchsia-100: #6f1877;
+  --quantic-utility-fuchsia-100-rgb: 111 24 119;
+  --quantic-utility-fuchsia-200: #821890;
+  --quantic-utility-fuchsia-200-rgb: 130 24 144;
+  --quantic-utility-fuchsia-300: #9f1ab1;
+  --quantic-utility-fuchsia-300-rgb: 159 26 177;
+  --quantic-utility-fuchsia-400: #ba24d5;
+  --quantic-utility-fuchsia-400-rgb: 186 36 213;
+  --quantic-utility-fuchsia-500: #d444f1;
+  --quantic-utility-fuchsia-500-rgb: 212 68 241;
+  --quantic-utility-fuchsia-600: #e478fa;
+  --quantic-utility-fuchsia-600-rgb: 228 120 250;
+  --quantic-utility-fuchsia-700: #eeaafd;
+  --quantic-utility-fuchsia-700-rgb: 238 170 253;
+  --quantic-utility-pink-50: #4e0d30;
+  --quantic-utility-pink-50-rgb: 78 13 48;
+  --quantic-utility-pink-100: #851651;
+  --quantic-utility-pink-100-rgb: 133 22 81;
+  --quantic-utility-pink-200: #9e165f;
+  --quantic-utility-pink-200-rgb: 158 22 95;
+  --quantic-utility-pink-300: #c11574;
+  --quantic-utility-pink-300-rgb: 193 21 116;
+  --quantic-utility-pink-400: #dd2590;
+  --quantic-utility-pink-400-rgb: 221 37 144;
+  --quantic-utility-pink-500: #ee46bc;
+  --quantic-utility-pink-500-rgb: 238 70 188;
+  --quantic-utility-pink-600: #f670c7;
+  --quantic-utility-pink-600-rgb: 246 112 199;
+  --quantic-utility-pink-700: #faa7e0;
+  --quantic-utility-pink-700-rgb: 250 167 224;
+  --quantic-utility-orange-dark-50: #57130a;
+  --quantic-utility-orange-dark-50-rgb: 87 19 10;
+  --quantic-utility-orange-dark-100: #771a0d;
+  --quantic-utility-orange-dark-100-rgb: 119 26 13;
+  --quantic-utility-orange-dark-200: #97180c;
+  --quantic-utility-orange-dark-200-rgb: 151 24 12;
+  --quantic-utility-orange-dark-300: #bc1b06;
+  --quantic-utility-orange-dark-300-rgb: 188 27 6;
+  --quantic-utility-orange-dark-400: #e62e05;
+  --quantic-utility-orange-dark-400-rgb: 230 46 5;
+  --quantic-utility-orange-dark-500: #ff4405;
+  --quantic-utility-orange-dark-500-rgb: 255 68 5;
+  --quantic-utility-orange-dark-600: #ff692e;
+  --quantic-utility-orange-dark-600-rgb: 255 105 46;
+  --quantic-utility-orange-dark-700: #ff9c66;
+  --quantic-utility-orange-dark-700-rgb: 255 156 102;
+  --quantic-utility-orange-50: #511c10;
+  --quantic-utility-orange-50-rgb: 81 28 16;
+  --quantic-utility-orange-100: #772917;
+  --quantic-utility-orange-100-rgb: 119 41 23;
+  --quantic-utility-orange-200: #932f19;
+  --quantic-utility-orange-200-rgb: 147 47 25;
+  --quantic-utility-orange-300: #b93815;
+  --quantic-utility-orange-300-rgb: 185 56 21;
+  --quantic-utility-orange-400: #e04f16;
+  --quantic-utility-orange-400-rgb: 224 79 22;
+  --quantic-utility-orange-500: #ef6820;
+  --quantic-utility-orange-500-rgb: 239 104 32;
+  --quantic-utility-orange-600: #f38744;
+  --quantic-utility-orange-600-rgb: 243 135 68;
+  --quantic-utility-orange-700: #f7b27a;
+  --quantic-utility-orange-700-rgb: 247 178 122;
+  --quantic-focus-ring: #0b8759;
+  --quantic-focus-ring-rgb: 11 135 89;
+  --quantic-focus-ring-error: #f04438;
+  --quantic-focus-ring-error-rgb: 240 68 56;
+  --quantic-shadow-xs: rgba(255, 255, 255, 0);
+  --quantic-shadow-main-centre-md: rgba(255, 255, 255, 0);
+  --quantic-shadow-main-centre-lg: rgba(255, 255, 255, 0);
+  --quantic-shadow-overlay-lg: rgba(255, 255, 255, 0);
+  --quantic-shadow-grid-md: rgba(255, 255, 255, 0);
+  --quantic-shadow-sm-01: rgba(255, 255, 255, 0);
+  --quantic-shadow-sm-02: rgba(255, 255, 255, 0);
+  --quantic-shadow-md-01: rgba(255, 255, 255, 0);
+  --quantic-shadow-md-02: rgba(255, 255, 255, 0);
+  --quantic-shadow-lg-01: rgba(255, 255, 255, 0);
+  --quantic-shadow-lg-02: rgba(255, 255, 255, 0);
+  --quantic-shadow-lg-03: rgba(255, 255, 255, 0);
+  --quantic-shadow-xl-01: rgba(255, 255, 255, 0);
+  --quantic-shadow-xl-02: rgba(255, 255, 255, 0);
+  --quantic-shadow-xl-03: rgba(255, 255, 255, 0);
+  --quantic-shadow-2xl-01: rgba(255, 255, 255, 0);
+  --quantic-shadow-2xl-02: rgba(255, 255, 255, 0);
+  --quantic-shadow-3xl-01: rgba(255, 255, 255, 0);
+  --quantic-shadow-3xl-02: rgba(255, 255, 255, 0);
+  --quantic-shadow-skeumorphic-inner: rgba(12, 14, 18, .05);
+  --quantic-shadow-skeumorphic-inner-border: rgba(12, 14, 18, .18);
+  --quantic-utility-yellow-50: #542c0d;
+  --quantic-utility-yellow-50-rgb: 84 44 13;
+  --quantic-utility-yellow-100: #713b12;
+  --quantic-utility-yellow-100-rgb: 113 59 18;
+  --quantic-utility-yellow-200: #854a0e;
+  --quantic-utility-yellow-200-rgb: 133 74 14;
+  --quantic-utility-yellow-300: #a15c07;
+  --quantic-utility-yellow-300-rgb: 161 92 7;
+  --quantic-utility-yellow-400: #ca8504;
+  --quantic-utility-yellow-400-rgb: 202 133 4;
+  --quantic-utility-yellow-500: #eaaa08;
+  --quantic-utility-yellow-500-rgb: 234 170 8;
+  --quantic-utility-yellow-600: #fac515;
+  --quantic-utility-yellow-600-rgb: 250 197 21;
+  --quantic-utility-yellow-700: #fde272;
+  --quantic-utility-yellow-700-rgb: 253 226 114
+}
+
+html,
+body {
+  font-family:var(--quantic-font-family-body);
+  font-size:var(--quantic-font-size-body-md, 1rem);
+  line-height:var(--quantic-line-height-body-md, 1.5rem)
+}
+
+h1 {
+  color:var(--quantic-text-primary);
+  font-weight:var(--quantic-font-weight-semibold);
+  font-family:var(--quantic-font-family-display);
+  font-size:var(--quantic-font-size-display-lg, 2.25rem);
+  line-height:var(--quantic-line-height-display-lg, 2.75rem);
+  margin-block:var(--quantic-spacing-6)
+}
+
+h2 {
+  color:var(--quantic-text-primary);
+  font-weight:var(--quantic-font-weight-semibold);
+  font-family:var(--quantic-font-family-display);
+  font-size:var(--quantic-font-size-display-md, 1.875rem);
+  line-height:var(--quantic-line-height-display-md, 2.375rem);
+  margin-block:var(--quantic-spacing-6)
+}
+h3 {
+  color:var(--quantic-text-primary);
+  font-weight:var(--quantic-font-weight-semibold);
+  font-family:var(--quantic-font-family-display);
+  font-size:var(--quantic-font-size-display-sm, 1.5rem);
+  line-height:var(--quantic-line-height-display-sm, 2rem);
+  margin-block:var(--quantic-spacing-6)
+}
+h4 {
+  color:var(--quantic-text-primary);
+  font-weight:var(--quantic-font-weight-semibold);
+  font-family:var(--quantic-font-family-display);
+  font-size:var(--quantic-font-size-display-xs, 1.25rem);
+  line-height:var(--quantic-line-height-display-xs, 1.875rem);
+  margin-block:var(--quantic-spacing-6)
+}
+h5 {
+  font-family:var(--quantic-font-family-body);
+  font-size:var(--quantic-font-size-body-lg, 1.125rem);
+  line-height:var(--quantic-line-height-body-lg, 1.75rem)
+}
+h6 {
+  font-family:var(--quantic-font-family-body);
+  font-size:var(--quantic-font-size-body-md, 1rem);
+  line-height:var(--quantic-line-height-body-md, 1.5rem)
+}
+h1 em,
+h2 em {
+  font-style:normal
+}
+a {
+  color:inherit
+}
+a:focus-visible {
+  outline:2px solid var(--quantic-focus-ring);
+  outline-offset:var(--quantic-spacing-1);
+  border-radius:var(--quantic-radius-xxs)
+}
+a:hover {
+  text-decoration:underline
+}
+quantic-table:not(:defined),
+quantic-button:not(:defined),
+quantic-card:not(:defined),
+quantic-panel:not(:defined),
+quantic-option-card:not(:defined),
+quantic-tabs:not(:defined) {
+  visibility:hidden
+}
+b {
+  font-weight:var(--quantic-font-weight-semibold)
+}
+a:hover {
+  text-decoration:none
+}
+a:focus-visible {
+  outline:none
+}
+textarea,
+button {
+  color:inherit
+}
+.border {
+  border-style:solid
+}
+.border-t {
+  border-top-style:solid
+}
+.border-l {
+  border-left-style:solid
+}
+.border-r {
+  border-right-style:solid
+}
+.border-b {
+  border-bottom-style:solid
+}

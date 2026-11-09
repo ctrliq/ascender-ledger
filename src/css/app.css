@@ -1,143 +1,46 @@
-body {
-  font-family: "Open SansVariable", sans-serif;
-}
+/*
+	Ledger's own additions to the CIQ theme (css/themes/ciq), which is loaded first.
+*/
 
-.navbar-dark {
-  background-color: rgba(21, 21, 21, 1) !important;
-}
-
-.navbar-brand {
-  padding-top: .75rem;
-  padding-bottom: .75rem;
-  font-size: 1rem;
-}
-
-.page-sidebar {
-  background-image: radial-gradient(116.94% 41.63% at 5% 1.23%, rgb(38, 194, 140) 0%, rgb(2, 93, 133) 50.52%, rgb(1, 17, 23) 100%) !important;
-  line-height: 12px !important;
-  background-color: #2f4050;
-}
-
-.topnav {
-  padding-right: 40px;
-}
-
-.navicon {
-  width: 20px;
-}
-
-.pf-c-nav__link:focus {
-  background-color: transparent !important;
-}
-
-.pf-c-nav__link:active {
-  background-color: transparent !important;
-}
-
-.pf-c-nav__link:hover {
-  background-color: rgba(51, 170, 51, .1) !important;
-}
-
-.active {
-  background-color: rgba(51, 170, 51, .2) !important;
-}
-
-.active::after {
-  border-color: rgba(51, 170, 51, .3) !important;
-}
-
-.btn-primary {
-	background-color: rgba(5, 133, 182, 1) !important;
-}
-
-.collapsing {
-    -webkit-transition: none;
-    transition: none;
-}
-
-.border {
-    border:solid #ccc !important;
-    border-width: 1px !important;
-}
-
-.bd-example {
-    position:relative;
-    padding: 24px;
-    margin:0 -1.5rem;
-    border:solid #ccc;
-    border-width: 1px;
-    margin: 0px;
-    width: 99%;
-}
-
-body {
-    font-size: 14px !important;
-}
-
-.nav-link {
-    color: #fff !important;
-    font-size: 16px !important;
-}
-
-.btn-xs {
-    padding: 1px 5px;
-    font-size: 12px;
-    line-height: 1.5;
-    border-radius: 3px;
-}
-
-.btn-s {
-    padding: 4px 8px;
-    font-size: 13px;
-    line-height: 1.5;
-    border-radius: 3px;
-}
-
-.filters {
-    font-size: 15px;
-    white-space: nowrap;
-    overflow: visible;
-    width: 100%;
-}
-
-.select2-container--bootstrap-5 .select2-selection {
-    min-height: calc(1.5em + .5rem + 2px);
-    font-size: .875rem;
-}
-
-.nav-link.active {
-    font-weight: bold;
-}
-
-.tab-pane.active {
-  background-color: white !important;
-}
-
-#nav-tab.nav.nav-tabs .nav-link {
-  background-color: #aaa !important;
-}
-
-#nav-tab.nav.nav-tabs .nav-link.active {
-  background-color: #555 !important;
-}
-
-.accordion-button {
-  color: #000;
-  --bs-accordion-border-color: #000 !important;
-  --bs-accordion-btn-focus-border-color: #000 !important;
-}
-
-.accordion-button:not(.collapsed) {
-  color: #000;
-  background-color: #e3e3e3;
-}
-
-.accordion-button:focus {
-    box-shadow: none;
-    border-color: rgba(0,0,0,.125);
+/* Pro sets headings in Satoshi, which is not shipped here (see themes/ciq/app.css); use Inter */
+:root {
+	--quantic-font-family-display: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 /* Fact names and values wrap rather than widening the table; a name keeps enough room to read */
 .ledger-col-name {
-    min-width: 12rem;
+	min-width: 15rem;
+}
+
+/* The number tiles on the dashboard */
+.ledger-count {
+	min-width: 10rem;
+}
+
+/* Diffs are stored with <font color=...> marking added, removed and changed lines; recolor them for the dark background */
+pre font[color=green] {
+	color: var(--bs-success-text-emphasis);
+}
+
+pre font[color=red] {
+	color: var(--bs-danger-text-emphasis);
+}
+
+pre font[color=blue] {
+	color: var(--bs-info-text-emphasis);
+}
+
+/*
+	Links in page content: the theme resets links to the text color, and Pro adds link-primary
+	to each one.  Give every content link that look instead of marking each one up.
+*/
+main a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.card),
+.login a {
+	color: var(--quantic-text-logo-green);
+	text-decoration: none;
+}
+
+main a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.card):hover,
+.login a:hover {
+	text-decoration: underline !important;
 }

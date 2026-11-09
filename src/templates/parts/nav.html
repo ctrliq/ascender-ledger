@@ -1,0 +1,65 @@
+{# The sidebar menu, used by the desktop sidebar and the slide-out menu on small screens.  menu_id has to be unique on the page. #}
+{% set admin_pages = ['/users.php', '/settings.php', '/servers.php'] %}
+<ul class="nav nav-pills flex-column mb-auto" id="{{ menu_id }}">
+	<li class="nav-item pf-c-nav__link">
+		<a href="/dashboard/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/dashboard.php' or server == '/index.php' %} active{% endif %}">
+			<i class="navicon fas fa-chart-line"></i> <span class="ms-1">Dashboard</span>
+		</a>
+	</li>
+	<li class="nav-item pf-c-nav__link">
+		<a href="/reports/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/reports.php' %} active{% endif %}">
+			<i class="navicon fa fa-table"></i> <span class="ms-1">Reports</span>
+		</a>
+	</li>
+{% if account.view_changes %}
+	<li class="nav-item pf-c-nav__link">
+		<a href="/changes/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/changes.php' %} active{% endif %}">
+			<i class="navicon fa fa-file"></i> <span class="ms-1">Changes</span>
+		</a>
+	</li>
+{% endif %}
+{% if account.view_facts %}
+	<li class="nav-item pf-c-nav__link">
+		<a href="/facts/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/facts.php' %} active{% endif %}">
+			<i class="navicon fa fa-puzzle-piece"></i> <span class="ms-1">Facts</span>
+		</a>
+	</li>
+	<li class="nav-item pf-c-nav__link">
+		<a href="/packages/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/packages.php' %} active{% endif %}">
+			<i class="navicon fas fa-box-open"></i> <span class="ms-1">Packages</span>
+		</a>
+	</li>
+	<li class="nav-item pf-c-nav__link">
+		<a href="/services/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/services.php' %} active{% endif %}">
+			<i class="navicon fas fa-database"></i> <span class="ms-1">Services</span>
+		</a>
+	</li>
+{% endif %}
+{% if account.super %}
+	<li>
+		<a href="#{{ menu_id }}-admin" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-2 py-1 text-truncate align-middle" aria-expanded="{% if server in admin_pages %}true{% else %}false{% endif %}">
+			<i class="navicon fa fa-cog"></i> <span class="ms-1">Admin</span>
+		</a>
+		<ul class="{% if server not in admin_pages %}collapse {% endif %}nav flex-column ms-4" id="{{ menu_id }}-admin">
+			<li class="pf-c-nav__link w-100">
+				<a href="/users/" class="nav-link px-0 py-1{% if server == '/users.php' %} active{% endif %}">
+					<i class="navicon fa fa-user p-1"></i> <span>Users</span>
+				</a>
+			</li>
+			<li class="pf-c-nav__link w-100">
+				<a href="/servers/" class="nav-link px-0 py-1{% if server == '/servers.php' %} active{% endif %}">
+					<i class="navicon fas fa-network-wired p-1"></i> <span>Servers</span>
+				</a>
+			</li>
+			<li class="pf-c-nav__link w-100">
+				<a href="/settings/" class="nav-link px-0 py-1{% if server == '/settings.php' %} active{% endif %}">
+					<i class="navicon fas fa-wrench p-1"></i> <span>Settings</span>
+				</a>
+			</li>
+		</ul>
+	</li>
+{% endif %}
+{% if is_dev %}
+	<li class="text-center text-danger fw-bold mt-3">*** DEV SITE ***</li>
+{% endif %}
+</ul>
