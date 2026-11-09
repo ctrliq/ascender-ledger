@@ -6,13 +6,13 @@ $db_version = read_setting('db_version', 1);
 
 /*
 	The first requests after an upgrade are usually a burst of parser posts, all of which would
-	otherwise run the same ALTERs at once.  Only the one holding the lock upgrades; the others
-	wait for it and then find the version already current.  A request that cannot get the lock
-	(another is still altering a large table) leaves the upgrade to that one.
+	otherwise run the same ALTERs at once.  Only the one holding the lock upgrades.  The others
+	wait briefly for it, and if it is still altering a large table they are turned away (see the
+	end of this file) rather than holding every PHP worker until it is done.
 */
 $db_upgrade_locked = false;
 if ($new_db_version != $db_version) {
-	$db_upgrade_locked = (bool) db_fetch_cell("SELECT GET_LOCK('ledger_db_upgrade', 300) AS `l`", 'l');
+	$db_upgrade_locked = (bool) db_fetch_cell("SELECT GET_LOCK('ledger_db_upgrade', 10) AS `l`", 'l');
 	$db_version = db_fetch_cell("SELECT `value` FROM `settings` WHERE `setting` = 'db_version'", 'value');
 	$settings_cache = array();
 }
@@ -120,6 +120,7 @@ if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) 
 	try {
 		db_upgrade_19();
 		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(19));
+		$db_version = 19;
 	} catch (Exception $e) {
 		error_log('Ledger: database upgrade to version 19 failed, and will be retried: ' . $e->getMessage());
 	}
@@ -127,6 +128,25 @@ if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) 
 
 if ($db_upgrade_locked) {
 	db_fetch_cell("SELECT RELEASE_LOCK('ledger_db_upgrade') AS `l`", 'l');
+}
+
+/*
+	Ledger's code expects the current schema (the parser relies on the unique host name, for
+	one), so nothing runs against an older one: not while another request is still upgrading,
+	and not after an upgrade step failed.  The request is answered with 503, which Ascender's
+	log shipping retries, so no data is lost; the upgrade is tried again on a later request.
+*/
+if ($new_db_version != $db_version) {
+	$upgrading = !$db_upgrade_locked;
+	if (php_sapi_name() == 'cli') {
+		echo ($upgrading ? "The database is being upgraded by another process; try again shortly.\n" : "The database upgrade failed; see the error log.\n");
+		exit(1);
+	}
+	http_response_code(503);
+	header('Retry-After: 60');
+	header('Content-Type: text/plain');
+	print ($upgrading ? 'Ledger is upgrading its database.  Try again in a minute.' : 'Ledger could not upgrade its database.  The administrator can find the reason in the PHP error log.');
+	exit;
 }
 
 /*
@@ -214,14 +234,19 @@ function db_upgrade_19() {
 	if (!db_index_exists('hosts', 'hostname', true)) {
 		/*
 			Fold any duplicate hosts into the most recently seen row with that name first.  Its
-			facts, packages and services are the current ones, so they are kept where both rows
-			have the same entry, and its time keeps the merged host from being pruned as stale.
+			packages and services are taken as the current ones where both rows have the same
+			entry, a fact is taken from whichever row gathered it last, and the kept row's time
+			stops the merged host from being pruned as stale.
 		*/
 		$dups = db_fetch_assocs("SELECT `hostname` FROM `hosts` GROUP BY `hostname` HAVING COUNT(*) > 1");
 		foreach ($dups as $d) {
 			$rows = db_fetch_assocs_prepare('SELECT `id` FROM `hosts` WHERE `hostname` = ? ORDER BY `time` DESC, `id` ASC', array($d['hostname']));
 			$keep = $rows[0]['id'];
 			foreach (array_slice($rows, 1) as $o) {
+				// Facts carry their own time, so a fact the other row gathered more recently wins
+				db_execute_prepare('UPDATE `facts` AS `k` JOIN `facts` AS `o` ON `o`.`fact` = `k`.`fact` AND `o`.`host` = ?
+					SET `k`.`data` = `o`.`data`, `k`.`type` = `o`.`type`, `k`.`time` = `o`.`time`
+					WHERE `k`.`host` = ? AND `o`.`time` > IFNULL(`k`.`time`, 0)', array($o['id'], $keep));
 				foreach (array('facts', 'packages', 'services') as $t) {
 					db_execute_prepare("UPDATE IGNORE `$t` SET `host` = ? WHERE `host` = ?", array($keep, $o['id']));
 					db_execute_prepare("DELETE FROM `$t` WHERE `host` = ?", array($o['id']));

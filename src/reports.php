@@ -188,13 +188,13 @@ if (isset($_REQUEST['action'])) {
 												array($report->id, $start, $enabled, $repeat, $next, $emails, $account['id'], $subject));
 					} else {
 						if ($account['super']) {
-							$schedule = db_fetch_assoc_prepare('SELECT * FROM `reports_schedules` WHERE `id` = ?', array($sid));
+							$schedule = db_fetch_assoc_prepare('SELECT * FROM `reports_schedules` WHERE `report` = ? AND `id` = ?', array($report->id, $sid));
 						} else {
-							$schedule = db_fetch_assoc_prepare('SELECT * FROM `reports_schedules` WHERE `owner` = ? AND `id` = ?', array($account['id'], $sid));
+							$schedule = db_fetch_assoc_prepare('SELECT * FROM `reports_schedules` WHERE `report` = ? AND `owner` = ? AND `id` = ?', array($report->id, $account['id'], $sid));
 						}
 						if (isset($schedule['id'])) {
-							db_execute_prepare('UPDATE `reports_schedules` SET `start` = ?, `enabled` = ?, `repeat` = ?, `next` = ?, `emails` = ?, `subject` = ? WHERE `id` = ?',
-							array($start, $enabled, $repeat, $next, $emails, $subject, $sid));
+							db_execute_prepare('UPDATE `reports_schedules` SET `start` = ?, `enabled` = ?, `repeat` = ?, `next` = ?, `emails` = ?, `subject` = ? WHERE `id` = ? AND `report` = ?',
+							array($start, $enabled, $repeat, $next, $emails, $subject, $sid, $report->id));
 						}
 					}
 					Header("Location: /reports/" . $report->id . "/schedule/\n\n");
@@ -203,9 +203,9 @@ if (isset($_REQUEST['action'])) {
 					if (isset($_GET['schedule'])) {
 						$sid = intval($_GET['schedule']);
 						if ($account['super']) {
-							db_execute_prepare('DELETE FROM `reports_schedules` WHERE `id` = ?', array($sid));
+							db_execute_prepare('DELETE FROM `reports_schedules` WHERE `id` = ? AND `report` = ?', array($sid, $report->id));
 						} else {
-							db_execute_prepare('DELETE FROM `reports_schedules` WHERE `id` = ? AND `owner` = ?', array($sid, $account['id']));
+							db_execute_prepare('DELETE FROM `reports_schedules` WHERE `id` = ? AND `report` = ? AND `owner` = ?', array($sid, $report->id, $account['id']));
 						}
 					}
 					Header("Location: /reports/" . $report->id . "/schedule/\n\n");
