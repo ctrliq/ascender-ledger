@@ -63,6 +63,7 @@ while (!$done) {
 
 		try {
 			$report = new Report($s['report']);
+			$html = null;
 
 			if ($report->id && !schedule_owner_allowed($s, $report)) {
 				error_log('Ledger: scheduled report ' . $s['id'] . ' was not sent: its owner is disabled or can no longer view report ' . $report->id);
@@ -73,9 +74,29 @@ while (!$done) {
 					$data = build_report($report->id);
 				}
 				$html = $twig->render('emails/report_email.html', array_merge($twigarr, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
+				unset($data);
+			}
+
+			/*
+				Queueing the email for every recipient and moving the schedule on happen together
+				or not at all, so a run that fails part way and is retried never sends anyone the
+				report twice.  The schedule is only moved on while this run still holds its claim;
+				if the claim timed out and another run took it over, that run sends the report.
+			*/
+			db_begin();
+			if ($html !== null) {
 				send_email(array_map('trim', explode(',', $s['emails'])), $s['subject'], $html);
 			}
+			$stmt = db_prepare_cached('UPDATE `reports_schedules` SET `next` = ?, `process` = 0, `claimed` = 0 WHERE `id` = ? AND `process` = ?');
+			$stmt->execute(array($next, $s['id'], $r));
+			if ($stmt->rowCount() == 1) {
+				db_commit();
+			} else {
+				db_rollback();
+				error_log('Ledger: scheduled report ' . $s['id'] . ' was not sent by this run: another run took it over');
+			}
 		} catch (Exception $e) {
+			db_rollback();
 			/*
 				A failed run (the database was unavailable, say) keeps its claim, so it is tried
 				again when the claim times out, until the next run is due; then it is skipped,
@@ -86,9 +107,8 @@ while (!$done) {
 				continue;
 			}
 			error_log('Ledger: scheduled report ' . $s['id'] . ' failed, and is skipped until its next run: ' . $e->getMessage());
+			db_execute_prepare('UPDATE `reports_schedules` SET `next` = ?, `process` = 0, `claimed` = 0 WHERE `id` = ? AND `process` = ?', array($next, $s['id'], $r));
 		}
-
-		db_execute_prepare('UPDATE `reports_schedules` SET `next` = ?, `process` = 0, `claimed` = 0 WHERE `id` = ? AND `process` = ?', array($next, $s['id'], $r));
 	} else {
 		$done = true;
 	}
