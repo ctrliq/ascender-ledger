@@ -29,9 +29,9 @@ if (!is_array($counts) || !isset($counts['hosts'])) {
 // Tell administrators when Ascender's data is being refused, which is otherwise silent
 $rejected = null;
 if (!empty($account['super'])) {
+	// Cleared by the parser once the refused server sends a record that is accepted (see parse.php)
 	$r = json_decode((string) read_setting('auth_rejected', '{}'), true);
-	$last = intval(db_fetch_cell('SELECT MAX(`lastseen`) AS `l` FROM `servers`', 'l'));
-	if (isset($r['time']) && $r['time'] > time() - 86400 && $r['time'] > $last) {
+	if (isset($r['time']) && $r['time'] > time() - 86400) {
 		$rejected = $r;
 	}
 }

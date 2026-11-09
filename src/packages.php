@@ -97,7 +97,8 @@ if (dt_is_request()) {
 				'arch'     => $r['arch'],
 				'source'   => $r['source'],
 			);
-		}
+		},
+		array('`p`.`host`', '`p`.`name`', '`p`.`version`', '`p`.`release`', '`p`.`epoch`', '`p`.`arch`')
 	);
 }
 

@@ -181,10 +181,26 @@ function db_upgrade_19() {
 	// A scheduled report's email is easily over the 64KB of a TEXT column
 	db_execute("ALTER TABLE `mail_queue` MODIFY `message` mediumtext NOT NULL");
 
+	// A schedule's recipients were limited to 255 characters, a handful of addresses
+	db_execute("ALTER TABLE `reports_schedules` MODIFY `emails` text NOT NULL");
+	// When a schedule was claimed by a cron run, so the claim of a run that died can be taken over
+	if (!db_column_exists('reports_schedules', 'claimed')) {
+		db_execute("ALTER TABLE `reports_schedules` ADD `claimed` int NOT NULL DEFAULT '0' AFTER `process`");
+	}
+
 	// Job numbers are only unique per Ascender server, so jobs record which one they came from
 	if (!db_column_exists('jobs', 'server')) {
 		db_execute("ALTER TABLE `jobs` ADD `server` varchar(128) NOT NULL DEFAULT '' AFTER `job`, ADD INDEX `job_server` (`job`, `server`)");
 	}
+	/*
+		Jobs recorded before this have no server.  Where every change made by a job came from
+		one server, that was the job's server.  A number used by more than one server is left
+		without one (see jobs_join_on() in misc.php).
+	*/
+	db_execute("UPDATE `jobs` AS `j`
+		JOIN (SELECT `job`, MIN(`server`) AS `server` FROM `changes` GROUP BY `job` HAVING COUNT(DISTINCT `server`) = 1) AS `c` ON `c`.`job` = `j`.`job`
+		SET `j`.`server` = `c`.`server`
+		WHERE `j`.`server` = ''");
 
 	if (!db_index_exists('changes', 'role')) {
 		db_execute("ALTER TABLE `changes` ADD INDEX `role` (`role`)");
@@ -196,16 +212,21 @@ function db_upgrade_19() {
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
 
 	if (!db_index_exists('hosts', 'hostname', true)) {
-		// Fold any duplicate hosts into the oldest row with that name first
-		$dups = db_fetch_assocs("SELECT `hostname`, MIN(`id`) AS `keep` FROM `hosts` GROUP BY `hostname` HAVING COUNT(*) > 1");
+		/*
+			Fold any duplicate hosts into the most recently seen row with that name first.  Its
+			facts, packages and services are the current ones, so they are kept where both rows
+			have the same entry, and its time keeps the merged host from being pruned as stale.
+		*/
+		$dups = db_fetch_assocs("SELECT `hostname` FROM `hosts` GROUP BY `hostname` HAVING COUNT(*) > 1");
 		foreach ($dups as $d) {
-			$others = db_fetch_assocs_prepare('SELECT `id` FROM `hosts` WHERE `hostname` = ? AND `id` != ?', array($d['hostname'], $d['keep']));
-			foreach ($others as $o) {
+			$rows = db_fetch_assocs_prepare('SELECT `id` FROM `hosts` WHERE `hostname` = ? ORDER BY `time` DESC, `id` ASC', array($d['hostname']));
+			$keep = $rows[0]['id'];
+			foreach (array_slice($rows, 1) as $o) {
 				foreach (array('facts', 'packages', 'services') as $t) {
-					db_execute_prepare("UPDATE IGNORE `$t` SET `host` = ? WHERE `host` = ?", array($d['keep'], $o['id']));
+					db_execute_prepare("UPDATE IGNORE `$t` SET `host` = ? WHERE `host` = ?", array($keep, $o['id']));
 					db_execute_prepare("DELETE FROM `$t` WHERE `host` = ?", array($o['id']));
 				}
-				db_execute_prepare('UPDATE `changes` SET `host` = ? WHERE `host` = ?', array($d['keep'], $o['id']));
+				db_execute_prepare('UPDATE `changes` SET `host` = ? WHERE `host` = ?', array($keep, $o['id']));
 				db_execute_prepare('DELETE FROM `hosts` WHERE `id` = ?', array($o['id']));
 			}
 		}

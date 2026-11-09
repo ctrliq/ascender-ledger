@@ -109,7 +109,8 @@ if (dt_is_request()) {
 				'status'   => ucwords((string) $r['status']),
 				'source'   => ucwords((string) $r['source']),
 			);
-		}
+		},
+		array('`s`.`host`', '`s`.`name`')
 	);
 }
 

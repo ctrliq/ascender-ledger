@@ -35,12 +35,15 @@ if (!isset($_SERVER['REMOTE_ADDR'])) exit;
 */
 $auth_failure = parser_auth_failure();
 if ($auth_failure != '' && read_setting('require_auth_token', '0') == '1') {
-	parser_record_rejection($auth_failure);
+	parser_record_rejection($auth_failure, $d);
 	exit;
 }
 
 $time = time();
 $server = parser_server($d, $time, ($auth_failure == '' ? 1 : 0));
+if ($auth_failure == '') {
+	parser_clear_rejection($d);
+}
 
 if (isset($d['logger_name'])) {
 	switch ($d['logger_name']) {
@@ -216,16 +219,54 @@ function parser_auth_failure() {
 /*
 	Remembers the latest rejected request, at most once a minute, for the dashboard
 */
-function parser_record_rejection($reason) {
+function parser_record_rejection($reason, $d) {
+	$uuid = parser_uuid($d);
+	$ip = substr($_SERVER['REMOTE_ADDR'], 0, 45);
+
+	// The Servers page shows this server's token as not valid; a later accepted record restores it
+	if ($uuid != '') {
+		db_execute_prepare('UPDATE `servers` SET `auth_ok` = 0 WHERE `uuid` = ? AND `auth_ok` = 1', array($uuid));
+	} else {
+		db_execute_prepare('UPDATE `servers` SET `auth_ok` = 0 WHERE `uuid` IS NULL AND `ip` = ? AND `auth_ok` = 1', array($ip));
+	}
+
 	$last = json_decode((string) read_setting('auth_rejected', '{}'), true);
 	if (is_array($last) && isset($last['time']) && $last['time'] > time() - 60) {
 		return;
 	}
 	write_setting('auth_rejected', json_encode(array(
 		'time'   => time(),
-		'ip'     => substr($_SERVER['REMOTE_ADDR'], 0, 45),
+		'ip'     => $ip,
+		'uuid'   => $uuid,
 		'reason' => $reason,
 	)));
+}
+
+/*
+	The dashboard warns about the last refused record until the server it came from sends one
+	that is accepted, or for a day.  Other servers sending data does not clear it.
+*/
+function parser_clear_rejection($d) {
+	$last = json_decode((string) read_setting('auth_rejected', '{}'), true);
+	if (!is_array($last) || !isset($last['time'])) {
+		return;
+	}
+	$uuid = parser_uuid($d);
+	$same = ((isset($last['uuid']) && $last['uuid'] != '') ? $last['uuid'] == $uuid : $last['ip'] == $_SERVER['REMOTE_ADDR']);
+	if ($same) {
+		write_setting('auth_rejected', '{}');
+	}
+}
+
+/*
+	The install UUID a record carries, or '' when it has none that looks like one
+*/
+function parser_uuid($d) {
+	$uuid = (isset($d['tower_uuid']) && is_string($d['tower_uuid']) ? strtolower(trim($d['tower_uuid'])) : '');
+	if (!preg_match('/^[0-9a-f-]{8,64}$/', $uuid) || trim($uuid, '0-') == '') {
+		$uuid = '';
+	}
+	return $uuid;
 }
 
 /*
@@ -237,10 +278,7 @@ function parser_record_rejection($reason) {
 function parser_server($d, $time, $auth_ok) {
 	$ip = substr($_SERVER['REMOTE_ADDR'], 0, 45);
 
-	$uuid = (isset($d['tower_uuid']) && is_string($d['tower_uuid']) ? strtolower(trim($d['tower_uuid'])) : '');
-	if (!preg_match('/^[0-9a-f-]{8,64}$/', $uuid) || trim($uuid, '0-') == '') {
-		$uuid = '';
-	}
+	$uuid = parser_uuid($d);
 
 	$url = (isset($d['tower_url']) && is_string($d['tower_url']) ? rtrim(trim($d['tower_url']), '/') : '');
 	if (!valid_http_url($url)) {

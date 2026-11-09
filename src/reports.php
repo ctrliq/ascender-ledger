@@ -175,13 +175,13 @@ if (isset($_REQUEST['action'])) {
 					while ($next < time()) {
 						$next += $repeat;
 					}
-					$emails = array();
-					foreach (preg_split('/[\s,;]+/', (string) $_POST['emails']) as $e) {
-						if (filter_var($e, FILTER_VALIDATE_EMAIL)) {
-							$emails[] = $e;
+					// Whole addresses only: an address cut short could be someone else's
+					$emails = '';
+					foreach (array_unique(preg_split('/[\s,;]+/', (string) $_POST['emails'])) as $e) {
+						if (filter_var($e, FILTER_VALIDATE_EMAIL) && strlen($emails) + strlen($e) + 2 <= 65535) {
+							$emails .= ($emails === '' ? '' : ', ') . $e;
 						}
 					}
-					$emails = substr(implode(', ', array_unique($emails)), 0, 255);
 					if ($sid == 0) {
 						db_execute_prepare('INSERT INTO `reports_schedules` (`report`, `start`, `enabled`, `repeat`, `next`, `emails`, `owner`, `subject`)
 												VALUES (?, ?, ?, ?, ?, ?, ?, ?)',

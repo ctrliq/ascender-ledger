@@ -167,6 +167,16 @@ function sql_placeholders($n) {
 }
 
 /*
+	The ON condition joining a change ($c) to its job ($j).  Job numbers are per Ascender
+	server, so a job matches on number and server.  Jobs recorded before Ledger kept the server
+	have none, and are used only when the change's server has no job with that number, so a
+	change never joins to two jobs (and is never listed twice).
+*/
+function jobs_join_on($j = 'j', $c = 'c') {
+	return "`$j`.`job` = `$c`.`job` AND (`$j`.`server` = `$c`.`server` OR (`$j`.`server` = '' AND NOT EXISTS (SELECT 1 FROM `jobs` AS `jx` WHERE `jx`.`job` = `$c`.`job` AND `jx`.`server` = `$c`.`server`)))";
+}
+
+/*
 	Builds a facts report: one row per matching host, holding the value of each column.  A
 	column made of several facts shows their values joined with commas.  Only the facts the
 	columns use are read, a few hundred hosts at a time.
@@ -370,7 +380,7 @@ function build_changes_report($id, $limit = 1000) {
 	$sql = "SELECT `changes`.`id`, `changes`.`time`, `changes`.`playbook`, `changes`.`role`, `changes`.`task`, `changes`.`task_action`,
 					`hosts`.`hostname`, `jobs`.`name` as `template`
 			FROM `changes`
-			LEFT JOIN `jobs` ON `jobs`.`job` = `changes`.`job` AND (`jobs`.`server` = `changes`.`server` OR `jobs`.`server` = '')
+			LEFT JOIN `jobs` ON " . jobs_join_on('jobs', 'changes') . "
 			LEFT JOIN `hosts` ON `hosts`.`id` = `changes`.`host`
 			" . $w[0] . "
 			ORDER BY `changes`.`time` DESC

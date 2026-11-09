@@ -192,7 +192,7 @@ if (dt_is_request()) {
 
 	dt_serve(
 		'`c`.`id`, `c`.`time`, `c`.`host`, `h`.`hostname`, `c`.`playbook`, `c`.`task`, `c`.`task_action`, `j`.`job_type`',
-		'FROM `changes` AS `c` LEFT JOIN `hosts` AS `h` ON `h`.`id` = `c`.`host` LEFT JOIN `jobs` AS `j` ON `j`.`job` = `c`.`job` AND (`j`.`server` = `c`.`server` OR `j`.`server` = \'\')',
+		'FROM `changes` AS `c` LEFT JOIN `hosts` AS `h` ON `h`.`id` = `c`.`host` LEFT JOIN `jobs` AS `j` ON ' . jobs_join_on('j', 'c'),
 		$where,
 		$params,
 		array(
@@ -215,7 +215,8 @@ if (dt_is_request()) {
 				'task_action' => $r['task_action'],
 				'check'       => ($r['job_type'] == 'check'),
 			);
-		}
+		},
+		array('`c`.`id`')
 	);
 }
 

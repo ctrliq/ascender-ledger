@@ -116,7 +116,8 @@ if (dt_is_request()) {
 				'data'     => $r['data'],
 				'type'     => $r['type'],
 			);
-		}
+		},
+		array('`f`.`host`', '`f`.`fact`')
 	);
 }
 

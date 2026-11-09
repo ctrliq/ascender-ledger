@@ -70,6 +70,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'save' && $_SERVER['REQUEST_MET
 
 		if (isset($_POST['regenerate_auth_token']) && $_POST['regenerate_auth_token'] === '1') {
 			write_setting('auth_token', generate_auth_token());
+			// No server has the new token yet; each shows Valid again once it sends it
+			db_execute('UPDATE `servers` SET `auth_ok` = 0');
 		}
 
 		Header("Location: /settings/general/?saved=1\n\n");

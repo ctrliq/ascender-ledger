@@ -36,8 +36,11 @@ function dt_like_escape($s) {
 	$default_order SQL to order by when the request does not ask for an orderable column
 	$search_cols   the columns the table's search box looks in
 	$row           callback turning a result row into the array sent to the browser
+	$unique        the columns that identify a row (the table's primary key).  They are added to
+	               the end of every sort, so rows that tie on the sorted columns still come in the
+	               same order on every request and a row is never repeated or skipped between pages.
 */
-function dt_serve($select, $from, $where, $params, $orders, $default_order, $search_cols, $row) {
+function dt_serve($select, $from, $where, $params, $orders, $default_order, $search_cols, $row, $unique = array()) {
 	$draw   = isset($_GET['draw']) ? intval($_GET['draw']) : 0;
 	$start  = isset($_GET['start']) ? max(0, intval($_GET['start'])) : 0;
 	$length = isset($_GET['length']) ? intval($_GET['length']) : 25;
@@ -83,6 +86,18 @@ function dt_serve($select, $from, $where, $params, $orders, $default_order, $sea
 		}
 	}
 	$order_sql = 'ORDER BY ' . (!empty($sort) ? implode(', ', $sort) : $default_order);
+	/*
+		The key columns follow the direction of the first sort column: an index on that column
+		ends with the primary key, so it can still return rows in this order without sorting
+		the whole table.
+	*/
+	$first = (!empty($sort) ? $sort[0] : explode(',', $default_order)[0]);
+	$key_dir = (preg_match('/\bDESC\s*$/i', $first) ? 'DESC' : 'ASC');
+	foreach ($unique as $u) {
+		if (!preg_match('/(^|, )' . preg_quote($u, '/') . '( ASC| DESC)?(,|$)/i', substr($order_sql, 9))) {
+			$order_sql .= ", $u $key_dir";
+		}
+	}
 
 	$where_sql = (!empty($where) ? 'WHERE ' . implode(' AND ', $where) : '');
 
