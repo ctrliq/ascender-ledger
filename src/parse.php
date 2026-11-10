@@ -378,8 +378,8 @@ function parse_packages($h, $packages) {
 				try {
 					db_execute_prepare($s, array($h,
 						substr(sql_clean_package(parse_str_field($v, 'name')), 0, 128),
-						substr(sql_clean_package(parse_str_field($v, 'version')), 0, 32),
-						substr(sql_clean_package(parse_str_field($v, 'release')), 0, 32),
+						substr(sql_clean_package(parse_str_field($v, 'version')), 0, 64),
+						substr(sql_clean_package(parse_str_field($v, 'release')), 0, 64),
 						substr(sql_clean_package(parse_str_field($v, 'epoch')), 0, 32),
 						substr(sql_clean_package(parse_str_field($v, 'arch')), 0, 32),
 						substr(sql_clean_package(parse_str_field($v, 'source')), 0, 32)));

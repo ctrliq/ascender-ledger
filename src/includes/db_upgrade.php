@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 19;
+$new_db_version = 20;
 
 $db_version = read_setting('db_version', 1);
 
@@ -123,6 +123,16 @@ if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) 
 		$db_version = 19;
 	} catch (Exception $e) {
 		error_log('Ledger: database upgrade to version 19 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 19) {
+	try {
+		db_upgrade_20();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(20));
+		$db_version = 20;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 20 failed, and will be retried: ' . $e->getMessage());
 	}
 }
 
@@ -260,4 +270,14 @@ function db_upgrade_19() {
 		}
 		db_execute("ALTER TABLE `hosts` ADD UNIQUE `hostname` (`hostname`)");
 	}
+}
+
+/*
+	Version 20
+	- Debian and Ubuntu put the whole package version, revision included, in `version`
+	  (1:1.2.3+dfsg1-1ubuntu0.24.04.1~esm2), which did not fit in 32 characters.  `release`
+	  grows to match, as Ascender Ledger Pro's did.
+*/
+function db_upgrade_20() {
+	db_execute("ALTER TABLE `packages` MODIFY `version` varchar(64) NOT NULL, MODIFY `release` varchar(64) NOT NULL");
 }

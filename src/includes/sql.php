@@ -100,8 +100,12 @@ function sql_clean_limit($text) {
 	return preg_replace('/[^A-Za-z0-9_\-: \|\[\],]/', '', $text);
 }
 
+/*
+	Package names, versions and architectures.  "~" is part of Debian and Ubuntu versions
+	(34~24.04 sorts before 34), so it has to survive.
+*/
 function sql_clean_package($text) {
-	return preg_replace('/[^A-Za-z0-9\-:_\.@\+]/', '', $text);
+	return preg_replace('/[^A-Za-z0-9\-:_\.@\+~]/', '', $text);
 }
 
 function sql_clean_play($text) {
