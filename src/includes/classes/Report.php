@@ -11,6 +11,10 @@ class Report {
 	var $sortd = 'asc';
 	var $role = '';
 	var $type = 'facts';
+	// A new report covers the last week, as in Ascender Ledger Pro (TIMESPAN_ALL is everything)
+	var $timespan = 11;
+	// A changes report's change filters (see changes_report_filter_fields())
+	var $options = array();
 
 	function __construct($id = 0) {
 		if ($id) {
@@ -24,10 +28,12 @@ class Report {
 		if (isset($account['cli'])) {
 			$u = db_fetch_assoc_prepare("SELECT * FROM `reports` WHERE `reports`.`id` = ?", array($id));
 		} else {
-			$u = db_fetch_assoc_prepare("SELECT `reports`.*, `reports_perms`.`role` FROM `reports`
-								LEFT JOIN `reports_perms` ON `reports_perms`.`report` = `reports`.`id`
-								WHERE `reports_perms`.`user` = ? AND `reports`.`id` = ?
-								ORDER BY `reports`.`name`", array($account['id'], $id));
+			// Shared with the user, or with one of their enabled teams; the better role counts
+			$role = report_role($id, $account['id']);
+			$u = ($role == '' ? array() : db_fetch_assoc_prepare("SELECT * FROM `reports` WHERE `id` = ?", array($id)));
+			if (isset($u['id'])) {
+				$u['role'] = $role;
+			}
 		}
 		$this->pop_class($u);
 		return $u;
@@ -95,6 +101,9 @@ class Report {
 			$this->sortd   = $u['sortd'];
 			$this->role    = (isset($u['role']) ? $u['role'] : 'view');
 			$this->set_type(isset($u['type']) ? $u['type'] : 'facts');
+			$this->timespan = (isset($u['timespan']) ? intval($u['timespan']) : TIMESPAN_ALL);
+			$options = (isset($u['options']) && is_string($u['options']) ? json_decode($u['options'], true) : null);
+			$this->options = (is_array($options) ? $options : array());
 			if ($this->type == 'changes') {
 				$this->columns = changes_report_columns();
 			}
@@ -118,51 +127,43 @@ class Report {
 		$this->save();
 	}
 
+	// A timespan from report_timespan_choices(); anything else keeps the current one
+	function set_timespan($id) {
+		if (isset(report_timespan_choices()[intval($id)])) {
+			$this->timespan = intval($id);
+		}
+	}
+
 	/*
-		Changes reports filter the changes table rather than the facts table, so their filters
-		are a field of the changes view and the value to match, in the same shape the changes
-		page builds from its own filter menus.  One filter per field, as on that page.
+		Sets a changes report's change filters from a form: every field, an empty value for
+		none.  Ids must be ids; names are cleaned like any other filter value.
 	*/
-	function add_changes_filter($field, $value) {
-		$fields = changes_report_filter_fields();
-
-		if (!is_string($field) || !isset($fields[$field]) || !is_scalar($value)) {
-			return false;
-		}
-
-		if (in_array($field, changes_report_numeric_filter_fields())) {
-			$value = intval($value);
-			if ($value < 1) {
-				return false;
+	function set_options($values) {
+		$options = array();
+		foreach (changes_report_filter_fields() as $field => $label) {
+			$v = (isset($values[$field]) && is_scalar($values[$field]) ? (string) $values[$field] : '');
+			if (in_array($field, changes_report_numeric_filter_fields(), true)) {
+				if (intval($v) > 0) {
+					$options[$field] = intval($v);
+				}
+			} elseif ($field == 'type') {
+				if ($v == 'run' || $v == 'check') {
+					$options[$field] = $v;
+				}
+			} elseif ($field == 'search') {
+				$v = trim(substr(preg_replace('/\s+/', ' ', $v), 0, 128));
+				if ($v !== '') {
+					$options[$field] = $v;
+				}
+			} else {
+				$v = $this->clean_filter($v);
+				if ($v !== '') {
+					$options[$field] = $v;
+				}
 			}
-		} else {
-			$value = $this->clean_filter($value);
-			if ($value === '') {
-				return false;
-			}
 		}
-
-		$filters = $this->strip_changes_filter($field);
-		$filters[] = array('field' => $field, 'value' => $value);
-		$this->filters = $filters;
+		$this->options = $options;
 		$this->save();
-
-		return true;
-	}
-
-	function remove_changes_filter($field) {
-		$this->filters = $this->strip_changes_filter($field);
-		$this->save();
-	}
-
-	function strip_changes_filter($field) {
-		$kept = array();
-		foreach ($this->filters as $f) {
-			if (!isset($f['field']) || $f['field'] != $field) {
-				$kept[] = $f;
-			}
-		}
-		return $kept;
 	}
 
 	function remove_filter($i) {
@@ -252,6 +253,21 @@ class Report {
 		}
 	}
 
+	function remove_team($team) {
+		$team = intval($team);
+		if ($this->id && $team > 0) {
+			db_execute_prepare('DELETE FROM `reports_team_perms` WHERE `report` = ? AND `team` = ?', array($this->id, $team));
+		}
+	}
+
+	// A team can view or edit a report; only a user owns one
+	function add_team($team, $role) {
+		$team = intval($team);
+		if ($this->id && $team > 0 && in_array($role, array('edit', 'view'), true) && db_fetch_cell_prepare('SELECT `id` FROM `teams` WHERE `id` = ?', 'id', array($team))) {
+			db_execute_prepare('INSERT INTO `reports_team_perms` (`report`, `team`, `role`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `role` = VALUES(`role`)', array($this->id, $team, $role));
+		}
+	}
+
 	function add_user($user, $role) {
 		$user = intval($user);
 		$roles = array('owner', 'edit', 'view');
@@ -277,6 +293,7 @@ class Report {
 	function delete() {
 		if ($this->role == "owner" || $this->role == "admin") {
 			db_execute_prepare('DELETE FROM `reports_perms` WHERE `report` = ?', array($this->id));
+			db_execute_prepare('DELETE FROM `reports_team_perms` WHERE `report` = ?', array($this->id));
 			db_execute_prepare('DELETE FROM `reports` WHERE `id` = ?', array($this->id));
 			return true;
 		} else {
@@ -286,11 +303,11 @@ class Report {
 
 	function save() {
 		if ($this->id) {
-			db_execute_prepare('UPDATE `reports` SET `owner` = ?, `name` = ?, `created` = ?, `filters` = ?, `columns` = ?, `sortc` = ?, `sortd` = ?, `type` = ? WHERE `id` = ?',
-						array($this->owner, $this->name, $this->created, base64_encode(serialize($this->filters)), base64_encode(serialize($this->columns)), $this->sortc, $this->sortd, $this->type, $this->id));
+			db_execute_prepare('UPDATE `reports` SET `owner` = ?, `name` = ?, `created` = ?, `filters` = ?, `columns` = ?, `sortc` = ?, `sortd` = ?, `type` = ?, `timespan` = ?, `options` = ? WHERE `id` = ?',
+						array($this->owner, $this->name, $this->created, base64_encode(serialize($this->filters)), base64_encode(serialize($this->columns)), $this->sortc, $this->sortd, $this->type, $this->timespan, json_encode($this->options), $this->id));
 		} else {
-			$id = db_execute_prepare('INSERT INTO `reports` (`owner`, `name`, `created`, `filters`, `columns`, `sortc`, `sortd`, `type`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-						array($this->owner, $this->name, $this->created,  base64_encode(serialize($this->filters)),base64_encode(serialize($this->columns)), $this->sortc, $this->sortd, $this->type));
+			$id = db_execute_prepare('INSERT INTO `reports` (`owner`, `name`, `created`, `filters`, `columns`, `sortc`, `sortd`, `type`, `timespan`, `options`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+						array($this->owner, $this->name, $this->created,  base64_encode(serialize($this->filters)),base64_encode(serialize($this->columns)), $this->sortc, $this->sortd, $this->type, $this->timespan, json_encode($this->options)));
 			$this->id = $id;
 			db_execute_prepare('INSERT INTO `reports_perms` (`report`, `user`, `role`) VALUES (?, ?, ?)',
 						array($this->id, $this->owner, 'owner'));

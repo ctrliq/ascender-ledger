@@ -2,7 +2,7 @@
 
 include_once('includes/global.php');
 
-if (empty($account['view_facts']) && empty($account['super'])) {
+if (!check_perm('facts')) {
 	header("Location: /\n\n");
 	exit;
 }
@@ -16,9 +16,16 @@ if (empty($account['view_facts']) && empty($account['super'])) {
 // The filter menus are only needed to draw the page, not for each page of table rows
 $types = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `type` FROM `facts` ORDER BY `type` ASC"), 'type');
 
+$names = array('host', 'fact', 'type', 'search');
+$saved = (dt_is_request() ? array() : saved_filters('facts', $names));
+
 if (isset($_GET['clear'])) {
-	if (in_array($_GET['clear'], array('host', 'fact', 'type', 'search'), true)) {
+	if (in_array($_GET['clear'], $names, true)) {
 		unset($_SESSION['facts_' . $_GET['clear']]);
+	} elseif ($_GET['clear'] === 'all') {
+		foreach ($names as $f) {
+			unset($_SESSION['facts_' . $f]);
+		}
 	}
 	header("Location: /facts/");
 	exit;
@@ -128,4 +135,5 @@ echo $twig->render('facts.html', array_merge($twigarr, array(
 	'hostname' => host_name($host),
 	'fact'     => $fact,
 	'search'   => $search,
+	'saved'    => $saved,
 )));

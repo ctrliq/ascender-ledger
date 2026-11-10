@@ -44,8 +44,11 @@ function dt_serve($select, $from, $where, $params, $orders, $default_order, $sea
 	$draw   = isset($_GET['draw']) ? intval($_GET['draw']) : 0;
 	$start  = isset($_GET['start']) ? max(0, intval($_GET['start'])) : 0;
 	$length = isset($_GET['length']) ? intval($_GET['length']) : 25;
-	if ($length < 1 || $length > DT_MAX_LENGTH) {
+	// A CSV or PDF export asks for every row at once, up to the export limit (Settings > Visual)
+	if ($length < 1) {
 		$length = 25;
+	} elseif ($length > max(DT_MAX_LENGTH, export_limit())) {
+		$length = max(DT_MAX_LENGTH, export_limit());
 	}
 	if ($start > DT_COUNT_CAP) {
 		$start = DT_COUNT_CAP;

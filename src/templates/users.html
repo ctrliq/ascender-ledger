@@ -2,9 +2,9 @@
 
 {% block body %}
 <div class="wrapper">
-{% if msg %}<span class="text-success"><center>{{ msg }}</center></span><br>{% endif %}
-{% if error %}<span class="text-danger"><center>{{ error }}</center></span><br>{% endif %}
 	<div class="container-fluid animated fadeInRight">
+{% if msg %}<div class="alert alert-success py-2">{{ msg }}</div>{% endif %}
+{% if error %}<div class="alert alert-danger py-2">{{ error }}</div>{% endif %}
 		<div class="shadow-sm border p-4 table-responsive">
 			<table class="table table-striped datatable-users w-100">
 				<thead>
@@ -17,6 +17,7 @@
 						<th></th>
 						<th>Admin</th>
 						<th></th>
+						<th>Teams</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -24,8 +25,8 @@
 {% for u in users %}
 					<tr>
 						<td width="30">
-                            <a href='/users/edit/{{ u['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-edit"></i></a>
-                        </td>
+							<a href="/users/edit/{{ u.id }}" class="btn btn-primary btn-xs" title="Edit"><i class="fa fa-edit"></i></a>
+						</td>
 						<td nowrap>{{ u.name }}</td>
 						<td nowrap>{{ u.username }}</td>
 						<td>{{ u.email }}</td>
@@ -33,54 +34,57 @@
 						<td>{% if u.enabled %}Enabled{% else %}Disabled{% endif %}</td>
 						<td>{% if u.super %}Yes{% else %}No{% endif %}</td>
 						<td>{% if u.super %}Admin{% else %}User{% endif %}</td>
+						<td>{{ u.teams|join(', ') }}</td>
 						<td width="30">
-                            {% if u.id != account.id %}<a href="/users/delete/{{ u.id }}?csrf_token={{ csrf_token|url_encode }}" class="btn btn-danger btn-xs dltlink" data-confirm="Are you sure you want to delete this User?" title="Delete"><i class="fa fa-trash"></i></a>{% endif %}
-                        </td>
+							{% if u.id != account.id %}<a href="/users/delete/{{ u.id }}?csrf_token={{ csrf_token|url_encode }}" class="btn btn-danger btn-xs dltlink" data-confirm="Are you sure you want to delete this User?" title="Delete"><i class="fa fa-trash"></i></a>{% endif %}
+						</td>
 					</tr>
 {% endfor %}
 				</tbody>
 			</table>
 		</div>
-        <br><button type="button" class="btn btn-primary btn-s" data-bs-toggle="modal" data-bs-target="#inviteuser">Invite User</button>
+		<br><button type="button" class="btn btn-primary btn-s" data-bs-toggle="modal" data-bs-target="#inviteuser">Invite User</button>
 	</div>
 </div>
 
 <div class="modal fade" id="inviteuser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="inviteuserLabel" aria-hidden="true">
-	<form action="/users/invite/" method=post>
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="inviteuserLabel">Invite User</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	<div class="modal-dialog modal-dialog-centered">
+		<form action="/users/invite/" method="post" class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="inviteuserLabel">Invite User</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<div class="mb-3">
+					<label for="email" class="form-label">Email</label>
+					<input type="text" class="form-control" name="email" id="email">
 				</div>
-				<div class="modal-body">
-					<div class="mb-3">
-               	    		<label for="name" class="col-sm-3 form-label">Email</label>
-						<div class="col">
-							<input type="text" class="form-control" name=email id=email>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-					<button type="submit" class="btn btn-primary">Invite</button>
+				<div class="mb-3">
+					<label for="teams" class="form-label">Teams</label>
+					<select class="ledger-select" name="teams[]" id="teams" multiple data-placeholder="Choose Teams...">
+{% for id,name in teams %}
+						<option value="{{ id }}"{% if id == default_team %} selected{% endif %}>{{ name }}</option>
+{% endfor %}
+					</select>
+					<div class="form-text">The new user has the permissions of these teams.</div>
 				</div>
 			</div>
-		</div>
-	</form>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Invite</button>
+			</div>
+		</form>
+	</div>
 </div>
 
-{% endblock %}
-{% block javascriptinc %}
 {% endblock %}
 {% block javascript %}
 	$('.datatable-users').DataTable({
 		order: [[1, 'asc']],
 		pageLength: 25,
 		columnDefs: [
-			{ targets: [0, 8], orderable: false },
+			{ targets: [0, 9], orderable: false },
 			{ targets: [5, 7], visible: false }
 		]
 	});
-
 {% endblock %}

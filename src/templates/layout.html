@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="csrf-token" content="{{ csrf_token }}">
+	<meta name="export-limit" content="{{ export_limit }}">
 	<title>Ascender Ledger</title>
 	<link rel="icon" type="image/png" sizes="192x192" href="/img/android-chrome-192x192.png">
 	<link rel="stylesheet" type="text/css" href="/css/bootstrap-5.3.8/bootstrap.min.css" />
@@ -53,6 +54,7 @@
 							</a>
 							<ul class="dropdown-menu dropdown-menu-end mx-2">
 								<li><a class="dropdown-item" href="/profile/">Profile</a></li>
+								<li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">About</a></li>
 								<li><a class="dropdown-item" href="/logout/">Logout</a></li>
 							</ul>
 						</li>
@@ -61,6 +63,34 @@
 			</div>
 		</div>
 	</nav>
+	<div class="modal" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalTitle" style="display:none;">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="aboutModalTitle">About Ascender Ledger</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body container px-4 text-center">
+					<div class="row gx-5">
+						<div class="col-6 p-0 d-flex align-items-center justify-content-center">
+							{# The logo is white text, so give it the navbar's dark background #}
+							<div class="rounded px-3 py-2" style="background-color: rgba(21, 21, 21, 1);">
+								<img src="/img/AscenderLedger_logo_rev.svg" alt="Ascender Ledger" style="min-height: 30px; max-height: 46px;">
+							</div>
+						</div>
+						<div class="col">
+							<p class="m-1 text-sm-left">Ascender Ledger Version {{ version }}</p>
+							<p class="m-1 text-sm-left">Copyright CIQ Inc., {{ 'now'|date('Y') }}</p>
+							<p class="m-1 text-sm-left"><a class="link-primary link-underline link-underline-opacity-0 link-underline-opacity-100-hover" href="https://github.com/ctrliq/ascender-ledger" target="_blank" rel="noopener">Apache License 2.0</a></p>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary btn-s" data-bs-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<div class="container-fluid flex-grow-1 d-flex flex-column flex-sm-row overflow-auto w-100 px-0">
 		<div class="row flex-grow-sm-1 flex-grow-sm-0 w-100 mx-0 flex-nowrap">

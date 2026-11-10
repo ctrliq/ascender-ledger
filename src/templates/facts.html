@@ -4,16 +4,20 @@
 <div class="wrapper">
 	<div class="container-fluid animated fadeInRight">
 		<div class="shadow-sm border p-4">
-			<div class="shadow-sm border p-2">
-				<div class="row">
+			<div class="shadow-sm border p-2 ledger-filters">
+				<div class="row g-2 align-items-center">
 					<div class="col-2">
-						<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
-							<option class="fst-italic" value="" selected disabled>Add a Filter</option>
+						<select class="ledger-select" name="addfilter" id="addfilter" data-placeholder="Add a Filter" data-nosearch="true" data-noclear="true">
+							<option></option>
 							<option value="hosts">Hosts</option>
 							<option value="facts">Facts</option>
 							<option value="types">Types</option>
 							<option value="search">Search</option>
 						</select>
+					</div>
+
+					<div class="col-auto">
+						<button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button>
 					</div>
 
 					<div class="col-4 filter-input" data-filter="hosts" style="display: none">
@@ -42,24 +46,22 @@
 					</div>
 
 					<div class="col-4 filter-input" data-filter="search" style="display: none">
-						<input type="text" class="form-control form-control-sm" data-url="/facts/?search=" value="{{ search }}" placeholder="Search all values">
-					</div>
-
-					<div class="col-1 align-text-bottom">
-						<button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button>
+						<input type="text" class="form-control" data-url="/facts/?search=" value="{{ search }}" placeholder="Search all values">
 					</div>
 				</div>
-				<br>
-				<div class="col-12">
+{% include 'parts/saved_filters.html' %}
+				{% if host or fact or type or search %}
+				<div class="pt-2">
 					Filters:
 					{% if host %}<a href="/facts/?clear=host" title="Remove" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hostname }}</i></a>{% endif %}
 					{% if fact %}<a href="/facts/?clear=fact" title="Remove" class="btn btn-primary btn-xs ms-1">FACT: <i>{{ fact }}</i></a>{% endif %}
 					{% if type %}<a href="/facts/?clear=type" title="Remove" class="btn btn-primary btn-xs ms-1">TYPE: <i>{{ type }}</i></a>{% endif %}
 					{% if search %}<a href="/facts/?clear=search" title="Remove" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ search }}</i></a>{% endif %}
+					<a href="/facts/?clear=all" title="Clear all filters"><i class="fa fa-trash text-secondary ps-2"></i></a>
 				</div>
+				{% endif %}
 			</div>
-			<br><br>
-			<div class="table-responsive">
+			<div class="table-responsive pt-3">
 				<table class="table table-striped datatable-facts w-100">
 					<thead>
 						<tr>
@@ -78,6 +80,7 @@
 {% block javascript %}
 	ledgerTable('.datatable-facts', {
 		url: '/facts/',
+		exportTitle: 'Facts',
 		order: [[1, 'asc']],
 		columns: [
 			{ data: 'hostname', className: 'text-nowrap', render: function (d, t, row) {

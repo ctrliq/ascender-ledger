@@ -40,4 +40,5 @@ if (!isset($account['id'])) {
 $twigarr = array('account' => $account, 'request_scheme' => (isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : 'cli'),
 				'server_name' => (isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : ''), 'server' => (isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : ''),
 				'is_dev' => $is_dev, 'disable_email' => $disable_email, 'imp' => $imp, 'version' => VERSION, 'base_url' => BASE_URL,
-				'csrf_token' => (isset($_SESSION['csrf_token']) ? $_SESSION['csrf_token'] : ''));
+				'csrf_token' => (isset($_SESSION['csrf_token']) ? $_SESSION['csrf_token'] : ''),
+				'export_limit' => (function_exists('export_limit') ? export_limit() : 10000));

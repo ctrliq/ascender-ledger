@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% if saved %}
+		<div class="alert alert-success py-2">Settings saved.</div>
+{% endif %}
+		<form method="post" action="/settings/save/" id="settingform" class="form-horizontal">
+			<input type="hidden" name="form" value="visual">
+			<div class="shadow-sm border p-4 mb-3">
+				<div class="row">
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label class="form-label fs-6 fw-bold" for="export_limit">Export Limit for CSV and PDF Output</label>
+							<div class="ps-3 w-75">
+								<select class="ledger-select" data-nosearch="true" data-noclear="true" name="export_limit" id="export_limit">
+{% for i in export_limits %}
+									<option value="{{ i }}"{% if export_limit == i %} selected{% endif %}>{{ i|number_format }} Rows</option>
+{% endfor %}
+								</select>
+								<div class="form-text">The most rows the CSV and PDF buttons on Changes, Facts, Packages and Services export.  They export every row the filters match, up to this many.</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label class="form-label fs-6 fw-bold" for="callback_limit">Callback Limit Select Menus</label>
+							<div class="ps-3 w-75">
+								<select class="ledger-select" data-nosearch="true" data-noclear="true" name="callback_limit" id="callback_limit">
+{% for i in callback_limits %}
+									<option value="{{ i }}"{% if callback_limit == i %} selected{% endif %}>{{ i }} Rows</option>
+{% endfor %}
+								</select>
+								<div class="form-text">How many matches the search-as-you-type menus (hosts, facts, packages) load at a time.  More load as you scroll.</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-6">
+						<div class="mb-3">
+							<label class="form-label fs-6 fw-bold" for="custom_login">Custom Login Information</label>
+							<div class="ps-3 w-75">
+								<textarea rows="5" class="form-control" name="custom_login" id="custom_login" maxlength="2000">{{ custom_login }}</textarea>
+								<div class="form-text">Text shown below the login form, such as a usage notice or who to contact for access.  Shown as plain text; leave blank to show nothing.</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="mb-3">
+				<a class="btn btn-secondary btn-s" href="/settings/">Return</a>
+				<button class="btn btn-primary btn-s" type="submit" name="save" id="save">Save</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

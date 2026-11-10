@@ -107,9 +107,10 @@ function ppre($arr) {
 /*
 	Turns the filters of a facts report into a query for the ids of the matching hosts.  Each
 	filter joins the one fact it tests (host and fact are the facts table's primary key), so a
-	host matches when it has every filtered fact with a value that passes.
+	host matches when it has every filtered fact with a value that passes.  With $span
+	(array(start, end)), only hosts last seen within it.
 */
-function build_filter($filters) {
+function build_filter($filters, $span = null) {
 	$sql = "SELECT `h`.`id` AS `host` FROM `hosts` AS `h`\n";
 	$p = array();
 	$c = 0;
@@ -159,6 +160,12 @@ function build_filter($filters) {
 		$p[] = $v;
 	}
 
+	if ($span !== null) {
+		$sql .= "WHERE `h`.`time` BETWEEN ? AND ?\n";
+		$p[] = $span[0];
+		$p[] = $span[1];
+	}
+
 	return array($sql, $p);
 }
 
@@ -190,7 +197,8 @@ function build_report ($id) {
 		return $data;
 	}
 
-	$w = build_filter(is_array($report->filters) ? $report->filters : array());
+	// All Data covers every host, however long ago it was seen
+	$w = build_filter(is_array($report->filters) ? $report->filters : array(), ($report->timespan == TIMESPAN_ALL ? null : report_span($report->timespan)));
 	$hosts = reindex_col(db_fetch_assocs_prepare($w[0], $w[1]), 'host');
 
 	$needed = array();
@@ -247,26 +255,24 @@ function build_report ($id) {
 }
 
 /*
-	The columns a changes report shows.  Unlike a facts report, where the columns are the facts
-	the user picked, a changes report always shows the same fields the changes page lists, so the
-	report is that page's table with its filters saved and schedulable.
+	The columns a changes report shows, as in Ascender Ledger Pro: the Changes page's fields.
+	The first column of the report page is a link to the change, which is not listed here.
 */
 function changes_report_columns() {
 	return array(
-		'Time'         => 'time',
-		'Host'         => 'hostname',
-		'Job Template' => 'template',
-		'Playbook'     => 'playbook',
-		'Role'         => 'role',
-		'Task'         => 'task',
-		'Module'       => 'task_action',
+		'Date'     => 'time',
+		'Host'     => 'hostname',
+		'Playbook' => 'playbook',
+		'Role'     => 'role',
+		'Task'     => 'task',
+		'Module'   => 'task_action',
 	);
 }
 
 /*
-	The fields a changes report can be filtered on.  These are the filter menus of the changes
-	page, plus a time window, which is what makes a scheduled report useful: "the changes of the
-	last 24 hours" rather than everything ever recorded.
+	A changes report's change filters, kept in its options: Pro's Playbook, Role, Module, Job
+	Type and Search, and the Host, Job Template, Inventory and Project filters of the Changes
+	page.  Which hosts it covers is chosen by its fact filters, as on a facts report.
 */
 function changes_report_filter_fields() {
 	return array(
@@ -279,128 +285,133 @@ function changes_report_filter_fields() {
 		'inventory' => 'Inventory',
 		'project'   => 'Project',
 		'search'    => 'Search',
-		'hours'     => 'Last Hours',
 	);
 }
 
 /*
-	The filter fields whose value is an id or a count rather than a name.
+	The change filters whose value is an id rather than a name
 */
 function changes_report_numeric_filter_fields() {
-	return array('host', 'template', 'inventory', 'project', 'hours');
+	return array('host', 'template', 'inventory', 'project');
+}
+
+// The FROM of a changes report, as the Changes page joins it
+function changes_report_from() {
+	return 'FROM `changes` AS `c` LEFT JOIN `hosts` AS `h` ON `h`.`id` = `c`.`host` LEFT JOIN `jobs` AS `j` ON ' . jobs_join_on('j', 'c');
 }
 
 /*
-	Turns the filters of a changes report into a WHERE clause and its parameters.  The comparisons
-	are the ones the changes page makes, with the values bound rather than interpolated.
+	The conditions choosing a changes report's rows, and their parameters: changes within its
+	timespan, on hosts its fact filters match, narrowed by its change filters.
 */
-function build_changes_filter($filters) {
-	$where = array();
-	$p = array();
+function changes_report_where($report) {
+	$span = report_span($report->timespan);
+	$where = array('`c`.`time` BETWEEN ? AND ?');
+	$p = array($span[0], $span[1]);
 
-	foreach ($filters as $f) {
-		if (!isset($f['field']) || !isset($f['value']) || !is_scalar($f['value'])) {
-			continue;
+	if (!empty($report->filters)) {
+		$hosts = build_filter($report->filters);
+		$where[] = '`c`.`host` IN (' . $hosts[0] . ')';
+		$p = array_merge($p, $hosts[1]);
+	}
+
+	$o = $report->options;
+	$exact = array('playbook' => '`c`.`playbook`', 'role' => '`c`.`role`', 'module' => '`c`.`task_action`', 'type' => '`j`.`job_type`');
+	foreach ($exact as $k => $col) {
+		if (isset($o[$k]) && $o[$k] !== '') {
+			$where[] = "$col = ?";
+			$p[] = (string) $o[$k];
 		}
-
-		switch ($f['field']) {
-			case 'host':
-				$where[] = '`changes`.`host` = ?';
-				$p[] = intval($f['value']);
-				break;
-			case 'template':
-				$where[] = '`jobs`.`job_template_id` = ?';
-				$p[] = intval($f['value']);
-				break;
-			case 'playbook':
-				$where[] = '`changes`.`playbook` = ?';
-				$p[] = $f['value'];
-				break;
-			case 'role':
-				$where[] = '`changes`.`role` = ?';
-				$p[] = $f['value'];
-				break;
-			case 'module':
-				$where[] = '`changes`.`task_action` = ?';
-				$p[] = $f['value'];
-				break;
-			case 'type':
-				$where[] = '`jobs`.`job_type` = ?';
-				$p[] = $f['value'];
-				break;
-			case 'inventory':
-				$where[] = '`jobs`.`inventory` LIKE ?';
-				$p[] = '%-' . intval($f['value']);
-				break;
-			case 'project':
-				$where[] = '`jobs`.`project` LIKE ?';
-				$p[] = '%-' . intval($f['value']);
-				break;
-			case 'search':
-				foreach (explode(' ', $f['value']) as $s) {
-					if ($s == '') {
-						continue;
-					}
-					$where[] = '(`changes`.`res` LIKE ? OR `changes`.`task_action` LIKE ? OR `changes`.`task` LIKE ? OR `changes`.`role` LIKE ? OR `changes`.`play` LIKE ?)';
-					for ($i = 0; $i < 5; $i++) {
-						$p[] = '%' . $s . '%';
-					}
-				}
-				break;
-			case 'hours':
-				$where[] = '`changes`.`time` >= ?';
-				$p[] = time() - (intval($f['value']) * 3600);
-				break;
+	}
+	if (!empty($o['host'])) {
+		$where[] = '`c`.`host` = ?';
+		$p[] = intval($o['host']);
+	}
+	if (!empty($o['template'])) {
+		$where[] = '`j`.`job_template_id` = ?';
+		$p[] = intval($o['template']);
+	}
+	foreach (array('inventory', 'project') as $k) {
+		if (!empty($o[$k])) {
+			$where[] = "`j`.`$k` LIKE ?";
+			$p[] = '%-' . intval($o[$k]);
+		}
+	}
+	if (isset($o['search']) && is_string($o['search'])) {
+		foreach (preg_split('/\s+/', $o['search'], -1, PREG_SPLIT_NO_EMPTY) as $term) {
+			$like = '%' . dt_like_escape($term) . '%';
+			$where[] = '(`h`.`hostname` LIKE ? OR `c`.`playbook` LIKE ? OR `c`.`role` LIKE ? OR `c`.`task` LIKE ? OR `c`.`task_action` LIKE ? OR `c`.`res` LIKE ?)';
+			array_push($p, $like, $like, $like, $like, $like, $like);
 		}
 	}
 
-	if (empty($where)) {
-		return array('', $p);
-	}
-
-	return array('WHERE ' . implode(' AND ', $where), $p);
+	return array($where, $p);
 }
 
 /*
-	Builds a changes report, returning the same shape as build_report: one row per change, each
-	holding the cell values of changes_report_columns() in order, so the report and email
-	templates render both kinds of report the same way.
+	A changes report for its email: the newest changes, up to the export limit, and how many
+	there are in all.  Each row holds the cells of changes_report_columns() in order.
 */
-function build_changes_report($id, $limit = 1000) {
-	$id = intval($id);
-	$report = new Report($id);
-	$data = array();
-
+function build_changes_report($id, $limit = null) {
+	$report = new Report(intval($id));
 	if (!$report->id || $report->type != 'changes') {
-		return $data;
+		return array('rows' => array(), 'total' => 0);
 	}
+	$limit = ($limit === null ? export_limit() : intval($limit));
 
-	$w = build_changes_filter($report->filters);
+	list($where, $p) = changes_report_where($report);
+	$where = ' WHERE ' . implode(' AND ', $where);
+	$total = intval(db_fetch_cell_prepare('SELECT COUNT(*) AS `n` ' . changes_report_from() . $where, 'n', $p));
 
-	$sql = "SELECT `changes`.`id`, `changes`.`time`, `changes`.`playbook`, `changes`.`role`, `changes`.`task`, `changes`.`task_action`,
-					`hosts`.`hostname`, `jobs`.`name` as `template`
-			FROM `changes`
-			LEFT JOIN `jobs` ON " . jobs_join_on('jobs', 'changes') . "
-			LEFT JOIN `hosts` ON `hosts`.`id` = `changes`.`host`
-			" . $w[0] . "
-			ORDER BY `changes`.`time` DESC
-			LIMIT " . intval($limit);
-
-	$changes = db_fetch_assocs_prepare($sql, $w[1]);
-
-	foreach ($changes as $c) {
-		$data[$c['id']] = array(
-			date('m/d/Y H:i', $c['time']),
-			$c['hostname'],
-			$c['template'],
-			$c['playbook'],
-			$c['role'],
-			$c['task'],
-			$c['task_action'],
+	$rows = array();
+	foreach (db_fetch_assocs_prepare('SELECT `c`.`id`, `c`.`time`, `h`.`hostname`, `c`.`playbook`, `c`.`role`, `c`.`task`, `c`.`task_action`, `j`.`job_type` '
+			. changes_report_from() . $where . ' ORDER BY `c`.`time` DESC, `c`.`id` DESC LIMIT ' . $limit, $p) as $c) {
+		$rows[] = array(
+			'check' => ($c['job_type'] == 'check'),
+			'cells' => array(date('m/d/Y H:i', $c['time']), $c['hostname'], $c['playbook'], $c['role'], $c['task'], $c['task_action']),
 		);
 	}
 
-	return $data;
+	return array('rows' => $rows, 'total' => $total);
+}
+
+/*
+	What a changes report's change filters are set to, as label => value for its header
+*/
+function changes_report_filter_summary($report) {
+	$fields = changes_report_filter_fields();
+	$names = null;
+	$out = array();
+	foreach ($fields as $k => $label) {
+		if (!isset($report->options[$k]) || $report->options[$k] === '' || $report->options[$k] === 0) {
+			continue;
+		}
+		$v = $report->options[$k];
+		if ($k == 'host') {
+			$v = host_name($v);
+		} elseif (in_array($k, array('template', 'inventory', 'project'), true)) {
+			$names = ($names === null ? changes_report_filter_options() : $names);
+			$v = (isset($names[$k][$v]) ? $names[$k][$v] : $v);
+		} elseif ($k == 'type') {
+			$v = ($v == 'check' ? 'Check Mode' : 'Run Mode');
+		}
+		$out[$label] = $v;
+	}
+	return $out;
+}
+
+/*
+	The facts filters of a report in words, for its header: All hosts, or each test joined by AND
+*/
+function report_filter_summary($filters) {
+	global $compares;
+	$parts = array();
+	foreach ((array) $filters as $f) {
+		if (isset($f['fact'], $f['compare'], $f['value']) && isset($compares[$f['compare']])) {
+			$parts[] = $f['fact'] . ' ' . strtolower($compares[$f['compare']]) . ' "' . $f['value'] . '"';
+		}
+	}
+	return (empty($parts) ? 'All hosts' : implode(' AND ', $parts));
 }
 
 /*
@@ -456,4 +467,273 @@ function changes_report_option_list($sql, $column) {
 		}
 	}
 	return $options;
+}
+
+/*
+	The Timespan filter's choices, as Ascender Ledger Pro has them.  "Last ..." spans end now and
+	move with the clock; "This ..." and "Previous ..." are whole calendar periods (a week starts
+	on Sunday).  0 is a custom span with its own start and end.
+*/
+function timespan_choices() {
+	return array(
+		1 => 'Last 30 Minutes', 2 => 'Last 1 Hour', 3 => 'Last 2 Hours', 4 => 'Last 4 Hours',
+		5 => 'Last 6 Hours', 6 => 'Last 12 Hours', 7 => 'Last Day', 8 => 'Last 2 Days',
+		9 => 'Last 3 Days', 10 => 'Last 4 Days', 11 => 'Last Week', 12 => 'Last 2 Weeks',
+		13 => 'Last Month', 14 => 'Last 2 Months', 15 => 'Last 3 Months', 16 => 'Last 4 Months',
+		17 => 'Last 6 Months', 18 => 'Last Year', 19 => 'Last 2 Years',
+		20 => 'This Day', 21 => 'This Week', 22 => 'This Month', 23 => 'This Year',
+		24 => 'Previous Day', 25 => 'Previous Week', 26 => 'Previous Month', 27 => 'Previous Year',
+		0 => 'Custom',
+	);
+}
+
+/*
+	The start and end (unix times, inclusive) of a preset timespan, or null for an unknown one
+*/
+function timespan_range($id, $now = null) {
+	$now = ($now === null ? time() : $now);
+	$t = (new DateTimeImmutable())->setTimestamp($now);
+	$back = array(
+		1 => 'PT30M', 2 => 'PT1H', 3 => 'PT2H', 4 => 'PT4H', 5 => 'PT6H', 6 => 'PT12H',
+		7 => 'P1D', 8 => 'P2D', 9 => 'P3D', 10 => 'P4D', 11 => 'P7D', 12 => 'P14D',
+	);
+	if (isset($back[$id])) {
+		return array($t->sub(new DateInterval($back[$id]))->getTimestamp(), $now);
+	}
+	/*
+		Months back land on the same day of the month, or the last day of a shorter month: a
+		month before March 31 is February 28, where PHP's own arithmetic gives March 3.
+	*/
+	$months = array(13 => 1, 14 => 2, 15 => 3, 16 => 4, 17 => 6, 18 => 12, 19 => 24);
+	if (isset($months[$id])) {
+		$first = $t->setDate((int) $t->format('Y'), (int) $t->format('n'), 1)->modify('-' . $months[$id] . ' months');
+		$day = min((int) $t->format('j'), (int) $first->format('t'));
+		return array($first->setDate((int) $first->format('Y'), (int) $first->format('n'), $day)->getTimestamp(), $now);
+	}
+
+	$day   = $t->setTime(0, 0);
+	$week  = $day->modify('-' . $day->format('w') . ' days');
+	$month = $day->modify('first day of this month');
+	$year  = $day->setDate((int) $day->format('Y'), 1, 1);
+	$spans = array(
+		20 => array($day, '+1 day'),
+		21 => array($week, '+1 week'),
+		22 => array($month, '+1 month'),
+		23 => array($year, '+1 year'),
+		24 => array($day->modify('-1 day'), '+1 day'),
+		25 => array($week->modify('-1 week'), '+1 week'),
+		26 => array($month->modify('-1 month'), '+1 month'),
+		27 => array($year->modify('-1 year'), '+1 year'),
+	);
+	if (isset($spans[$id])) {
+		return array($spans[$id][0]->getTimestamp(), $spans[$id][0]->modify($spans[$id][1])->getTimestamp() - 1);
+	}
+	return null;
+}
+
+/*
+	A date and time from a datetime-local input (2026-11-09T14:30), as a unix time, or null
+*/
+function timespan_parse_date($s) {
+	if (!is_string($s)) {
+		return null;
+	}
+	$d = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', substr($s, 0, 16));
+	return ($d === false ? null : $d->getTimestamp());
+}
+
+/*
+	Everything a user may do, as array(permission => true): their own permissions and those of
+	their enabled teams.  An administrator gets every permission.
+*/
+function user_permissions($user) {
+	global $permissions;
+	$p = array();
+	$rows = db_fetch_assocs_prepare('SELECT `perm` FROM `user_permission` WHERE `user` = ?
+		UNION SELECT `tp`.`perm` FROM `team_permission` AS `tp`
+		JOIN `team_user` AS `tu` ON `tu`.`team` = `tp`.`team`
+		JOIN `teams` AS `t` ON `t`.`id` = `tp`.`team` AND `t`.`enabled` = 1
+		WHERE `tu`.`user` = ?', array(intval($user), intval($user)));
+	foreach ($rows as $r) {
+		$p[$r['perm']] = true;
+	}
+	if (isset($p['super'])) {
+		$p = array_fill_keys(array_keys($permissions), true);
+	}
+	return $p;
+}
+
+/*
+	Whether the signed in user has a permission
+*/
+function check_perm($perm) {
+	global $account;
+	return !empty($account['perms'][$perm]);
+}
+
+/*
+	The enabled teams a user is in, by id
+*/
+function user_team_ids($user) {
+	return array_map('intval', array_column(db_fetch_assocs_prepare('SELECT `tu`.`team` FROM `team_user` AS `tu`
+		JOIN `teams` AS `t` ON `t`.`id` = `tu`.`team` AND `t`.`enabled` = 1 WHERE `tu`.`user` = ?', array(intval($user))), 'team'));
+}
+
+/*
+	A user's role on a report: their own, or the best of their enabled teams'.  '' for none.
+*/
+function report_role($report, $user) {
+	$rank = array('view' => 1, 'edit' => 2, 'owner' => 3);
+	$best = '';
+	$roles = db_fetch_assocs_prepare('SELECT `role` FROM `reports_perms` WHERE `report` = ? AND `user` = ?
+		UNION SELECT `rt`.`role` FROM `reports_team_perms` AS `rt`
+		JOIN `team_user` AS `tu` ON `tu`.`team` = `rt`.`team`
+		JOIN `teams` AS `t` ON `t`.`id` = `rt`.`team` AND `t`.`enabled` = 1
+		WHERE `rt`.`report` = ? AND `tu`.`user` = ?', array(intval($report), intval($user), intval($report), intval($user)));
+	foreach ($roles as $r) {
+		if (isset($rank[$r['role']]) && ($best == '' || $rank[$r['role']] > $rank[$best])) {
+			$best = $r['role'];
+		}
+	}
+	return $best;
+}
+
+/*
+	The most rows a CSV or PDF export of a list page holds (Settings > Visual)
+*/
+function export_limit() {
+	global $export_limits;
+	$v = intval(read_setting('export_limit', 10000));
+	return (in_array($v, $export_limits, true) ? $v : 10000);
+}
+
+/*
+	How many matches a search-as-you-type menu loads at a time (Settings > Visual)
+*/
+function callback_limit() {
+	global $callback_limits;
+	$v = intval(read_setting('callback_limit', 20));
+	return (in_array($v, $callback_limits, true) ? $v : 20);
+}
+
+/*
+	A report's timespan: All Data, or one of the Timespan filter's presets.  A report has no
+	custom span, as in Ascender Ledger Pro, since it is run again later (on a schedule) and a
+	fixed span would go stale.
+*/
+define('TIMESPAN_ALL', 99);
+
+function report_timespan_choices() {
+	$choices = array(TIMESPAN_ALL => 'All Data');
+	foreach (timespan_choices() as $id => $label) {
+		if ($id != 0) {
+			$choices[$id] = $label;
+		}
+	}
+	return $choices;
+}
+
+// The start and end of a report's timespan, now
+function report_span($id, $now = null) {
+	$now = ($now === null ? time() : $now);
+	$r = ($id == TIMESPAN_ALL ? null : timespan_range(intval($id), $now));
+	return ($r === null ? array(0, $now) : $r);
+}
+
+// A report's timespan in words, for its header
+function report_span_subtitle($id, $now = null) {
+	if ($id == TIMESPAN_ALL) {
+		return 'All Available Data';
+	}
+	$r = report_span($id, $now);
+	return 'From ' . date('m/d/Y H:i', $r[0]) . ' to ' . date('m/d/Y H:i', $r[1]);
+}
+
+
+/*
+	Saved filters, as in Ascender Ledger Pro.  Each user can name the filters set on a list page
+	(Changes, Facts, Packages, Services) and bring them back later.  A page keeps its filters in
+	the session as <page>_<name>, and which saved filter was last chosen as <page>_saved_filter,
+	so changing a filter after choosing one and pressing Save updates that saved filter.
+
+	Handles the saved filter actions for a page, sending the browser back to the page after one,
+	and returns what the page needs to draw the Saved Filters row.  Creating, saving and deleting
+	are POSTs (and so carry the CSRF token); choosing one is a link, like adding a filter.
+*/
+function saved_filters($page, $names) {
+	global $account;
+
+	$user = intval($account['id']);
+	$key = $page . '_saved_filter';
+	$current = array();
+	foreach ($names as $f) {
+		if (isset($_SESSION[$page . '_' . $f]) && $_SESSION[$page . '_' . $f] !== '') {
+			$current[$f] = $_SESSION[$page . '_' . $f];
+		}
+	}
+
+	$action = (isset($_REQUEST['action']) && is_string($_REQUEST['action']) ? $_REQUEST['action'] : '');
+	$id = (isset($_REQUEST['filter']) && is_scalar($_REQUEST['filter']) ? intval($_REQUEST['filter']) : 0);
+	$post = (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST');
+
+	if ($action == 'createfilter' && $post) {
+		$name = (isset($_POST['name']) && is_string($_POST['name']) ? trim(mb_substr(trim($_POST['name']), 0, 32)) : '');
+		if ($name != '' && !empty($current)) {
+			// A name already in use replaces that filter, as in Ascender Ledger Pro.  One statement on the
+			// unique (user, page, name) key, so two Creates at once cannot add the name twice, and
+			// LAST_INSERT_ID(`id`) hands back the row's id whether it was added or replaced.
+			$_SESSION[$key] = intval(db_execute_prepare('INSERT INTO `saved_filters` (`user`, `page`, `name`, `filters`) VALUES (?, ?, ?, ?)
+				ON DUPLICATE KEY UPDATE `id` = LAST_INSERT_ID(`id`), `filters` = VALUES(`filters`)', array($user, $page, $name, json_encode($current))));
+		}
+	} elseif ($action == 'savefilter' && $post) {
+		if (!empty($current)) {
+			db_execute_prepare('UPDATE `saved_filters` SET `filters` = ? WHERE `id` = ? AND `user` = ? AND `page` = ?', array(json_encode($current), $id, $user, $page));
+		}
+	} elseif ($action == 'deletefilter' && $post) {
+		db_execute_prepare('DELETE FROM `saved_filters` WHERE `id` = ? AND `user` = ? AND `page` = ?', array($id, $user, $page));
+		if (isset($_SESSION[$key]) && $_SESSION[$key] == $id) {
+			unset($_SESSION[$key]);
+		}
+	} elseif ($action == 'applyfilter') {
+		$row = db_fetch_assoc_prepare('SELECT `filters` FROM `saved_filters` WHERE `id` = ? AND `user` = ? AND `page` = ?', array($id, $user, $page));
+		if (isset($row['filters'])) {
+			$data = json_decode($row['filters'], true);
+			foreach ($names as $f) {
+				unset($_SESSION[$page . '_' . $f]);
+				if (!is_array($data) || !isset($data[$f])) {
+					continue;
+				}
+				// Values were checked when the filter was set.  A timespan is the only array, of numbers.
+				if (is_array($data[$f])) {
+					$_SESSION[$page . '_' . $f] = array_map('intval', array_filter($data[$f], 'is_scalar'));
+				} elseif (is_scalar($data[$f])) {
+					$_SESSION[$page . '_' . $f] = $data[$f];
+				}
+			}
+			$_SESSION[$key] = $id;
+		}
+	} else {
+		$action = '';
+	}
+
+	if ($action != '') {
+		header('Location: /' . $page . '/');
+		exit;
+	}
+
+	$list = reindex_arr_by_id_col(db_fetch_assocs_prepare('SELECT `id`, `name` FROM `saved_filters` WHERE `user` = ? AND `page` = ? ORDER BY `name` ASC', array($user, $page)), 'name');
+
+	// Clearing every filter, or deleting the chosen saved filter, leaves none chosen
+	$selected = (isset($_SESSION[$key]) ? intval($_SESSION[$key]) : 0);
+	if (empty($current) || !isset($list[$selected])) {
+		unset($_SESSION[$key]);
+		$selected = 0;
+	}
+
+	return array(
+		'page'     => $page,
+		'list'     => $list,
+		'selected' => $selected,
+		'active'   => !empty($current),
+	);
 }

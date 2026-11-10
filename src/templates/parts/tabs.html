@@ -1,0 +1,8 @@
+{# Pro's tab bar for the user and team pages: tabs is a list of [page, label, url] #}
+<div class="shadow-sm border d-flex flex-wrap gap-2 p-2 mb-3">
+{% for t in tabs %}
+	<a class="btn btn-sm ledger-tab {% if page == t[0] %}btn-primary{% else %}btn-secondary{% endif %}" href="{{ t[2] }}"{% if page == t[0] %} aria-current="page"{% endif %}>{{ t[1] }}</a>
+{% endfor %}
+</div>
+{% if msg %}<div class="alert alert-success py-2">{{ msg }}</div>{% endif %}
+{% if error %}<div class="alert alert-danger py-2">{{ error }}</div>{% endif %}

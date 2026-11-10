@@ -40,6 +40,7 @@
 				allowClear: !el.prop('multiple') && !el.data('noclear'),
 				placeholder: el.data('placeholder') || '',
 				tags: el.data('tags') === true,
+				minimumResultsForSearch: el.data('nosearch') ? Infinity : 0,
 				dropdownParent: el.closest('.modal').length ? el.closest('.modal') : $(document.body)
 			});
 		});
@@ -67,7 +68,9 @@
 
 	/*
 		The "Add a Filter" bar on the list pages.  Choosing a filter shows its input; Add sends
-		the browser to that input's data-url with the chosen value appended.
+		the browser to that input's data-url with the chosen value appended.  A filter made of
+		several inputs (class filter-multi) has data-url itself, and gets all its named inputs
+		appended as a query string.
 	*/
 	window.ledgerFilterBar = function () {
 		var chooser = $('#addfilter');
@@ -88,7 +91,12 @@
 			if (!f) {
 				return;
 			}
-			var input = $('.filter-input[data-filter="' + f + '"]').find('select, input').first();
+			var box = $('.filter-input[data-filter="' + f + '"]');
+			if (box.hasClass('filter-multi')) {
+				window.location = box.data('url') + box.find('[name]').serialize();
+				return;
+			}
+			var input = box.find('select, input').first();
 			var value = input.val();
 			if (value === null || value === undefined) {
 				value = '';
@@ -101,13 +109,56 @@
 			e.preventDefault();
 			apply();
 		});
-		$('.filter-input input[type="text"]').on('keydown', function (e) {
+		$('.filter-input input').on('keydown', function (e) {
 			if (e.key === 'Enter') {
 				e.preventDefault();
 				apply();
 			}
 		});
 		show();
+	};
+
+	/*
+		The Saved Filters row under the filter bar.  Choosing a saved filter applies it; Create
+		asks for a name and saves the current filters under it; Save updates the chosen one with
+		the current filters; Delete removes it.
+	*/
+	window.ledgerSavedFilters = function () {
+		var row = $('.ledger-saved-filters');
+		if (!row.length) {
+			return;
+		}
+		var page = row.data('page');
+		var form = $('#saved_filter_form');
+
+		function send(action, name) {
+			form.find('input[name="action"]').val(action);
+			if (name !== undefined) {
+				form.find('input[name="name"]').val(name);
+			}
+			form.trigger('submit');
+		}
+
+		$('#saved_filter').on('change', function () {
+			var id = $(this).val();
+			if (id) {
+				window.location = '/' + page + '/?action=applyfilter&filter=' + encodeURIComponent(id);
+			}
+		});
+		$('#saved_filter_create').on('click', function () {
+			var name = window.prompt('Enter a name for this Filter (up to 32 characters).', 'New Filter');
+			if (name !== null && $.trim(name) !== '') {
+				send('createfilter', $.trim(name));
+			}
+		});
+		$('#saved_filter_save').on('click', function () {
+			send('savefilter');
+		});
+		$('#saved_filter_delete').on('click', function () {
+			if (window.confirm('Are you sure you want to delete the saved filter "' + $(this).data('name') + '"?')) {
+				send('deletefilter');
+			}
+		});
 	};
 
 	/*
@@ -125,11 +176,73 @@
 	});
 
 	/*
+		Copy, CSV, PDF and Print buttons for a table whose rows come from the server, as in
+		Ascender Ledger Pro.  Copy and Print take the page on screen.  CSV and PDF take every row
+		the filters match, up to the export limit (Settings > Visual): the table loads them all
+		as one page, they are exported, and it goes back to the page it was on.  Cells are
+		exported as their data, not as shown, so a long fact value is not cut short.
+
+		That data is the literal text, so Buttons must not strip tags or decode entities from it
+		(a fact value of <node>prod</node> would come out as prod).  Print writes the cells into
+		its page as HTML, so it escapes them instead.
+	*/
+	var exportLimit = parseInt($('meta[name="export-limit"]').attr('content'), 10) || 10000;
+
+	function exportOptions(columns, extra) {
+		return $.extend({ columns: columns, orthogonal: 'export', stripHtml: false, decodeEntities: false }, extra);
+	}
+
+	function exportAll(kind, title, columns) {
+		return {
+			extend: kind,
+			title: title,
+			orientation: (kind === 'pdf' ? 'landscape' : undefined),
+			// Setting exportOptions replaces the CSV button's own, so keep its formula escaping
+			// (a cell starting with = + - @ is not run as a spreadsheet formula).  A PDF has no formulas.
+			exportOptions: exportOptions(columns, { escapeExcelFormula: kind === 'csv' }),
+			action: function (e, dt, node, config, cb) {
+				var self = this;
+				var len = dt.page.len();
+				var page = dt.page();
+				var want = Math.min(dt.page.info().recordsTotal, exportLimit);
+				var run = $.fn.dataTable.ext.buttons[kind + 'Html5'].action;
+				if (want <= len && page === 0) {
+					run.call(self, e, dt, node, config, cb);
+					return;
+				}
+				dt.one('draw', function () {
+					run.call(self, e, dt, node, config, function () {
+						dt.page.len(len).page(page).draw('page');
+						cb();
+					});
+				});
+				dt.page.len(want).draw();
+			}
+		};
+	}
+
+	window.ledgerExportButtons = function (title, columns) {
+		columns = columns || ':visible';
+		return [
+			{ extend: 'copy', exportOptions: exportOptions(columns) },
+			exportAll('csv', title, columns),
+			exportAll('pdf', title, columns),
+			{ extend: 'print', title: title, exportOptions: exportOptions(columns, {
+				format: { body: function (d) { return window.ledgerEscape(d); } }
+			}) }
+		];
+	};
+
+	/*
 		A DataTable whose rows come from the server a page at a time.  Every column is shown
 		as text unless it has its own render function.  The server stops counting rows at a
 		cap, so the info line says "more than" rather than giving a wrong total.
 	*/
 	window.ledgerTable = function (selector, options) {
+		// exportTitle adds the export buttons; exportColumns picks the columns they export
+		if (options.exportTitle) {
+			options = $.extend(true, {}, options, { layout: { topEnd: { buttons: window.ledgerExportButtons(options.exportTitle, options.exportColumns) } } });
+		}
 		var cols = options.columns.map(function (c) {
 			if (!c.render) {
 				c.render = $.fn.dataTable.render.text();
@@ -200,5 +313,6 @@
 	$(function () {
 		window.ledgerSelect();
 		window.ledgerFilterBar();
+		window.ledgerSavedFilters();
 	});
 })(jQuery);

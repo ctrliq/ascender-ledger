@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 19;
+$new_db_version = 23;
 
 $db_version = read_setting('db_version', 1);
 
@@ -123,6 +123,46 @@ if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) 
 		$db_version = 19;
 	} catch (Exception $e) {
 		error_log('Ledger: database upgrade to version 19 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 19) {
+	try {
+		db_upgrade_20();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(20));
+		$db_version = 20;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 20 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 20) {
+	try {
+		db_upgrade_21();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(21));
+		$db_version = 21;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 21 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 21) {
+	try {
+		db_upgrade_22();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(22));
+		$db_version = 22;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 22 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 22) {
+	try {
+		db_upgrade_23();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(23));
+		$db_version = 23;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 23 failed, and will be retried: ' . $e->getMessage());
 	}
 }
 
@@ -260,4 +300,169 @@ function db_upgrade_19() {
 		}
 		db_execute("ALTER TABLE `hosts` ADD UNIQUE `hostname` (`hostname`)");
 	}
+}
+
+/*
+	Version 20
+	- Debian and Ubuntu put the whole package version, revision included, in `version`
+	  (1:1.2.3+dfsg1-1ubuntu0.24.04.1~esm2), which did not fit in 32 characters.  `release`
+	  grows to match, as Ascender Ledger Pro's did.
+*/
+function db_upgrade_20() {
+	db_execute("ALTER TABLE `packages` MODIFY `version` varchar(64) NOT NULL, MODIFY `release` varchar(64) NOT NULL");
+}
+
+/*
+	Version 21
+	- Teams and permissions, as in Ascender Ledger Pro.  A user's permissions are their own plus
+	  those of their enabled teams, and reports can be shared with teams as well as users.
+	- The users table's super, view_changes and view_facts move into permissions, keeping what
+	  everyone could do: administrators join the Administrators team (and keep Administrator
+	  themselves, so editing a team cannot lock them out), users who could see both changes and
+	  facts join Normal Users, and anyone else gets what they had as their own permissions.
+	  View Facts covered packages and services, so it becomes all three.  Reports had no
+	  permission of their own, so everyone keeps View Reports and Create Reports.
+*/
+function db_upgrade_21() {
+	db_execute("CREATE TABLE IF NOT EXISTS `teams` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`enabled` tinyint(1) NOT NULL DEFAULT 1,
+		`name` varchar(32) NOT NULL,
+		PRIMARY KEY (`id`),
+		UNIQUE KEY `name` (`name`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+	db_execute("CREATE TABLE IF NOT EXISTS `team_permission` (
+		`team` int(11) NOT NULL,
+		`perm` varchar(32) NOT NULL,
+		PRIMARY KEY (`team`, `perm`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+	db_execute("CREATE TABLE IF NOT EXISTS `team_user` (
+		`team` int(11) NOT NULL,
+		`user` int(11) NOT NULL,
+		PRIMARY KEY (`team`, `user`),
+		KEY `user` (`user`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+	db_execute("CREATE TABLE IF NOT EXISTS `user_permission` (
+		`user` int(11) NOT NULL,
+		`perm` varchar(32) NOT NULL,
+		PRIMARY KEY (`user`, `perm`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+	db_execute("CREATE TABLE IF NOT EXISTS `reports_team_perms` (
+		`report` int(11) NOT NULL,
+		`team` int(11) NOT NULL,
+		`role` varchar(16) NOT NULL DEFAULT 'view',
+		PRIMARY KEY (`report`, `team`),
+		KEY `team` (`team`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+
+	if (!db_column_exists('users', 'super')) {
+		return;
+	}
+
+	$teams = array(
+		'Administrators' => array('super'),
+		'Auditors'       => array('changes', 'facts', 'packages', 'services', 'reports'),
+		'Normal Users'   => array('changes', 'facts', 'packages', 'services', 'reports', 'reports_create'),
+	);
+	$ids = array();
+	foreach ($teams as $name => $perms) {
+		db_execute_prepare('INSERT IGNORE INTO `teams` (`name`, `enabled`) VALUES (?, 1)', array($name));
+		$ids[$name] = intval(db_fetch_cell_prepare('SELECT `id` FROM `teams` WHERE `name` = ?', 'id', array($name)));
+		foreach ($perms as $p) {
+			db_execute_prepare('INSERT IGNORE INTO `team_permission` (`team`, `perm`) VALUES (?, ?)', array($ids[$name], $p));
+		}
+	}
+
+	foreach (db_fetch_assocs('SELECT `id`, `super`, `view_changes`, `view_facts` FROM `users`') as $u) {
+		$own = array();
+		if ($u['super']) {
+			db_execute_prepare('INSERT IGNORE INTO `team_user` (`team`, `user`) VALUES (?, ?)', array($ids['Administrators'], $u['id']));
+			$own[] = 'super';
+		} elseif ($u['view_changes'] && $u['view_facts']) {
+			db_execute_prepare('INSERT IGNORE INTO `team_user` (`team`, `user`) VALUES (?, ?)', array($ids['Normal Users'], $u['id']));
+		} else {
+			$own = array('reports', 'reports_create');
+			if ($u['view_changes']) {
+				$own[] = 'changes';
+			}
+			if ($u['view_facts']) {
+				$own = array_merge($own, array('facts', 'packages', 'services'));
+			}
+		}
+		foreach ($own as $p) {
+			db_execute_prepare('INSERT IGNORE INTO `user_permission` (`user`, `perm`) VALUES (?, ?)', array($u['id'], $p));
+		}
+	}
+
+	db_execute("ALTER TABLE `users` DROP `super`, DROP `view_changes`, DROP `view_facts`");
+}
+
+/*
+	Version 22
+	- Reports get a timespan, as in Ascender Ledger Pro.  A facts report lists the hosts seen
+	  within it; a changes report lists the changes made within it.  Existing facts reports
+	  get All Data (99), which is what they showed before.
+	- A changes report's change filters move into `options` (JSON), and its `filters` become
+	  the same fact filters a facts report has, choosing which hosts it covers.  A Last Hours
+	  filter becomes the closest timespan; one without becomes All Data.
+	- hosts.time is indexed, for the facts report timespan.
+*/
+function db_upgrade_22() {
+	if (!db_column_exists('reports', 'timespan')) {
+		db_execute("ALTER TABLE `reports` ADD `timespan` int NOT NULL DEFAULT 99 AFTER `sortd`");
+	}
+	if (!db_column_exists('reports', 'options')) {
+		db_execute("ALTER TABLE `reports` ADD `options` text NULL AFTER `timespan`");
+	}
+	if (!db_index_exists('hosts', 'time')) {
+		db_execute("ALTER TABLE `hosts` ADD INDEX `time` (`time`)");
+	}
+
+	// Hours each "Last ..." timespan covers, to find the closest to a Last Hours filter
+	$spans = array(1 => 0.5, 2 => 1, 3 => 2, 4 => 4, 5 => 6, 6 => 12, 7 => 24, 8 => 48, 9 => 72, 10 => 96, 11 => 168, 12 => 336,
+		13 => 730, 14 => 1461, 15 => 2191, 16 => 2922, 17 => 4383, 18 => 8766, 19 => 17532);
+	$fields = array('host', 'template', 'playbook', 'role', 'module', 'type', 'inventory', 'project', 'search');
+
+	foreach (db_fetch_assocs("SELECT `id`, `filters` FROM `reports` WHERE `type` = 'changes' AND `options` IS NULL") as $r) {
+		$old = @unserialize(base64_decode($r['filters']), array('allowed_classes' => false));
+		$options = array();
+		$timespan = 99;
+		foreach ((is_array($old) ? $old : array()) as $f) {
+			if (!isset($f['field']) || !isset($f['value']) || !is_scalar($f['value'])) {
+				continue;
+			}
+			if ($f['field'] == 'hours' && intval($f['value']) > 0) {
+				$best = null;
+				foreach ($spans as $id => $hours) {
+					$d = abs(log($hours) - log(intval($f['value'])));
+					if ($best === null || $d < $best) {
+						$best = $d;
+						$timespan = $id;
+					}
+				}
+			} elseif (in_array($f['field'], $fields, true)) {
+				$options[$f['field']] = $f['value'];
+			}
+		}
+		db_execute_prepare('UPDATE `reports` SET `filters` = ?, `options` = ?, `timespan` = ? WHERE `id` = ?',
+			array(base64_encode(serialize(array())), json_encode($options), $timespan, $r['id']));
+	}
+}
+
+/*
+	Version 23
+	- Saved filters, as in Ascender Ledger Pro: each user can name the filters set on the
+	  Changes, Facts, Packages and Services pages and choose them again later.  A name is
+	  unique per user and page, so saving under a name in use replaces that filter.
+*/
+function db_upgrade_23() {
+	db_execute("CREATE TABLE IF NOT EXISTS `saved_filters` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`user` int(11) NOT NULL,
+		`name` varchar(32) NOT NULL,
+		`page` varchar(32) NOT NULL,
+		`filters` text NOT NULL,
+		PRIMARY KEY (`id`),
+		UNIQUE KEY `user_page_name` (`user`, `page`, `name`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }

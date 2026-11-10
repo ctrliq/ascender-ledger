@@ -1,0 +1,17 @@
+{# A switch per permission, as in Pro.  checked: the permissions that are on.  via (optional): permission => team names that also give it #}
+<div class="row">
+{% for p,label in permissions %}
+	<div class="mb-4 col-12 col-sm-6 col-lg-4 col-xl-3">
+		<div class="form-check form-switch">
+			<input type="checkbox" class="form-check-input" role="switch" name="perm[{{ p }}]" id="perm-{{ p }}" value="1"{% if checked[p] is defined %} checked{% endif %}>
+			<label class="form-check-label fw-bold" for="perm-{{ p }}">{{ label }}</label>
+		</div>
+{% if via is defined and via[p] is defined %}
+		<div class="small text-secondary ms-5">Also given by {{ via[p]|join(', ') }}</div>
+{% endif %}
+{% if p == 'super' %}
+		<div class="small text-secondary ms-5">Allows everything, and the Admin menu</div>
+{% endif %}
+	</div>
+{% endfor %}
+</div>

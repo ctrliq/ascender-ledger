@@ -8,3 +8,23 @@ $yn = array(
 );
 
 $reoccur = array(86400 => 'Daily', 604800 => 'Weekly', 2538000 => 'Monthly');
+
+/*
+	What a user or team can be allowed to do, as in Ascender Ledger Pro.  Administrator allows
+	everything.  A user has their own permissions plus those of every enabled team they are in.
+*/
+$permissions = array(
+	'super'          => 'Administrator',
+	'changes'        => 'View Changes',
+	'facts'          => 'View Facts',
+	'packages'       => 'View Packages',
+	'services'       => 'View Services',
+	'reports'        => 'View Reports',
+	'reports_create' => 'Create Reports',
+);
+
+/*
+	Visual settings, with the choices Ascender Ledger Pro offers
+*/
+$export_limits   = array(1000, 2000, 3000, 4000, 5000, 10000, 20000, 30000, 40000, 50000);
+$callback_limits = array(10, 20, 50, 100);

@@ -1,0 +1,23 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% include 'parts/user_tabs.html' %}
+		<div class="shadow-sm border p-4">
+			<form method="post" action="/users/teams/{{ user.id }}">
+				<div class="mb-3 ledger-form">
+					<label for="teams" class="form-label">Teams</label>
+					<select class="ledger-select" name="teams[]" id="teams" multiple data-placeholder="Choose Teams...">
+{% for id,name in teams %}
+						<option value="{{ id }}"{% if member[id] is defined %} selected{% endif %}>{{ name }}</option>
+{% endfor %}
+					</select>
+					<div class="form-text">The user gets every permission of each enabled team they are in, and the reports shared with those teams.</div>
+				</div>
+				<a href="/users/" class="btn btn-secondary">Return</a>
+				<button class="btn btn-primary" type="submit">Save</button>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

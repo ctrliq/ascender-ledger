@@ -21,20 +21,20 @@ require_once('includes/classes/Report.php');
 
 /*
 	A schedule's report is only sent while its owner could still see it in Ledger: the owner is
-	enabled, the report is still shared with them, and they may view that type of data.
+	enabled, the report is still shared with them (or a team of theirs), and they may view
+	reports and that type of data.
 */
 function schedule_owner_allowed($s, $report) {
-	$u = db_fetch_assoc_prepare('SELECT `enabled`, `super`, `view_changes`, `view_facts` FROM `users` WHERE `id` = ?', array($s['owner']));
+	$u = db_fetch_assoc_prepare('SELECT `enabled` FROM `users` WHERE `id` = ?', array($s['owner']));
 	if (!isset($u['enabled']) || !$u['enabled']) {
 		return false;
 	}
-	if (!db_fetch_cell_prepare('SELECT 1 AS `e` FROM `reports_perms` WHERE `report` = ? AND `user` = ?', 'e', array($report->id, $s['owner']))) {
+	// Shared with them directly or through one of their teams
+	if (report_role($report->id, $s['owner']) == '') {
 		return false;
 	}
-	if ($u['super']) {
-		return true;
-	}
-	return ($report->type == 'changes' ? (bool) $u['view_changes'] : (bool) $u['view_facts']);
+	$perms = user_permissions($s['owner']);
+	return (!empty($perms['reports']) && !empty($perms[$report->type == 'changes' ? 'changes' : 'facts']));
 }
 
 // A claim older than this belongs to a run that died part way (out of memory, killed), and is taken over
@@ -68,12 +68,16 @@ while (!$done) {
 			if ($report->id && !schedule_owner_allowed($s, $report)) {
 				error_log('Ledger: scheduled report ' . $s['id'] . ' was not sent: its owner is disabled or can no longer view report ' . $report->id);
 			} elseif ($report->id) {
+				$header = array('subtitle' => report_span_subtitle($report->timespan), 'host_filters' => report_filter_summary($report->filters));
 				if ($report->type == 'changes') {
+					// The newest changes, up to the export limit, and how many there are in all
 					$data = build_changes_report($report->id);
+					$html = $twig->render('emails/report_changes_email.html', array_merge($twigarr, $header, array('report' => $report, 'data' => $data,
+						'total' => $data['total'], 'columns' => $report->columns, 'change_filters' => changes_report_filter_summary($report))));
 				} else {
 					$data = build_report($report->id);
+					$html = $twig->render('emails/report_email.html', array_merge($twigarr, $header, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
 				}
-				$html = $twig->render('emails/report_email.html', array_merge($twigarr, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
 				unset($data);
 			}
 

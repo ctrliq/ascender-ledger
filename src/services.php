@@ -2,7 +2,7 @@
 
 include_once('includes/global.php');
 
-if (empty($account['view_facts']) && empty($account['super'])) {
+if (!check_perm('services')) {
 	header("Location: /\n\n");
 	exit;
 }
@@ -11,9 +11,16 @@ if (empty($account['view_facts']) && empty($account['super'])) {
 $states   = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `state` FROM `services` ORDER BY `state` ASC"), 'state');
 $statuses = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `status` FROM `services` ORDER BY `status` ASC"), 'status');
 
+$names = array('host', 'service', 'state', 'status');
+$saved = (dt_is_request() ? array() : saved_filters('services', $names));
+
 if (isset($_GET['clear'])) {
-	if (in_array($_GET['clear'], array('host', 'service', 'state', 'status'), true)) {
+	if (in_array($_GET['clear'], $names, true)) {
 		unset($_SESSION['services_' . $_GET['clear']]);
+	} elseif ($_GET['clear'] === 'all') {
+		foreach ($names as $f) {
+			unset($_SESSION['services_' . $f]);
+		}
 	}
 	header("Location: /services/");
 	exit;
@@ -122,4 +129,5 @@ echo $twig->render('services.html', array_merge($twigarr, array(
 	'host'     => $host,
 	'hostname' => host_name($host),
 	'service'  => $service,
+	'saved'    => $saved,
 )));

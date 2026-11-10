@@ -1,0 +1,62 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% if msg %}<div class="alert alert-success py-2">{{ msg }}</div>{% endif %}
+{% if error %}<div class="alert alert-danger py-2">{{ error }}</div>{% endif %}
+		<div class="shadow-sm border p-4 table-responsive">
+			<table class="table table-striped datatable-teams w-100">
+				<thead>
+					<tr>
+						<th></th>
+						<th>Name</th>
+						<th>Enabled</th>
+						<th>Users</th>
+						<th>Permissions</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+{% for t in teams %}
+					<tr>
+						<td width="30"><a href="/teams/edit/{{ t.id }}" class="btn btn-primary btn-xs" title="Edit"><i class="fa fa-edit"></i></a></td>
+						<td class="text-nowrap"><a href="/teams/edit/{{ t.id }}">{{ t.name }}</a></td>
+						<td>{% if t.enabled %}Yes{% else %}No{% endif %}</td>
+						<td><a href="/teams/users/{{ t.id }}">{{ t.users }}</a></td>
+						<td>{{ t.perms|join(', ') }}</td>
+						<td width="30"><a href="/teams/delete/{{ t.id }}?csrf_token={{ csrf_token|url_encode }}" class="btn btn-danger btn-xs dltlink" data-confirm="Are you sure you want to delete the team {{ t.name }}?  Its users keep their own permissions." title="Delete"><i class="fa fa-trash"></i></a></td>
+					</tr>
+{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<br><button type="button" class="btn btn-primary btn-s" data-bs-toggle="modal" data-bs-target="#createteam">Create Team</button>
+	</div>
+</div>
+
+<div class="modal fade" id="createteam" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="createteamLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<form action="/teams/create/" method="post" class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="createteamLabel">Create Team</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<label for="name" class="form-label">Name</label>
+				<input type="text" class="form-control" name="name" id="name" maxlength="32">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Create</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}
+{% block javascript %}
+	$('.datatable-teams').DataTable({
+		order: [[1, 'asc']],
+		pageLength: 25,
+		columnDefs: [{ targets: [0, 5], orderable: false }]
+	});
+{% endblock %}

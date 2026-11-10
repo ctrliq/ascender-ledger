@@ -1,0 +1,11 @@
+{# A report's title, timespan and the hosts it covers, as in Ascender Ledger Pro #}
+			<h1>{{ report.name }}</h1>
+			<h4>{{ subtitle }}</h4>
+			<p class="text-secondary mb-1">Hosts: {{ host_filters }}</p>
+{% if change_filters is defined and change_filters %}
+			<p class="text-secondary">
+{% for label,value in change_filters %}
+				{{ label }}: {% if label == 'Search' %}&quot;{{ value }}&quot;{% else %}{{ value }}{% endif %}{% if not loop.last %}&nbsp;&nbsp;{% endif %}
+{% endfor %}
+			</p>
+{% endif %}

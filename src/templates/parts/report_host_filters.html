@@ -1,0 +1,36 @@
+{# A report's fact filters (a facts report's hosts, or the hosts a changes report covers), with the Add Filter button #}
+					<div class="shadow-sm row bd-example">
+						<div class="col">
+							<h3>{% if report.type == 'changes' %}Host Filters{% else %}Filters{% endif %}</h3>
+{% if report.type == 'changes' %}
+							<p class="text-secondary small">Only changes on hosts matching every filter are included.  With no filters, the report covers all hosts.</p>
+{% endif %}
+							<div class="table-responsive">
+								<table class="table table-striped datatable-columns w-100">
+									<thead>
+										<tr>
+											<th>Fact</th>
+											<th>Compare</th>
+											<th>Value</th>
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+{% set c = 0 %}
+{% for f in filters %}
+										<tr>
+											<td>{{ f.fact }}</td>
+											<td>{{ compares[f.compare] }}</td>
+											<td>{{ f.value }}</td>
+											<td>
+												<a href="/reports.php?action=deletefilter&amp;report={{ report.id }}&amp;filter={{ c }}&amp;csrf_token={{ csrf_token|url_encode }}" class='btn btn-primary btn-xs' type='button' name=deletefact id=deletefact><i class="fa fa-trash"></i></a>
+											</td>
+										</tr>
+{% set c = c + 1 %}
+{% endfor %}
+									</tbody>
+								</table>
+							</div>
+							<br><button class="btn btn-primary btn-s" type="button" name=filtermb id=filtermb data-bs-toggle="modal" data-bs-target="#filtermodal">Add Filter</button>
+						</div>
+					</div>

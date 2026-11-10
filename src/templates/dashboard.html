@@ -21,16 +21,16 @@
 			<div class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 ledger-count">
 				<center><h5 class="text-success">{{ counts.hosts }}</h5><h6 class="text-body">Hosts</h6></center>
 			</div>
-			{% set tag = account.view_changes ? 'a' : 'div' %}
-			<{{ tag }}{% if account.view_changes %} href="/changes/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
+			{% set tag = account.perms.changes ? 'a' : 'div' %}
+			<{{ tag }}{% if account.perms.changes %} href="/changes/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
 				<center><h5 class="text-success">{{ counts.changes }}</h5><h6 class="text-body">Changes</h6></center>
 			</{{ tag }}>
-			{% set tag = account.view_facts ? 'a' : 'div' %}
-			<{{ tag }}{% if account.view_facts %} href="/facts/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
+			{% set tag = account.perms.facts ? 'a' : 'div' %}
+			<{{ tag }}{% if account.perms.facts %} href="/facts/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
 				<center><h5 class="text-success">{{ counts.facts }}</h5><h6 class="text-body">Facts</h6></center>
 			</{{ tag }}>
-			{% set tag = account.view_facts ? 'a' : 'div' %}
-			<{{ tag }}{% if account.view_facts %} href="/packages/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
+			{% set tag = account.perms.packages ? 'a' : 'div' %}
+			<{{ tag }}{% if account.perms.packages %} href="/packages/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
 				<center><h5 class="text-success">{{ counts.packages }}</h5><h6 class="text-body">Packages</h6></center>
 			</{{ tag }}>
 		</div>

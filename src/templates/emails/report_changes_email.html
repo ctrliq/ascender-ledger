@@ -1,0 +1,27 @@
+{% block body %}
+<h1>{{ report.name }}</h1>
+<p>{{ subtitle }}<br>Hosts: {{ host_filters }}{% for label,value in change_filters %}<br>{{ label }}: {{ value }}{% endfor %}</p>
+{% if total > data.rows|length %}
+<p>Showing the newest {{ data.rows|length|number_format }} of {{ total|number_format }} changes.</p>
+{% else %}
+<p>{{ total|number_format }} changes.</p>
+{% endif %}
+<table style="border: solid 1px #ccc; border-spacing: 0px; width: 90%">
+    <thead>
+        <tr>
+{% for d,k in columns %}
+            <th style="border: solid 1px #ccc; padding: 8px">{{ d }}</th>
+{% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+{% for r in data.rows %}
+        <tr>
+{% for v in r.cells %}
+            <td style="border: solid 1px #ccc; padding: 8px{% if r.check %}; font-style: italic{% endif %}">{{ v }}</td>
+{% endfor %}
+        </tr>
+{% endfor %}
+    </tbody>
+</table>
+{% endblock %}

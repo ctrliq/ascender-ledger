@@ -48,15 +48,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'save' && $_SERVER['REQUEST_MET
 		write_setting('remove_invocation', (isset($_POST['remove_invocation']) ? 1 : 0));
 		write_setting('require_auth_token', (isset($_POST['require_auth_token']) ? '1' : '0'));
 
-		foreach ($retention_settings as $f) {
-			if (isset($_POST[$f])) {
-				$v = intval($_POST[$f]);
-				if ($v >= 30 && $v <= 360 && $v % 30 == 0) {
-					write_setting($f, $v);
-				}
-			}
-		}
-
 		$modules = array();
 		if (isset($_POST['allowed_modules']) && is_array($_POST['allowed_modules'])) {
 			foreach ($_POST['allowed_modules'] as $a) {
@@ -75,6 +66,36 @@ if (isset($_GET['action']) && $_GET['action'] == 'save' && $_SERVER['REQUEST_MET
 		}
 
 		Header("Location: /settings/general/?saved=1\n\n");
+		exit;
+	}
+
+	if ($form == 'visual') {
+		if (isset($_POST['export_limit']) && in_array(intval($_POST['export_limit']), $export_limits, true)) {
+			write_setting('export_limit', intval($_POST['export_limit']));
+		}
+		if (isset($_POST['callback_limit']) && in_array(intval($_POST['callback_limit']), $callback_limits, true)) {
+			write_setting('callback_limit', intval($_POST['callback_limit']));
+		}
+		if (isset($_POST['custom_login']) && is_string($_POST['custom_login'])) {
+			// Plain text: the login page escapes it and keeps its line breaks
+			write_setting('custom_login', mb_substr(trim(str_replace("\r\n", "\n", $_POST['custom_login'])), 0, 2000));
+		}
+
+		Header("Location: /settings/visual/?saved=1\n\n");
+		exit;
+	}
+
+	if ($form == 'maint') {
+		foreach ($retention_settings as $f) {
+			if (isset($_POST[$f])) {
+				$v = intval($_POST[$f]);
+				if ($v >= 30 && $v <= 360 && $v % 30 == 0) {
+					write_setting($f, $v);
+				}
+			}
+		}
+
+		Header("Location: /settings/maint/?saved=1\n\n");
 		exit;
 	}
 
@@ -118,6 +139,17 @@ $saved = isset($_GET['saved']);
 
 if (isset($_GET['action']) && $_GET['action'] == 'general') {
 	echo $twig->render('settings_general.html', array_merge($twigarr, array('settings' => $settings, 'default_modules' => $default_modules, 'saved' => $saved)));
+	exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] == 'visual') {
+	echo $twig->render('settings_visual.html', array_merge($twigarr, array('saved' => $saved, 'export_limits' => $export_limits, 'callback_limits' => $callback_limits,
+		'export_limit' => export_limit(), 'callback_limit' => callback_limit(), 'custom_login' => read_setting('custom_login', ''))));
+	exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] == 'maint') {
+	echo $twig->render('settings_maint.html', array_merge($twigarr, array('settings' => $settings, 'saved' => $saved)));
 	exit;
 }
 

@@ -220,3 +220,50 @@ function showloginbox($error) {
 	Header("Location: /login/\n\n");
 	exit;
 }
+
+/*
+	Makes a change to users, teams or permissions, unless it would take Administrator away from
+	the administrator making it: removing yourself from a team, a team's permissions, or your
+	own.  That would leave nobody who could put it back.  Returns whether the change was kept.
+*/
+function change_keeping_admin($change) {
+	global $account;
+	db_begin();
+	try {
+		$change();
+	} catch (Exception $e) {
+		db_rollback();
+		throw $e;
+	}
+	$p = user_permissions($account['id']);
+	if (empty($p['super'])) {
+		db_rollback();
+		return false;
+	}
+	db_commit();
+	return true;
+}
+
+/*
+	The message or error named in the query string (?msg=saved, ?error=lockout), for the admin pages
+*/
+function admin_messages() {
+	$msgs = array(
+		'saved'   => 'Saved',
+		'invited' => 'Invite sent',
+		'created' => 'Team created',
+		'deleted' => 'Deleted',
+	);
+	$errors = array(
+		'invalidemail' => 'Invalid Email Address',
+		'exists'       => 'A user with that email address already exists',
+		'userexists'   => 'Another user already has that username',
+		'teamexists'   => 'A team with that name already exists',
+		'teamname'     => 'A team name needs letters or numbers',
+		'lockout'      => 'Not saved: that would take away your own Administrator permission',
+	);
+	return array(
+		'msg'   => (isset($_GET['msg']) && is_string($_GET['msg']) && isset($msgs[$_GET['msg']]) ? $msgs[$_GET['msg']] : ''),
+		'error' => (isset($_GET['error']) && is_string($_GET['error']) && isset($errors[$_GET['error']]) ? $errors[$_GET['error']] : ''),
+	);
+}

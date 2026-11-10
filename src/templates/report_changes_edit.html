@@ -1,120 +1,69 @@
 {% extends 'layout.html' %}
 {% block body %}
 		<div class="wrapper wrapper-content">
-			<div class="row">
-				<div class="col">
-					<div class="shadow-sm row bd-example">
-						<div class="col-auto text-nowrap">
-							<label class="col-form-label text-end">Report Name</label>
-						</div>
-
-						<div class="form-group col">
-							<form method="post" action=/reports/ id=nameform class="form-horizontal">
-								<input type=hidden name=action value=savename>
-								<input type=hidden name=report value={{ report.id }}>
-								<input type="text" class="form-control form-control-sm" name=name id=name value='{{ report.name }}'>
-						</div>
-
-						<div class="col-sm-2">
-								<input type="submit" class="btn btn-primary btn-s" value=Save>
-							</form>
-						</div>
+			<div class="row g-3">
+				<div class="col-xl">
+					<div>
+{% include 'parts/report_name_form.html' %}
 					</div>
-				</div>
-
-				<div class="col">
-					<div class="shadow-sm row bd-example">
-						<div class="col-auto text-nowrap">
-							<label class="col-form-label text-end">Sort Field</label>
-						</div>
-						<div class="col">
-							<form method="post" action=/reports/ id=sortform class="form-horizontal">
-								<input type=hidden name=action value=savesort>
-								<input type=hidden name=report value={{ report.id }}>
-								<select class="form-control ledger-select" data-noclear="true" name=sortc id=sortc>
-{% set c = 0 %}
-{% for d,k in columns %}
-									<option value={{ c }} {% if report.sortc == c %}selected{% endif %}>{{ d }}</option>
-{% set c = c + 1 %}
-{% endfor %}
-								</select>
-						</div>
-						<div class="col-sm-2">
-							<select class="form-select form-select-sm" name=sortd id=sortd>
-								<option value='asc' {% if report.sortd == 'asc' %}selected{% endif %}>ASC</option>
-								<option value='desc' {% if report.sortd == 'desc' %}selected{% endif %}>DESC</option>
-							</select>
-						</div>
-						<div class="col">
-							<input type="submit" class="btn btn-primary btn-s" value=Save>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-<br>
-			<div class="row">
-				<div class="col">
-					<div class="shadow-sm row bd-example">
-						<div class="col">
-							<h3>Filters</h3>
-							<p>A changes report lists the same fields as the Changes page, narrowed by the filters set here.
-							Set <b>Last Hours</b> to report on a window rather than on everything recorded, which is what a
-							scheduled report normally wants.</p>
-							<div class="table-responsive">
-								<table class="table table-striped">
-									<thead>
-										<tr>
-											<th width=20%>Filter</th>
-											<th>Value</th>
-											<th width=90></th>
-										</tr>
-									</thead>
-									<tbody>
-{% for field,label in fields %}
-										<tr>
-											<td>{{ label }}</td>
-											<td>
-												<form method="post" action=/reports/ class="form-horizontal d-flex gap-2">
-													<input type=hidden name=action value=addfilter>
-													<input type=hidden name=report value={{ report.id }}>
-													<input type=hidden name=field value="{{ field }}">
-{% if field == 'host' %}
-													<select class="form-control form-select-sm ledger-lookup" data-lookup="hosts" data-placeholder="Choose a Host..." name=value id=value_host>
-{% if current.host is defined %}
-														<option value="{{ current.host }}" selected>{{ current_hostname }}</option>
-{% endif %}
-													</select>
-{% elseif options[field] is defined %}
-													<select class="form-control form-select form-select-sm ledger-select" name=value id=value_{{ field }}>
-														<option value=""></option>
-{% for value,name in options[field] %}
-														<option value="{{ value }}"{% if current[field] is defined and current[field] == value %} selected{% endif %}>{{ name }}</option>
-{% endfor %}
-													</select>
+					<div class="mt-3">
+{% if account.perms.facts %}
+{% include 'parts/report_host_filters.html' %}
 {% else %}
-													<input type="text" class="form-control form-control-sm" name=value id=value_{{ field }} value="{{ current[field]|default('') }}">
-{% endif %}
-													<input type="submit" class="btn btn-primary btn-xs" value=Set>
-												</form>
-											</td>
-											<td nowrap>
-{% if current[field] is defined %}
-												<a href="/reports.php?action=deletefilter&amp;report={{ report.id }}&amp;field={{ field|url_encode }}&amp;csrf_token={{ csrf_token|url_encode }}" class='btn btn-danger btn-xs' type='button' name=deletefilter id=deletefilter><i class="fa fa-trash"></i></a>
-{% endif %}
-											</td>
-										</tr>
-{% endfor %}
-									</tbody>
-								</table>
-							</div>
+					<div class="shadow-sm row bd-example">
+						<div class="col">
+							<h3>Host Filters</h3>
+							<p class="text-secondary small">{% if filters %}This report covers only hosts matching its host filters.  {% endif %}Filtering hosts by their facts needs the View Facts permission.</p>
 						</div>
 					</div>
+{% endif %}
+					</div>
+				</div>
+
+				<div class="col-xl">
+					<form method="post" action="/reports/" id="optionsform" class="shadow-sm row bd-example ledger-controls mx-0">
+						<input type="hidden" name="action" value="saveoptions">
+						<input type="hidden" name="report" value="{{ report.id }}">
+						<div class="col">
+							<h3>Change Filters</h3>
+							<p class="text-secondary small">Only changes matching every filter set here are included.</p>
+{% set fields = { host: 'Host', template: 'Job Template', playbook: 'Playbook', role: 'Role', module: 'Module', type: 'Job Type', inventory: 'Inventory', project: 'Project' } %}
+{% for field,label in fields %}
+							<div class="row mb-2 align-items-center">
+								<label class="col-sm-3 col-form-label" for="opt_{{ field }}">{{ label }}</label>
+								<div class="col-sm-9">
+{% if field == 'host' %}
+									<select class="ledger-lookup" data-lookup="hosts" data-placeholder="Any" name="host" id="opt_host">
+{% if report.options.host is defined %}
+										<option value="{{ report.options.host }}" selected>{{ host_name }}</option>
+{% endif %}
+									</select>
+{% else %}
+									<select class="ledger-select" data-placeholder="Any"{% if field == 'type' %} data-nosearch="true"{% endif %} name="{{ field }}" id="opt_{{ field }}">
+										<option value=""></option>
+{% for value,name in options[field] %}
+										<option value="{{ value }}"{% if report.options[field] is defined and report.options[field] == value %} selected{% endif %}>{{ name }}</option>
+{% endfor %}
+									</select>
+{% endif %}
+								</div>
+							</div>
+{% endfor %}
+							<div class="row mb-3 align-items-center">
+								<label class="col-sm-3 col-form-label" for="opt_search">Search</label>
+								<div class="col-sm-9">
+									<input type="text" class="form-control" name="search" id="opt_search" maxlength="128" value="{{ report.options.search|default('') }}" placeholder="Host, playbook, role, task, module or result text">
+								</div>
+							</div>
+							<button type="submit" class="btn btn-primary btn-s">Save</button>
+						</div>
+					</form>
 				</div>
 			</div>
 		</div>
-{% endblock %}
-{% block javascriptinc %}
-{% endblock %}
-{% block javascript %}
+
+{% if account.perms.facts %}
+{% include 'parts/report_filter_modal.html' %}
+{% endif %}
+
 {% endblock %}
