@@ -18,7 +18,7 @@ if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('delete', 
 }
 
 // Form actions only ever arrive as POSTs, which is where the CSRF check applies
-if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('savesort', 'savename', 'addfilter', 'addcolumn', 'adduserperm', 'addteamperm', 'schedulesave'), true) && $_SERVER['REQUEST_METHOD'] != 'POST') {
+if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('savesort', 'savename', 'saveoptions', 'addfilter', 'addcolumn', 'adduserperm', 'addteamperm', 'schedulesave'), true) && $_SERVER['REQUEST_METHOD'] != 'POST') {
 	Header("Location: /reports/\n\n");
 	exit;
 }
@@ -45,7 +45,7 @@ if (isset($_REQUEST['action'])) {
 					if ($report->owner == $account['id'] || $account['super']) {
 						$report->delete();
 					}
-					Header("Location: /reports/\n\n");
+					Header("Location: /reports/" . ($report->type == 'changes' ? '?type=changes' : '') . "\n\n");
 					exit;
 				case 'adduserperm':
 					if ($report->owner == $account['id'] || $account['super']) {
@@ -90,35 +90,29 @@ if (isset($_REQUEST['action'])) {
 					if ($report->owner == $account['id']  || $report->role == 'edit'|| $account['super']) {
 						$name = $_POST['name'];
 						$report->set_name($name);
+						if (isset($_POST['timespan'])) {
+							$report->set_timespan($_POST['timespan']);
+						}
 						$report->save();
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
+				case 'saveoptions':
+					if (($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) && $report->type == 'changes') {
+						$report->set_options($_POST);
+					}
+					Header("Location: /reports/edit/" . $report->id . "\n\n");
+					exit;
+				// Both kinds of report filter on facts: a facts report's hosts, or the hosts a changes report covers
 				case 'deletefilter':
 					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
-						if ($report->type == 'changes') {
-							if (isset($_GET['field'])) {
-								$report->remove_changes_filter($_GET['field']);
-							}
-						} else {
-							$filter = intval($_GET['filter']);
-							$report->remove_filter($filter);
-						}
+						$report->remove_filter(intval($_GET['filter']));
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'addfilter':
 					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
-						if ($report->type == 'changes') {
-							if (isset($_POST['field']) && isset($_POST['value'])) {
-								$report->add_changes_filter($_POST['field'], $_POST['value']);
-							}
-						} else {
-							$value = post_str('value');
-							$compare = post_str('compare');
-							$fact = post_str('fact');
-							$report->add_filter($fact, $compare, $value);
-						}
+						$report->add_filter(post_str('fact'), post_str('compare'), post_str('value'));
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
@@ -246,30 +240,69 @@ if (isset($_REQUEST['action'])) {
 					}
 					exit;
 				case 'view':
+					$header = array('subtitle' => report_span_subtitle($report->timespan), 'host_filters' => report_filter_summary($report->filters));
 					if ($report->type == 'changes') {
-						$data = build_changes_report($report->id);
-					} else {
-						$data = build_report($report->id);
+						/*
+							A changes report is read a page at a time, like the Changes page, so it can
+							cover any number of changes.  Its export buttons fetch every row, up to the
+							export limit.
+						*/
+						if (dt_is_request()) {
+							list($where, $params) = changes_report_where($report);
+							dt_serve(
+								'`c`.`id`, `c`.`time`, `c`.`host`, `h`.`hostname`, `c`.`playbook`, `c`.`role`, `c`.`task`, `c`.`task_action`, `j`.`job_type`',
+								changes_report_from(),
+								$where,
+								$params,
+								array(
+									1 => array('`c`.`time`'),
+									2 => array('`h`.`hostname`'),
+									3 => array('`c`.`playbook`'),
+									4 => array('`c`.`role`'),
+									5 => array('`c`.`task`'),
+									6 => array('`c`.`task_action`'),
+								),
+								'`c`.`time` DESC',
+								array('`h`.`hostname`', '`c`.`playbook`', '`c`.`role`', '`c`.`task`', '`c`.`task_action`'),
+								function ($r) {
+									return array(
+										'id'          => intval($r['id']),
+										'date'        => date('m/d/Y H:i', $r['time']),
+										'host_id'     => intval($r['host']),
+										'hostname'    => $r['hostname'],
+										'playbook'    => $r['playbook'],
+										'role'        => $r['role'],
+										'task'        => $r['task'],
+										'task_action' => $r['task_action'],
+										'check'       => ($r['job_type'] == 'check'),
+									);
+								},
+								array('`c`.`id`')
+							);
+						}
+						echo $twig->render('report_changes.html', array_merge($twigarr, $header, array('report' => $report, 'change_filters' => changes_report_filter_summary($report))));
+						exit;
 					}
-					echo $twig->render('report.html', array_merge($twigarr, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
+					$data = build_report($report->id);
+					echo $twig->render('report.html', array_merge($twigarr, $header, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
 					exit;
 				case 'edit':
 					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
+						$common = array('report' => $report, 'filters' => $report->filters, 'compares' => $compares, 'timespans' => report_timespan_choices());
 						if ($report->type == 'changes') {
-							$current = array();
-							foreach ($report->filters as $f) {
-								if (isset($f['field'])) {
-									$current[$f['field']] = $f['value'];
+							$options = changes_report_filter_options();
+							// A saved value the changes table no longer has (retention removed it) stays in its menu, so saving keeps it
+							foreach (array('playbook', 'role', 'module') as $k) {
+								if (!empty($report->options[$k]) && !isset($options[$k][$report->options[$k]])) {
+									$options[$k][$report->options[$k]] = $report->options[$k];
 								}
 							}
-							echo $twig->render('report_changes_edit.html', array_merge($twigarr, array('report' => $report, 'current' => $current,
-									'current_hostname' => (isset($current['host']) ? host_name($current['host']) : ''),
-									'columns' => $report->columns, 'fields' => changes_report_filter_fields(), 'options' => changes_report_filter_options())));
+							echo $twig->render('report_changes_edit.html', array_merge($twigarr, $common, array('options' => $options,
+									'host_name' => (!empty($report->options['host']) ? host_name($report->options['host']) : ''))));
 							exit;
 						}
 						// The fact pickers search the server as you type, so no list of facts is sent
-						echo $twig->render('report_edit.html', array_merge($twigarr, array('report' => $report, 'filters' => $report->filters,
-								'columns' => $report->columns, 'compares' => $compares)));
+						echo $twig->render('report_edit.html', array_merge($twigarr, $common, array('columns' => $report->columns)));
 						exit;
 					}
 					Header("Location: /reports/\n\n");
@@ -325,7 +358,21 @@ foreach ($rows as $row) {
 	}
 }
 uasort($reports, function ($a, $b) { return strcasecmp($a['name'], $b['name']); });
-$reports = array_values($reports);
+
+/*
+	One tab per kind of report, as in Ascender Ledger Pro, for the kinds the user may see
+*/
+$tabs = array();
+if (check_perm('facts')) {
+	$tabs['facts'] = 'Facts';
+}
+if (check_perm('changes')) {
+	$tabs['changes'] = 'Changes';
+}
+$page = (isset($_GET['type']) && is_string($_GET['type']) && isset($tabs[$_GET['type']]) ? $_GET['type'] : (string) key($tabs));
+$reports = array_values(array_filter($reports, function ($r) use ($page) {
+	return ($r['type'] == 'changes' ? 'changes' : 'facts') == $page;
+}));
 
 
-echo $twig->render('reports.html', array_merge($twigarr, array('reports' => $reports, 'users' => $users, 'compares' => $compares)));
+echo $twig->render('reports.html', array_merge($twigarr, array('reports' => $reports, 'users' => $users, 'compares' => $compares, 'tabs' => $tabs, 'page' => $page)));

@@ -4,6 +4,9 @@
 
 <div class="wrapper">
 	<div class="container-fluid animated fadeInRight">
+{% set tablist = [] %}
+{% for type,label in tabs %}{% set tablist = tablist|merge([[type, label, '/reports/' ~ (type == 'facts' ? '' : '?type=' ~ type)]]) %}{% endfor %}
+{% include 'parts/tabs.html' with { tabs: tablist } %}
 		<div class="shadow-sm border p-4">
 			<div class="table-responsive">
 				<table class="table table-striped datatable-reports w-100">
@@ -17,23 +20,17 @@
 			</div>
 		</div>
 		<br>
-{% if account.perms.reports_create and account.perms.facts %}
-		<a href="/reports/new/?csrf_token={{ csrf_token|url_encode }}" class="btn btn-primary btn-s">Create New Report</a>
-{% endif %}
-{% if account.perms.reports_create and account.perms.changes %}
-		<a href="/reports/new/changes/?csrf_token={{ csrf_token|url_encode }}" class="btn btn-primary btn-s">Create New Changes Report</a>
+{% if account.perms.reports_create and page %}
+		<a href="/reports/new/{{ page == 'changes' ? 'changes/' : '' }}?csrf_token={{ csrf_token|url_encode }}" class="btn btn-primary btn-s">Create</a>
 {% endif %}
 	</div>
 </div>
 
 {% endblock %}
-{% block javascriptinc %}
-{% endblock %}
 {% block javascript %}
 	$('.datatable-reports').DataTable({
 		order: [[1, 'asc']],
 		pageLength: 25,
-		responsive: true,
-		buttons: []
+		columnDefs: [{ targets: [0, 4], orderable: false }]
 	});
 {% endblock %}

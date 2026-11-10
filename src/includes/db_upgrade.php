@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 21;
+$new_db_version = 22;
 
 $db_version = read_setting('db_version', 1);
 
@@ -143,6 +143,16 @@ if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) 
 		$db_version = 21;
 	} catch (Exception $e) {
 		error_log('Ledger: database upgrade to version 21 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 21) {
+	try {
+		db_upgrade_22();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(22));
+		$db_version = 22;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 22 failed, and will be retried: ' . $e->getMessage());
 	}
 }
 
@@ -375,4 +385,56 @@ function db_upgrade_21() {
 	}
 
 	db_execute("ALTER TABLE `users` DROP `super`, DROP `view_changes`, DROP `view_facts`");
+}
+
+/*
+	Version 22
+	- Reports get a timespan, as in Ascender Ledger Pro.  A facts report lists the hosts seen
+	  within it; a changes report lists the changes made within it.  Existing facts reports
+	  get All Data (99), which is what they showed before.
+	- A changes report's change filters move into `options` (JSON), and its `filters` become
+	  the same fact filters a facts report has, choosing which hosts it covers.  A Last Hours
+	  filter becomes the closest timespan; one without becomes All Data.
+	- hosts.time is indexed, for the facts report timespan.
+*/
+function db_upgrade_22() {
+	if (!db_column_exists('reports', 'timespan')) {
+		db_execute("ALTER TABLE `reports` ADD `timespan` int NOT NULL DEFAULT 99 AFTER `sortd`");
+	}
+	if (!db_column_exists('reports', 'options')) {
+		db_execute("ALTER TABLE `reports` ADD `options` text NULL AFTER `timespan`");
+	}
+	if (!db_index_exists('hosts', 'time')) {
+		db_execute("ALTER TABLE `hosts` ADD INDEX `time` (`time`)");
+	}
+
+	// Hours each "Last ..." timespan covers, to find the closest to a Last Hours filter
+	$spans = array(1 => 0.5, 2 => 1, 3 => 2, 4 => 4, 5 => 6, 6 => 12, 7 => 24, 8 => 48, 9 => 72, 10 => 96, 11 => 168, 12 => 336,
+		13 => 730, 14 => 1461, 15 => 2191, 16 => 2922, 17 => 4383, 18 => 8766, 19 => 17532);
+	$fields = array('host', 'template', 'playbook', 'role', 'module', 'type', 'inventory', 'project', 'search');
+
+	foreach (db_fetch_assocs("SELECT `id`, `filters` FROM `reports` WHERE `type` = 'changes' AND `options` IS NULL") as $r) {
+		$old = @unserialize(base64_decode($r['filters']), array('allowed_classes' => false));
+		$options = array();
+		$timespan = 99;
+		foreach ((is_array($old) ? $old : array()) as $f) {
+			if (!isset($f['field']) || !isset($f['value']) || !is_scalar($f['value'])) {
+				continue;
+			}
+			if ($f['field'] == 'hours' && intval($f['value']) > 0) {
+				$best = null;
+				foreach ($spans as $id => $hours) {
+					$d = abs(log($hours) - log(intval($f['value'])));
+					if ($best === null || $d < $best) {
+						$best = $d;
+						$timespan = $id;
+					}
+				}
+			} elseif (in_array($f['field'], $fields, true)) {
+				$options[$f['field']] = $f['value'];
+			}
+		}
+		db_execute_prepare('UPDATE `reports` SET `filters` = ?, `options` = ?, `timespan` = ? WHERE `id` = ?',
+			array(base64_encode(serialize(array())), json_encode($options), $timespan, $r['id']));
+	}
 }

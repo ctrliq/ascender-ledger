@@ -68,12 +68,16 @@ while (!$done) {
 			if ($report->id && !schedule_owner_allowed($s, $report)) {
 				error_log('Ledger: scheduled report ' . $s['id'] . ' was not sent: its owner is disabled or can no longer view report ' . $report->id);
 			} elseif ($report->id) {
+				$header = array('subtitle' => report_span_subtitle($report->timespan), 'host_filters' => report_filter_summary($report->filters));
 				if ($report->type == 'changes') {
+					// The newest changes, up to the export limit, and how many there are in all
 					$data = build_changes_report($report->id);
+					$html = $twig->render('emails/report_changes_email.html', array_merge($twigarr, $header, array('report' => $report, 'data' => $data,
+						'total' => $data['total'], 'columns' => $report->columns, 'change_filters' => changes_report_filter_summary($report))));
 				} else {
 					$data = build_report($report->id);
+					$html = $twig->render('emails/report_email.html', array_merge($twigarr, $header, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
 				}
-				$html = $twig->render('emails/report_email.html', array_merge($twigarr, array('report' => $report, 'data' => $data, 'filters' => $report->filters, 'columns' => $report->columns, 'sortc' => $report->sortc, 'sortd' => $report->sortd)));
 				unset($data);
 			}
 

@@ -146,7 +146,9 @@
 			extend: kind,
 			title: title,
 			orientation: (kind === 'pdf' ? 'landscape' : undefined),
-			exportOptions: { columns: columns, orthogonal: 'export' },
+			// Setting exportOptions replaces the CSV button's own, so keep its formula escaping
+			// (a cell starting with = + - @ is not run as a spreadsheet formula)
+			exportOptions: { columns: columns, orthogonal: 'export', escapeExcelFormula: true },
 			action: function (e, dt, node, config, cb) {
 				var self = this;
 				var len = dt.page.len();

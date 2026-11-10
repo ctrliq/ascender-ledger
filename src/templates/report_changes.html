@@ -1,0 +1,60 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+		<div class="shadow-sm border p-4 table-responsive">
+{% include 'parts/report_header.html' %}
+			<div id="report_error" class="alert alert-danger d-none">The report could not be loaded.  Check the PHP error log for details.</div>
+			<table class="table table-striped datatable-report-changes w-100">
+				<thead>
+					<tr>
+						<th></th>
+						<th>Date</th>
+						<th>Host</th>
+						<th>Playbook</th>
+						<th>Role</th>
+						<th>Task</th>
+						<th>Module</th>
+					</tr>
+				</thead>
+			</table>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{% block javascript %}
+	// A failed load shows a message instead of looking like an empty report
+	$('.datatable-report-changes').on('dt-error.dt', function () {
+		$('#report_error').removeClass('d-none');
+	}).on('xhr.dt', function (e, settings, json) {
+		if (json && !json.error) {
+			$('#report_error').addClass('d-none');
+		}
+	});
+
+	$.fn.dataTable.ext.errMode = 'none';
+
+	ledgerTable('.datatable-report-changes', {
+		url: '/reports/view/{{ report.id }}',
+		exportTitle: {{ report.name|json_encode|raw }},
+		exportColumns: ':visible:not(:first-child)',
+		order: [[1, 'desc']],
+		createdRow: function (row, data) {
+			if (data.check) {
+				$(row).addClass('fst-italic');
+			}
+		},
+		columns: [
+			{ data: 'id', orderable: false, width: 30, render: function (d, t) {
+				return t === 'display' ? '<a href="/changes/view/' + parseInt(d, 10) + '" class="btn btn-primary btn-xs" title="View" aria-label="View"><i class="fa fa-eye" aria-hidden="true"></i></a>' : d;
+			} },
+			{ data: 'date', className: 'text-nowrap' },
+			{ data: 'hostname', className: 'text-nowrap' },
+			{ data: 'playbook' },
+			{ data: 'role' },
+			{ data: 'task' },
+			{ data: 'task_action' }
+		]
+	});
+{% endblock %}

@@ -76,3 +76,13 @@ main a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.card):h
 .ledger-controls .ledger-sort-dir {
 	width: 7rem;
 }
+.ledger-controls .ledger-label {
+	min-width: 7rem;
+}
+.ledger-controls .ledger-report-name {
+	width: 14rem;
+	max-width: 100%;
+}
+.ledger-controls .ledger-timespan {
+	width: 12rem;
+}

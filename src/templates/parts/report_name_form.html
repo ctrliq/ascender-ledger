@@ -1,0 +1,27 @@
+{# A report's name and timespan, saved together, laid out as in Ascender Ledger Pro #}
+					<form method="post" action="/reports/" id="nameform" class="shadow-sm bd-example row g-2 align-items-center mx-0 h-100 ledger-controls">
+						<input type="hidden" name="action" value="savename">
+						<input type="hidden" name="report" value="{{ report.id }}">
+						<div class="col-auto ledger-label">
+							<label for="name" class="col-form-label text-nowrap">Report Name</label>
+						</div>
+						<div class="col-auto">
+							<input type="text" class="form-control ledger-report-name" name="name" id="name" value="{{ report.name }}">
+						</div>
+						<div class="col-auto text-nowrap">
+							<button type="submit" class="btn btn-primary btn-s">Save</button>
+							<a href="/reports/view/{{ report.id }}" class="btn btn-primary btn-s">View</a>
+						</div>
+						<div class="w-100"></div>
+						<div class="col-auto ledger-label">
+							<label for="timespan" class="col-form-label text-nowrap">Timespan</label>
+						</div>
+						<div class="col-auto ledger-timespan">
+							<select class="ledger-select" data-nosearch="true" data-noclear="true" name="timespan" id="timespan">
+{% for id,label in timespans %}
+								<option value="{{ id }}"{% if report.timespan == id %} selected{% endif %}>{{ label }}</option>
+{% endfor %}
+							</select>
+						</div>
+						<div class="w-100 form-text mt-0">{% if report.type == 'changes' %}The changes made within this time.{% else %}Only hosts seen within this time.{% endif %}  "Last" spans end when the report is run, so a scheduled report always covers the latest period.</div>
+					</form>
