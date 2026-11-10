@@ -452,7 +452,8 @@ function db_upgrade_22() {
 /*
 	Version 23
 	- Saved filters, as in Ascender Ledger Pro: each user can name the filters set on the
-	  Changes, Facts, Packages and Services pages and choose them again later.
+	  Changes, Facts, Packages and Services pages and choose them again later.  A name is
+	  unique per user and page, so saving under a name in use replaces that filter.
 */
 function db_upgrade_23() {
 	db_execute("CREATE TABLE IF NOT EXISTS `saved_filters` (
@@ -462,6 +463,6 @@ function db_upgrade_23() {
 		`page` varchar(32) NOT NULL,
 		`filters` text NOT NULL,
 		PRIMARY KEY (`id`),
-		KEY `user_page` (`user`, `page`)
+		UNIQUE KEY `user_page_name` (`user`, `page`, `name`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }

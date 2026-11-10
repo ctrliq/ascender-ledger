@@ -103,15 +103,16 @@ if (isset($_REQUEST['action'])) {
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
-				// Both kinds of report filter on facts: a facts report's hosts, or the hosts a changes report covers
+				// Both kinds of report filter on facts: a facts report's hosts, or the hosts a changes report covers.
+				// Filtering on facts needs View Facts, or a changes report could be used to test fact values.
 				case 'deletefilter':
-					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
+					if (($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) && check_perm('facts')) {
 						$report->remove_filter(intval($_GET['filter']));
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
 					exit;
 				case 'addfilter':
-					if ($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) {
+					if (($report->owner == $account['id'] || $report->role == 'edit' || $account['super']) && check_perm('facts')) {
 						$report->add_filter(post_str('fact'), post_str('compare'), post_str('value'));
 					}
 					Header("Location: /reports/edit/" . $report->id . "\n\n");
@@ -240,7 +241,9 @@ if (isset($_REQUEST['action'])) {
 					}
 					exit;
 				case 'view':
-					$header = array('subtitle' => report_span_subtitle($report->timespan), 'host_filters' => report_filter_summary($report->filters));
+					// Without View Facts, a changes report's viewer is told its hosts are filtered, not on which facts
+					$host_filters = (check_perm('facts') || empty($report->filters) ? report_filter_summary($report->filters) : 'Filtered by host facts');
+					$header = array('subtitle' => report_span_subtitle($report->timespan), 'host_filters' => $host_filters);
 					if ($report->type == 'changes') {
 						/*
 							A changes report is read a page at a time, like the Changes page, so it can
@@ -291,10 +294,11 @@ if (isset($_REQUEST['action'])) {
 						$common = array('report' => $report, 'filters' => $report->filters, 'compares' => $compares, 'timespans' => report_timespan_choices());
 						if ($report->type == 'changes') {
 							$options = changes_report_filter_options();
-							// A saved value the changes table no longer has (retention removed it) stays in its menu, so saving keeps it
-							foreach (array('playbook', 'role', 'module') as $k) {
+							// A saved value the changes table no longer has (retention removed it) stays in its menu, so saving
+							// keeps it.  A template, inventory or project is stored by ID, which is all there is left to show.
+							foreach (array('template', 'playbook', 'role', 'module', 'inventory', 'project') as $k) {
 								if (!empty($report->options[$k]) && !isset($options[$k][$report->options[$k]])) {
-									$options[$k][$report->options[$k]] = $report->options[$k];
+									$options[$k][$report->options[$k]] = (in_array($k, array('template', 'inventory', 'project'), true) ? 'ID ' : '') . $report->options[$k];
 								}
 							}
 							echo $twig->render('report_changes_edit.html', array_merge($twigarr, $common, array('options' => $options,

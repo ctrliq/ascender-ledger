@@ -50,12 +50,15 @@ main a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.card):h
 	height: 40px;
 	font-size: .875rem;
 }
+/* The Timespan row wraps on a narrow screen, and no control is wider than the screen */
 .ledger-filters .ledger-timespan-choice {
 	width: 14rem;
+	max-width: 100%;
 	flex: none;
 }
 .ledger-filters .ledger-timespan-date {
 	width: 13.5rem;
+	max-width: 100%;
 	flex: none;
 }
 

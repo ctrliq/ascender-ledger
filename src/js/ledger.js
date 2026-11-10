@@ -181,8 +181,16 @@
 		the filters match, up to the export limit (Settings > Visual): the table loads them all
 		as one page, they are exported, and it goes back to the page it was on.  Cells are
 		exported as their data, not as shown, so a long fact value is not cut short.
+
+		That data is the literal text, so Buttons must not strip tags or decode entities from it
+		(a fact value of <node>prod</node> would come out as prod).  Print writes the cells into
+		its page as HTML, so it escapes them instead.
 	*/
 	var exportLimit = parseInt($('meta[name="export-limit"]').attr('content'), 10) || 10000;
+
+	function exportOptions(columns, extra) {
+		return $.extend({ columns: columns, orthogonal: 'export', stripHtml: false, decodeEntities: false }, extra);
+	}
 
 	function exportAll(kind, title, columns) {
 		return {
@@ -190,8 +198,8 @@
 			title: title,
 			orientation: (kind === 'pdf' ? 'landscape' : undefined),
 			// Setting exportOptions replaces the CSV button's own, so keep its formula escaping
-			// (a cell starting with = + - @ is not run as a spreadsheet formula)
-			exportOptions: { columns: columns, orthogonal: 'export', escapeExcelFormula: true },
+			// (a cell starting with = + - @ is not run as a spreadsheet formula).  A PDF has no formulas.
+			exportOptions: exportOptions(columns, { escapeExcelFormula: kind === 'csv' }),
 			action: function (e, dt, node, config, cb) {
 				var self = this;
 				var len = dt.page.len();
@@ -216,10 +224,12 @@
 	window.ledgerExportButtons = function (title, columns) {
 		columns = columns || ':visible';
 		return [
-			{ extend: 'copy', exportOptions: { columns: columns, orthogonal: 'export' } },
+			{ extend: 'copy', exportOptions: exportOptions(columns) },
 			exportAll('csv', title, columns),
 			exportAll('pdf', title, columns),
-			{ extend: 'print', title: title, exportOptions: { columns: columns, orthogonal: 'export' } }
+			{ extend: 'print', title: title, exportOptions: exportOptions(columns, {
+				format: { body: function (d) { return window.ledgerEscape(d); } }
+			}) }
 		];
 	};
 

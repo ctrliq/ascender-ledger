@@ -679,15 +679,11 @@ function saved_filters($page, $names) {
 	if ($action == 'createfilter' && $post) {
 		$name = (isset($_POST['name']) && is_string($_POST['name']) ? trim(mb_substr(trim($_POST['name']), 0, 32)) : '');
 		if ($name != '' && !empty($current)) {
-			// A name already in use replaces that filter, as in Ascender Ledger Pro
-			$exists = db_fetch_cell_prepare('SELECT `id` FROM `saved_filters` WHERE `user` = ? AND `page` = ? AND `name` = ?', 'id', array($user, $page, $name));
-			if ($exists) {
-				db_execute_prepare('UPDATE `saved_filters` SET `filters` = ? WHERE `id` = ?', array(json_encode($current), $exists));
-				$_SESSION[$key] = intval($exists);
-			} else {
-				db_execute_prepare('INSERT INTO `saved_filters` (`user`, `page`, `name`, `filters`) VALUES (?, ?, ?, ?)', array($user, $page, $name, json_encode($current)));
-				$_SESSION[$key] = intval(db_fetch_cell_prepare('SELECT `id` FROM `saved_filters` WHERE `user` = ? AND `page` = ? AND `name` = ?', 'id', array($user, $page, $name)));
-			}
+			// A name already in use replaces that filter, as in Ascender Ledger Pro.  One statement on the
+			// unique (user, page, name) key, so two Creates at once cannot add the name twice, and
+			// LAST_INSERT_ID(`id`) hands back the row's id whether it was added or replaced.
+			$_SESSION[$key] = intval(db_execute_prepare('INSERT INTO `saved_filters` (`user`, `page`, `name`, `filters`) VALUES (?, ?, ?, ?)
+				ON DUPLICATE KEY UPDATE `id` = LAST_INSERT_ID(`id`), `filters` = VALUES(`filters`)', array($user, $page, $name, json_encode($current))));
 		}
 	} elseif ($action == 'savefilter' && $post) {
 		if (!empty($current)) {
