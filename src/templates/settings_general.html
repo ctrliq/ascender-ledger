@@ -42,6 +42,9 @@
 						</div>
 					</div>
 
+				</div>
+
+				<div class="float-start w-50">
 					<div class="mb-3">
 						<div class="form-check form-switch">
 							<input class="form-check-input" type="checkbox" name="require_auth_token" id="require_auth_token" {% if settings.require_auth_token == '1' %}checked{% endif %}>
@@ -67,59 +70,12 @@
 						</div>
 					</div>
 				</div>
-
-
-				<div class="float-start w-50">
-					<div class="mb-3">
-						<label class="form-label fs-6 fw-bold" for="hosts_retention">Hosts Retention (Days)</label>
-						<div>
-							<select class="form-select w-75" name="hosts_retention" id="hosts_retention">
-								{% for i in range(30, 360, 30) %}
-								<option{% if settings.hosts_retention == i %} selected{% endif %}>{{ i }}</option>
-								{% endfor %}
-							</select>
-						</div>
-					</div>
-
-					<div class="mb-3">
-						<label class="form-label fs-6 fw-bold" for="facts_retention">Facts Retention (Days)</label>
-						<div>
-							<select class="form-select w-75" name="facts_retention" id="facts_retention">
-								{% for i in range(30, 360, 30) %}
-								<option{% if settings.facts_retention == i %} selected{% endif %}>{{ i }}</option>
-								{% endfor %}
-							</select>
-						</div>
-					</div>
-
-					<div class="mb-3">
-						<label class="form-label fs-6 fw-bold" for="changes_retention">Changes Retention (Days)</label>
-						<div>
-							<select class="form-select w-75" name="changes_retention" id="changes_retention">
-								{% for i in range(30, 360, 30) %}
-								<option{% if settings.changes_retention == i %} selected{% endif %}>{{ i }}</option>
-								{% endfor %}
-							</select>
-						</div>
-					</div>
-
-					<div class="mb-3">
-						<label class="form-label fs-6 fw-bold" for="packages_retention">Packages Retention (Days)</label>
-						<div>
-							<select class="form-select w-75" name="packages_retention" id="packages_retention">
-								{% for i in range(30, 360, 30) %}
-								<option{% if settings.packages_retention == i %} selected{% endif %}>{{ i }}</option>
-								{% endfor %}
-							</select>
-						</div>
-					</div>
-
-				</div>
 			</div>
 
 			<div class="mb-3">
 				<div class="col-sm-offset-2">
-					<button class="btn btn-primary" type="submit" name="save" id="save">Save</button>
+					<a class="btn btn-secondary btn-s" href="/settings/">Return</a>
+					<button class="btn btn-primary btn-s" type="submit" name="save" id="save">Save</button>
 				</div>
 			</div>
 

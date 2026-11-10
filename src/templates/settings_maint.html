@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% if saved %}
+		<div class="alert alert-success py-2">Settings saved.</div>
+{% endif %}
+		<form method="post" action="/settings/save/" id="settingform" class="form-horizontal">
+			<input type="hidden" name="form" value="maint">
+			<div class="shadow-sm border p-4 mb-3">
+				<label class="form-label fs-5 fw-bold">Retention Settings</label>
+				<p class="form-text mt-0">Data older than this is removed by the nightly clean up.</p>
+				<div class="row">
+{% for col in [[['hosts_retention', 'Hosts'], ['facts_retention', 'Facts']], [['changes_retention', 'Changes'], ['packages_retention', 'Packages']]] %}
+					<div class="col-md-6">
+{% for f in col %}
+						<div class="mb-3">
+							<label class="form-label fs-6 fw-bold" for="{{ f[0] }}">{{ f[1] }} Retention (Days)</label>
+							<div class="ps-3 w-75">
+								<select class="ledger-select" data-nosearch="true" data-noclear="true" name="{{ f[0] }}" id="{{ f[0] }}">
+{% for i in range(30, 360, 30) %}
+									<option{% if (settings[f[0]] ?? 30) == i %} selected{% endif %}>{{ i }}</option>
+{% endfor %}
+								</select>
+							</div>
+						</div>
+{% endfor %}
+					</div>
+{% endfor %}
+				</div>
+			</div>
+
+			<div class="mb-3">
+				<a class="btn btn-secondary btn-s" href="/settings/">Return</a>
+				<button class="btn btn-primary btn-s" type="submit" name="save" id="save">Save</button>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}
