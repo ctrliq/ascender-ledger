@@ -457,3 +457,123 @@ function changes_report_option_list($sql, $column) {
 	}
 	return $options;
 }
+
+/*
+	The Timespan filter's choices, as Ascender Ledger Pro has them.  "Last ..." spans end now and
+	move with the clock; "This ..." and "Previous ..." are whole calendar periods (a week starts
+	on Sunday).  0 is a custom span with its own start and end.
+*/
+function timespan_choices() {
+	return array(
+		1 => 'Last 30 Minutes', 2 => 'Last 1 Hour', 3 => 'Last 2 Hours', 4 => 'Last 4 Hours',
+		5 => 'Last 6 Hours', 6 => 'Last 12 Hours', 7 => 'Last Day', 8 => 'Last 2 Days',
+		9 => 'Last 3 Days', 10 => 'Last 4 Days', 11 => 'Last Week', 12 => 'Last 2 Weeks',
+		13 => 'Last Month', 14 => 'Last 2 Months', 15 => 'Last 3 Months', 16 => 'Last 4 Months',
+		17 => 'Last 6 Months', 18 => 'Last Year', 19 => 'Last 2 Years',
+		20 => 'This Day', 21 => 'This Week', 22 => 'This Month', 23 => 'This Year',
+		24 => 'Previous Day', 25 => 'Previous Week', 26 => 'Previous Month', 27 => 'Previous Year',
+		0 => 'Custom',
+	);
+}
+
+/*
+	The start and end (unix times, inclusive) of a preset timespan, or null for an unknown one
+*/
+function timespan_range($id, $now = null) {
+	$now = ($now === null ? time() : $now);
+	$t = (new DateTimeImmutable())->setTimestamp($now);
+	$back = array(
+		1 => 'PT30M', 2 => 'PT1H', 3 => 'PT2H', 4 => 'PT4H', 5 => 'PT6H', 6 => 'PT12H',
+		7 => 'P1D', 8 => 'P2D', 9 => 'P3D', 10 => 'P4D', 11 => 'P7D', 12 => 'P14D',
+		13 => 'P1M', 14 => 'P2M', 15 => 'P3M', 16 => 'P4M', 17 => 'P6M', 18 => 'P1Y', 19 => 'P2Y',
+	);
+	if (isset($back[$id])) {
+		return array($t->sub(new DateInterval($back[$id]))->getTimestamp(), $now);
+	}
+
+	$day   = $t->setTime(0, 0);
+	$week  = $day->modify('-' . $day->format('w') . ' days');
+	$month = $day->modify('first day of this month');
+	$year  = $day->setDate((int) $day->format('Y'), 1, 1);
+	$spans = array(
+		20 => array($day, '+1 day'),
+		21 => array($week, '+1 week'),
+		22 => array($month, '+1 month'),
+		23 => array($year, '+1 year'),
+		24 => array($day->modify('-1 day'), '+1 day'),
+		25 => array($week->modify('-1 week'), '+1 week'),
+		26 => array($month->modify('-1 month'), '+1 month'),
+		27 => array($year->modify('-1 year'), '+1 year'),
+	);
+	if (isset($spans[$id])) {
+		return array($spans[$id][0]->getTimestamp(), $spans[$id][0]->modify($spans[$id][1])->getTimestamp() - 1);
+	}
+	return null;
+}
+
+/*
+	A date and time from a datetime-local input (2026-11-09T14:30), as a unix time, or null
+*/
+function timespan_parse_date($s) {
+	if (!is_string($s)) {
+		return null;
+	}
+	$d = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', substr($s, 0, 16));
+	return ($d === false ? null : $d->getTimestamp());
+}
+
+/*
+	Everything a user may do, as array(permission => true): their own permissions and those of
+	their enabled teams.  An administrator gets every permission.
+*/
+function user_permissions($user) {
+	global $permissions;
+	$p = array();
+	$rows = db_fetch_assocs_prepare('SELECT `perm` FROM `user_permission` WHERE `user` = ?
+		UNION SELECT `tp`.`perm` FROM `team_permission` AS `tp`
+		JOIN `team_user` AS `tu` ON `tu`.`team` = `tp`.`team`
+		JOIN `teams` AS `t` ON `t`.`id` = `tp`.`team` AND `t`.`enabled` = 1
+		WHERE `tu`.`user` = ?', array(intval($user), intval($user)));
+	foreach ($rows as $r) {
+		$p[$r['perm']] = true;
+	}
+	if (isset($p['super'])) {
+		$p = array_fill_keys(array_keys($permissions), true);
+	}
+	return $p;
+}
+
+/*
+	Whether the signed in user has a permission
+*/
+function check_perm($perm) {
+	global $account;
+	return !empty($account['perms'][$perm]);
+}
+
+/*
+	The enabled teams a user is in, by id
+*/
+function user_team_ids($user) {
+	return array_map('intval', array_column(db_fetch_assocs_prepare('SELECT `tu`.`team` FROM `team_user` AS `tu`
+		JOIN `teams` AS `t` ON `t`.`id` = `tu`.`team` AND `t`.`enabled` = 1 WHERE `tu`.`user` = ?', array(intval($user))), 'team'));
+}
+
+/*
+	A user's role on a report: their own, or the best of their enabled teams'.  '' for none.
+*/
+function report_role($report, $user) {
+	$rank = array('view' => 1, 'edit' => 2, 'owner' => 3);
+	$best = '';
+	$roles = db_fetch_assocs_prepare('SELECT `role` FROM `reports_perms` WHERE `report` = ? AND `user` = ?
+		UNION SELECT `rt`.`role` FROM `reports_team_perms` AS `rt`
+		JOIN `team_user` AS `tu` ON `tu`.`team` = `rt`.`team`
+		JOIN `teams` AS `t` ON `t`.`id` = `rt`.`team` AND `t`.`enabled` = 1
+		WHERE `rt`.`report` = ? AND `tu`.`user` = ?', array(intval($report), intval($user), intval($report), intval($user)));
+	foreach ($roles as $r) {
+		if (isset($rank[$r['role']]) && ($best == '' || $rank[$r['role']] > $rank[$best])) {
+			$best = $r['role'];
+		}
+	}
+	return $best;
+}

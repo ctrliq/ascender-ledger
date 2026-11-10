@@ -1,40 +1,19 @@
 {# The sidebar menu, used by the desktop sidebar and the slide-out menu on small screens.  menu_id has to be unique on the page. #}
-{% set admin_pages = ['/users.php', '/settings.php', '/servers.php'] %}
+{% set admin_pages = ['/users.php', '/teams.php', '/settings.php', '/servers.php'] %}
+{% macro item(url, icon, label, active) %}
+	<li class="nav-item pf-c-nav__link">
+		<a href="{{ url }}" class="nav-link px-2 py-1 text-truncate align-middle{% if active %} active{% endif %}">
+			<i class="navicon {{ icon }}"></i> <span class="ms-1">{{ label }}</span>
+		</a>
+	</li>
+{% endmacro %}
 <ul class="nav nav-pills flex-column mb-auto" id="{{ menu_id }}">
-	<li class="nav-item pf-c-nav__link">
-		<a href="/dashboard/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/dashboard.php' or server == '/index.php' %} active{% endif %}">
-			<i class="navicon fas fa-chart-line"></i> <span class="ms-1">Dashboard</span>
-		</a>
-	</li>
-	<li class="nav-item pf-c-nav__link">
-		<a href="/reports/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/reports.php' %} active{% endif %}">
-			<i class="navicon fa fa-table"></i> <span class="ms-1">Reports</span>
-		</a>
-	</li>
-{% if account.view_changes %}
-	<li class="nav-item pf-c-nav__link">
-		<a href="/changes/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/changes.php' %} active{% endif %}">
-			<i class="navicon fa fa-file"></i> <span class="ms-1">Changes</span>
-		</a>
-	</li>
-{% endif %}
-{% if account.view_facts %}
-	<li class="nav-item pf-c-nav__link">
-		<a href="/facts/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/facts.php' %} active{% endif %}">
-			<i class="navicon fa fa-puzzle-piece"></i> <span class="ms-1">Facts</span>
-		</a>
-	</li>
-	<li class="nav-item pf-c-nav__link">
-		<a href="/packages/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/packages.php' %} active{% endif %}">
-			<i class="navicon fas fa-box-open"></i> <span class="ms-1">Packages</span>
-		</a>
-	</li>
-	<li class="nav-item pf-c-nav__link">
-		<a href="/services/" class="nav-link px-2 py-1 text-truncate align-middle{% if server == '/services.php' %} active{% endif %}">
-			<i class="navicon fas fa-database"></i> <span class="ms-1">Services</span>
-		</a>
-	</li>
-{% endif %}
+{{ _self.item('/dashboard/', 'fas fa-chart-line', 'Dashboard', server == '/dashboard.php' or server == '/index.php') }}
+{% if account.perms.reports %}{{ _self.item('/reports/', 'fa fa-table', 'Reports', server == '/reports.php') }}{% endif %}
+{% if account.perms.changes %}{{ _self.item('/changes/', 'fa fa-file', 'Changes', server == '/changes.php') }}{% endif %}
+{% if account.perms.facts %}{{ _self.item('/facts/', 'fa fa-puzzle-piece', 'Facts', server == '/facts.php') }}{% endif %}
+{% if account.perms.packages %}{{ _self.item('/packages/', 'fas fa-box-open', 'Packages', server == '/packages.php') }}{% endif %}
+{% if account.perms.services %}{{ _self.item('/services/', 'fas fa-database', 'Services', server == '/services.php') }}{% endif %}
 {% if account.super %}
 	<li>
 		<a href="#{{ menu_id }}-admin" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-2 py-1 text-truncate align-middle" aria-expanded="{% if server in admin_pages %}true{% else %}false{% endif %}">
@@ -44,6 +23,11 @@
 			<li class="pf-c-nav__link w-100">
 				<a href="/users/" class="nav-link px-0 py-1{% if server == '/users.php' %} active{% endif %}">
 					<i class="navicon fa fa-user p-1"></i> <span>Users</span>
+				</a>
+			</li>
+			<li class="pf-c-nav__link w-100">
+				<a href="/teams/" class="nav-link px-0 py-1{% if server == '/teams.php' %} active{% endif %}">
+					<i class="navicon fa fa-users p-1"></i> <span>Teams</span>
 				</a>
 			</li>
 			<li class="pf-c-nav__link w-100">

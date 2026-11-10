@@ -1,7 +1,7 @@
 <?php
 include_once('includes/global.php');
 
-if (empty($account['view_changes']) && empty($account['super'])) {
+if (!check_perm('changes')) {
 	header("Location: /\n\n");
 	exit;
 }
@@ -58,11 +58,15 @@ if (!dt_is_request()) {
 	}
 }
 
-$filter_names = array('host', 'csearch', 'template', 'playbook', 'role', 'module', 'type', 'inventory', 'project');
+$filter_names = array('host', 'csearch', 'template', 'playbook', 'role', 'module', 'type', 'inventory', 'project', 'timespan');
 
 if (isset($_GET['clear'])) {
 	if (in_array($_GET['clear'], $filter_names, true)) {
 		unset($_SESSION['changes_' . $_GET['clear']]);
+	} elseif ($_GET['clear'] === 'all') {
+		foreach ($filter_names as $f) {
+			unset($_SESSION['changes_' . $f]);
+		}
 	}
 	header("Location: /changes/");
 	exit;
@@ -125,6 +129,22 @@ if (isset($_GET['action']) && $_GET['action'] == 'addfilter') {
 			unset($_SESSION['changes_project']);
 		}
 	}
+	/*
+		A preset timespan is kept as its number, so "Last Day" keeps meaning the last day.  A
+		custom one keeps its start and end.
+	*/
+	if (isset($_GET['timespan']) && is_string($_GET['timespan'])) {
+		$id = intval($_GET['timespan']);
+		$start = timespan_parse_date(isset($_GET['start']) ? $_GET['start'] : '');
+		$end = timespan_parse_date(isset($_GET['end']) ? $_GET['end'] : '');
+		if ($id == 0 && $start !== null && $end !== null && $start <= $end) {
+			$_SESSION['changes_timespan'] = array('id' => 0, 'start' => $start, 'end' => $end + 59);
+		} elseif ($id != 0 && timespan_range($id) !== null) {
+			$_SESSION['changes_timespan'] = array('id' => $id);
+		} else {
+			unset($_SESSION['changes_timespan']);
+		}
+	}
 	if (isset($_GET['csearch']) && is_string($_GET['csearch'])) {
 		$s = trim(substr($_GET['csearch'], 0, 128));
 		if ($s == '') {
@@ -178,6 +198,14 @@ if (dt_is_request()) {
 		$where[] = '`j`.`project` LIKE ?';
 		$params[] = '%-' . intval($current['project']);
 	}
+	if (is_array($current['timespan'])) {
+		$span = ($current['timespan']['id'] == 0 ? array($current['timespan']['start'], $current['timespan']['end']) : timespan_range($current['timespan']['id']));
+		if ($span !== null) {
+			$where[] = '`c`.`time` BETWEEN ? AND ?';
+			$params[] = $span[0];
+			$params[] = $span[1];
+		}
+	}
 	if ($current['csearch'] !== '') {
 		foreach (preg_split('/\s+/', $current['csearch']) as $s) {
 			if ($s == '') {
@@ -220,6 +248,29 @@ if (dt_is_request()) {
 	);
 }
 
+/*
+	The Timespan filter starts on the current choice, or Last Day.  Each preset's start and end
+	go to the page so choosing one fills in the dates it covers.
+*/
+$timespans = timespan_choices();
+$spans = array();
+foreach ($timespans as $id => $label) {
+	$r = timespan_range($id);
+	if ($r !== null) {
+		$spans[$id] = array(date('Y-m-d\TH:i', $r[0]), date('Y-m-d\TH:i', $r[1]));
+	}
+}
+$ts = (is_array($current['timespan']) ? $current['timespan'] : array('id' => 7));
+if ($ts['id'] == 0) {
+	$ts['text'] = date('m/d/Y H:i', $ts['start']) . ' to ' . date('m/d/Y H:i', $ts['end']);
+	$ts['start_date'] = date('Y-m-d\TH:i', $ts['start']);
+	$ts['end_date'] = date('Y-m-d\TH:i', $ts['end']);
+} else {
+	$ts['text'] = $timespans[$ts['id']];
+	list($ts['start_date'], $ts['end_date']) = $spans[$ts['id']];
+}
+
 echo $twig->render('changes.html', array_merge($twigarr, array(
+		'timespans' => $timespans, 'spans' => $spans, 'ts' => $ts,
 		'playbooks' => $playbooks, 'templates' => $templates, 'modules' => $modules, 'types' => $types, 'inventories' => $inventories, 'projects' => $projects,
 		'roles' => $roles, 'current' => $current, 'hostname' => host_name($current['host']))));

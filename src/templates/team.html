@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% include 'parts/team_tabs.html' %}
+		<div class="shadow-sm border p-4">
+			<form method="post" action="/teams/save/{{ team.id }}" class="ledger-form">
+				<div class="mb-3">
+					<label for="name" class="form-label">Name</label>
+					<input type="text" class="form-control" name="name" id="name" maxlength="32" value="{{ team.name }}">
+				</div>
+				<div class="mb-3">
+					<label for="enabled" class="form-label">Enabled</label>
+					<select class="form-select" name="enabled" id="enabled">
+						<option value="1">Yes</option>
+						<option value="0"{% if not team.enabled %} selected{% endif %}>No</option>
+					</select>
+					<div class="form-text">A disabled team gives its users no permissions and no access to the reports shared with it.</div>
+				</div>
+				<a href="/teams/" class="btn btn-secondary">Return</a>
+				<button class="btn btn-primary" type="submit">Save</button>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

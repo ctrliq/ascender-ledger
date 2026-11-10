@@ -1,0 +1,6 @@
+<h4 class="mb-3">User: {{ user.name ?: user.username }}</h4>
+{% include 'parts/tabs.html' with { tabs: [
+	['details', 'Details', '/users/edit/' ~ user.id],
+	['teams', 'Teams', '/users/teams/' ~ user.id],
+	['permissions', 'Permissions', '/users/permissions/' ~ user.id]
+] } %}

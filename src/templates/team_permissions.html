@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% include 'parts/team_tabs.html' %}
+		<div class="shadow-sm border p-4">
+			<form method="post" action="/teams/permissions/{{ team.id }}">
+				<p class="text-secondary">Every user in the team has these permissions while the team is enabled.</p>
+{% include 'parts/permission_switches.html' %}
+				<a href="/teams/" class="btn btn-secondary">Return</a>
+				<button class="btn btn-primary" type="submit">Save</button>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

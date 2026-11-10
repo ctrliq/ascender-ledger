@@ -16,8 +16,13 @@
 				</table>
 			</div>
 		</div>
-		<br><a href="/reports/new/?csrf_token={{ csrf_token|url_encode }}" class="btn btn-primary btn-s">Create New Report</a>
+		<br>
+{% if account.perms.reports_create and account.perms.facts %}
+		<a href="/reports/new/?csrf_token={{ csrf_token|url_encode }}" class="btn btn-primary btn-s">Create New Report</a>
+{% endif %}
+{% if account.perms.reports_create and account.perms.changes %}
 		<a href="/reports/new/changes/?csrf_token={{ csrf_token|url_encode }}" class="btn btn-primary btn-s">Create New Changes Report</a>
+{% endif %}
 	</div>
 </div>
 

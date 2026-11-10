@@ -46,7 +46,12 @@ done
 if [ ! -d "/var/lib/mysql/ledger" ]; then
   /usr/bin/mysql -e "CREATE DATABASE IF NOT EXISTS ledger;"
   /usr/bin/mysql ledger < /root/ledger.sql
-  /usr/bin/mysql ledger -e "INSERT INTO users (name, username, email, password, enabled, registered, code, super) VALUES ('admin', 'admin', 'admin', '', '1', '1', '', '1');";
+  /usr/bin/mysql ledger -e "INSERT INTO users (name, username, email, password, enabled, registered, code) VALUES ('admin', 'admin', 'admin', '', '1', '1', '');";
+  # Make admin an Administrator.  Ledger's own database upgrade turns the super column into
+  # permissions and drops it, and the web container may already have done that, so the UPDATE
+  # is allowed to fail: the permission row is what counts either way.
+  /usr/bin/mysql ledger -e "UPDATE users SET super = 1 WHERE username = 'admin';" 2>/dev/null
+  /usr/bin/mysql ledger -e "CREATE TABLE IF NOT EXISTS user_permission (user int(11) NOT NULL, perm varchar(32) NOT NULL, PRIMARY KEY (user, perm)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT IGNORE INTO user_permission (user, perm) SELECT id, 'super' FROM users WHERE username = 'admin';"
 fi
 
 # Grab the Database Password

@@ -2,7 +2,7 @@
 
 include_once('includes/global.php');
 
-if (empty($account['view_facts']) && empty($account['super'])) {
+if (!check_perm('facts')) {
 	header("Location: /\n\n");
 	exit;
 }
@@ -17,8 +17,13 @@ if (empty($account['view_facts']) && empty($account['super'])) {
 $types = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `type` FROM `facts` ORDER BY `type` ASC"), 'type');
 
 if (isset($_GET['clear'])) {
-	if (in_array($_GET['clear'], array('host', 'fact', 'type', 'search'), true)) {
+	$names = array('host', 'fact', 'type', 'search');
+	if (in_array($_GET['clear'], $names, true)) {
 		unset($_SESSION['facts_' . $_GET['clear']]);
+	} elseif ($_GET['clear'] === 'all') {
+		foreach ($names as $f) {
+			unset($_SESSION['facts_' . $f]);
+		}
 	}
 	header("Location: /facts/");
 	exit;

@@ -1,0 +1,22 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% include 'parts/team_tabs.html' %}
+		<div class="shadow-sm border p-4">
+			<form method="post" action="/teams/users/{{ team.id }}">
+				<div class="mb-3 ledger-form">
+					<label for="users" class="form-label">Local Users</label>
+					<select class="ledger-select" name="users[]" id="users" multiple data-placeholder="Choose Users...">
+{% for u in users %}
+						<option value="{{ u.id }}"{% if member[u.id] is defined %} selected{% endif %}>{{ u.name ?: u.username }} ({{ u.email ?: u.username }}){% if not u.enabled %} - disabled{% endif %}</option>
+{% endfor %}
+					</select>
+				</div>
+				<a href="/teams/" class="btn btn-secondary">Return</a>
+				<button class="btn btn-primary" type="submit">Save</button>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -21,20 +21,20 @@ require_once('includes/classes/Report.php');
 
 /*
 	A schedule's report is only sent while its owner could still see it in Ledger: the owner is
-	enabled, the report is still shared with them, and they may view that type of data.
+	enabled, the report is still shared with them (or a team of theirs), and they may view
+	reports and that type of data.
 */
 function schedule_owner_allowed($s, $report) {
-	$u = db_fetch_assoc_prepare('SELECT `enabled`, `super`, `view_changes`, `view_facts` FROM `users` WHERE `id` = ?', array($s['owner']));
+	$u = db_fetch_assoc_prepare('SELECT `enabled` FROM `users` WHERE `id` = ?', array($s['owner']));
 	if (!isset($u['enabled']) || !$u['enabled']) {
 		return false;
 	}
-	if (!db_fetch_cell_prepare('SELECT 1 AS `e` FROM `reports_perms` WHERE `report` = ? AND `user` = ?', 'e', array($report->id, $s['owner']))) {
+	// Shared with them directly or through one of their teams
+	if (report_role($report->id, $s['owner']) == '') {
 		return false;
 	}
-	if ($u['super']) {
-		return true;
-	}
-	return ($report->type == 'changes' ? (bool) $u['view_changes'] : (bool) $u['view_facts']);
+	$perms = user_permissions($s['owner']);
+	return (!empty($perms['reports']) && !empty($perms[$report->type == 'changes' ? 'changes' : 'facts']));
 }
 
 // A claim older than this belongs to a run that died part way (out of memory, killed), and is taken over

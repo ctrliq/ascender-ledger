@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 20;
+$new_db_version = 21;
 
 $db_version = read_setting('db_version', 1);
 
@@ -133,6 +133,16 @@ if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) 
 		$db_version = 20;
 	} catch (Exception $e) {
 		error_log('Ledger: database upgrade to version 20 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 20) {
+	try {
+		db_upgrade_21();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(21));
+		$db_version = 21;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 21 failed, and will be retried: ' . $e->getMessage());
 	}
 }
 
@@ -280,4 +290,89 @@ function db_upgrade_19() {
 */
 function db_upgrade_20() {
 	db_execute("ALTER TABLE `packages` MODIFY `version` varchar(64) NOT NULL, MODIFY `release` varchar(64) NOT NULL");
+}
+
+/*
+	Version 21
+	- Teams and permissions, as in Ascender Ledger Pro.  A user's permissions are their own plus
+	  those of their enabled teams, and reports can be shared with teams as well as users.
+	- The users table's super, view_changes and view_facts move into permissions, keeping what
+	  everyone could do: administrators join the Administrators team (and keep Administrator
+	  themselves, so editing a team cannot lock them out), users who could see both changes and
+	  facts join Normal Users, and anyone else gets what they had as their own permissions.
+	  View Facts covered packages and services, so it becomes all three.  Reports had no
+	  permission of their own, so everyone keeps View Reports and Create Reports.
+*/
+function db_upgrade_21() {
+	db_execute("CREATE TABLE IF NOT EXISTS `teams` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`enabled` tinyint(1) NOT NULL DEFAULT 1,
+		`name` varchar(32) NOT NULL,
+		PRIMARY KEY (`id`),
+		UNIQUE KEY `name` (`name`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+	db_execute("CREATE TABLE IF NOT EXISTS `team_permission` (
+		`team` int(11) NOT NULL,
+		`perm` varchar(32) NOT NULL,
+		PRIMARY KEY (`team`, `perm`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+	db_execute("CREATE TABLE IF NOT EXISTS `team_user` (
+		`team` int(11) NOT NULL,
+		`user` int(11) NOT NULL,
+		PRIMARY KEY (`team`, `user`),
+		KEY `user` (`user`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+	db_execute("CREATE TABLE IF NOT EXISTS `user_permission` (
+		`user` int(11) NOT NULL,
+		`perm` varchar(32) NOT NULL,
+		PRIMARY KEY (`user`, `perm`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+	db_execute("CREATE TABLE IF NOT EXISTS `reports_team_perms` (
+		`report` int(11) NOT NULL,
+		`team` int(11) NOT NULL,
+		`role` varchar(16) NOT NULL DEFAULT 'view',
+		PRIMARY KEY (`report`, `team`),
+		KEY `team` (`team`)
+		) ENGINE=InnoDB DEFAULT CHARSET=latin1");
+
+	if (!db_column_exists('users', 'super')) {
+		return;
+	}
+
+	$teams = array(
+		'Administrators' => array('super'),
+		'Auditors'       => array('changes', 'facts', 'packages', 'services', 'reports'),
+		'Normal Users'   => array('changes', 'facts', 'packages', 'services', 'reports', 'reports_create'),
+	);
+	$ids = array();
+	foreach ($teams as $name => $perms) {
+		db_execute_prepare('INSERT IGNORE INTO `teams` (`name`, `enabled`) VALUES (?, 1)', array($name));
+		$ids[$name] = intval(db_fetch_cell_prepare('SELECT `id` FROM `teams` WHERE `name` = ?', 'id', array($name)));
+		foreach ($perms as $p) {
+			db_execute_prepare('INSERT IGNORE INTO `team_permission` (`team`, `perm`) VALUES (?, ?)', array($ids[$name], $p));
+		}
+	}
+
+	foreach (db_fetch_assocs('SELECT `id`, `super`, `view_changes`, `view_facts` FROM `users`') as $u) {
+		$own = array();
+		if ($u['super']) {
+			db_execute_prepare('INSERT IGNORE INTO `team_user` (`team`, `user`) VALUES (?, ?)', array($ids['Administrators'], $u['id']));
+			$own[] = 'super';
+		} elseif ($u['view_changes'] && $u['view_facts']) {
+			db_execute_prepare('INSERT IGNORE INTO `team_user` (`team`, `user`) VALUES (?, ?)', array($ids['Normal Users'], $u['id']));
+		} else {
+			$own = array('reports', 'reports_create');
+			if ($u['view_changes']) {
+				$own[] = 'changes';
+			}
+			if ($u['view_facts']) {
+				$own = array_merge($own, array('facts', 'packages', 'services'));
+			}
+		}
+		foreach ($own as $p) {
+			db_execute_prepare('INSERT IGNORE INTO `user_permission` (`user`, `perm`) VALUES (?, ?)', array($u['id'], $p));
+		}
+	}
+
+	db_execute("ALTER TABLE `users` DROP `super`, DROP `view_changes`, DROP `view_facts`");
 }

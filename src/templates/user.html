@@ -2,9 +2,10 @@
 
 {% block body %}
 <div class="wrapper">
-	<div class="container-fluid animated fadeInRight" style="width: 50%">
-		<div class="shadow-sm bd-example">
-			<form method="post" action=/users/save/{{ user.id }} id=saform class="form-horizontal" enctype="multipart/form-data">
+	<div class="container-fluid animated fadeInRight">
+{% include 'parts/user_tabs.html' %}
+		<div class="shadow-sm border p-4">
+			<form method="post" action=/users/save/{{ user.id }} id=saform class="form-horizontal ledger-form" enctype="multipart/form-data">
 				<input type=hidden name=action value=save>
 				<div class="mb-3">
 	                    <label for="name" class="col-sm-3 form-label">Name</label>
@@ -27,38 +28,9 @@
 				<div class="mb-3">
 	                    <label for="enabled" class="col-sm-3 form-label">Enabled</label>
 					<div class="col">
-						<select class="form-select" name=enabled id=enabled>
+						<select class="form-select" name=enabled id=enabled{% if user.id == account.id %} disabled title="You cannot disable yourself"{% endif %}>
 							<option value="1">Yes</option>
 							<option value="0"{% if not user.enabled %} selected{% endif %}>No</option>
-						</select>
-     	               </div>
-				</div>
-
-				<div class="mb-3">
-	                    <label for="type" class="col-sm-3 form-label">Type</label>
-					<div class="col">
-						<select class="form-select" name=super id=super>
-							<option value="0">Standard</option>
-							<option value="1"{% if user.super %} selected{% endif %}>Admin</option>
-						</select>
-	                    </div>
-				</div>
-				<div class="mb-3">
-	                    <label for="view_changes" class="col-sm-3 form-label">View Changes</label>
-					<div class="col">
-						<select class="form-select" name=view_changes id=view_changes>
-							<option value="1">Yes</option>
-							<option value="0"{% if not user.view_changes %} selected{% endif %}>No</option>
-						</select>
-     	               </div>
-				</div>
-
-				<div class="mb-3">
-	                    <label for="view_facts" class="col-sm-3 form-label">View Facts</label>
-					<div class="col">
-						<select class="form-select" name=view_facts id=view_facts>
-							<option value="1">Yes</option>
-							<option value="0"{% if not user.view_facts %} selected{% endif %}>No</option>
 						</select>
      	               </div>
 				</div>
@@ -79,7 +51,7 @@
 				<div class="hr-line-dashed"></div>
 				<div class="mb-3">
 					<div class="col-sm-4 col-sm-offset-2">
-						<a href="/users/" class="btn btn-secondary" name=cancel>Cancel</a>
+						<a href="/users/" class="btn btn-secondary" name=cancel>Return</a>
 						<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
 					</div>
 				</div>

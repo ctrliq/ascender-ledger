@@ -40,6 +40,7 @@
 				allowClear: !el.prop('multiple') && !el.data('noclear'),
 				placeholder: el.data('placeholder') || '',
 				tags: el.data('tags') === true,
+				minimumResultsForSearch: el.data('nosearch') ? Infinity : 0,
 				dropdownParent: el.closest('.modal').length ? el.closest('.modal') : $(document.body)
 			});
 		});
@@ -67,7 +68,9 @@
 
 	/*
 		The "Add a Filter" bar on the list pages.  Choosing a filter shows its input; Add sends
-		the browser to that input's data-url with the chosen value appended.
+		the browser to that input's data-url with the chosen value appended.  A filter made of
+		several inputs (class filter-multi) has data-url itself, and gets all its named inputs
+		appended as a query string.
 	*/
 	window.ledgerFilterBar = function () {
 		var chooser = $('#addfilter');
@@ -88,7 +91,12 @@
 			if (!f) {
 				return;
 			}
-			var input = $('.filter-input[data-filter="' + f + '"]').find('select, input').first();
+			var box = $('.filter-input[data-filter="' + f + '"]');
+			if (box.hasClass('filter-multi')) {
+				window.location = box.data('url') + box.find('[name]').serialize();
+				return;
+			}
+			var input = box.find('select, input').first();
 			var value = input.val();
 			if (value === null || value === undefined) {
 				value = '';
@@ -101,7 +109,7 @@
 			e.preventDefault();
 			apply();
 		});
-		$('.filter-input input[type="text"]').on('keydown', function (e) {
+		$('.filter-input input').on('keydown', function (e) {
 			if (e.key === 'Enter') {
 				e.preventDefault();
 				apply();

@@ -24,10 +24,12 @@ class Report {
 		if (isset($account['cli'])) {
 			$u = db_fetch_assoc_prepare("SELECT * FROM `reports` WHERE `reports`.`id` = ?", array($id));
 		} else {
-			$u = db_fetch_assoc_prepare("SELECT `reports`.*, `reports_perms`.`role` FROM `reports`
-								LEFT JOIN `reports_perms` ON `reports_perms`.`report` = `reports`.`id`
-								WHERE `reports_perms`.`user` = ? AND `reports`.`id` = ?
-								ORDER BY `reports`.`name`", array($account['id'], $id));
+			// Shared with the user, or with one of their enabled teams; the better role counts
+			$role = report_role($id, $account['id']);
+			$u = ($role == '' ? array() : db_fetch_assoc_prepare("SELECT * FROM `reports` WHERE `id` = ?", array($id)));
+			if (isset($u['id'])) {
+				$u['role'] = $role;
+			}
 		}
 		$this->pop_class($u);
 		return $u;
@@ -252,6 +254,21 @@ class Report {
 		}
 	}
 
+	function remove_team($team) {
+		$team = intval($team);
+		if ($this->id && $team > 0) {
+			db_execute_prepare('DELETE FROM `reports_team_perms` WHERE `report` = ? AND `team` = ?', array($this->id, $team));
+		}
+	}
+
+	// A team can view or edit a report; only a user owns one
+	function add_team($team, $role) {
+		$team = intval($team);
+		if ($this->id && $team > 0 && in_array($role, array('edit', 'view'), true) && db_fetch_cell_prepare('SELECT `id` FROM `teams` WHERE `id` = ?', 'id', array($team))) {
+			db_execute_prepare('INSERT INTO `reports_team_perms` (`report`, `team`, `role`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `role` = VALUES(`role`)', array($this->id, $team, $role));
+		}
+	}
+
 	function add_user($user, $role) {
 		$user = intval($user);
 		$roles = array('owner', 'edit', 'view');
@@ -277,6 +294,7 @@ class Report {
 	function delete() {
 		if ($this->role == "owner" || $this->role == "admin") {
 			db_execute_prepare('DELETE FROM `reports_perms` WHERE `report` = ?', array($this->id));
+			db_execute_prepare('DELETE FROM `reports_team_perms` WHERE `report` = ?', array($this->id));
 			db_execute_prepare('DELETE FROM `reports` WHERE `id` = ?', array($this->id));
 			return true;
 		} else {

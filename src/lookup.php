@@ -15,7 +15,6 @@ $what = (isset($_GET['what']) && is_string($_GET['what']) ? $_GET['what'] : '');
 $q    = (isset($_GET['q']) && is_string($_GET['q']) ? trim(substr($_GET['q'], 0, 128)) : '');
 $page = (isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1);
 
-$view_facts = (!empty($account['view_facts']) || !empty($account['super']));
 
 $like   = '%' . dt_like_escape($q) . '%';
 $offset = ($page - 1) * LOOKUP_PAGE;
@@ -24,14 +23,14 @@ $rows   = array();
 
 switch ($what) {
 	case 'hosts':
-		if (!$view_facts && empty($account['view_changes'])) {
+		if (!check_perm('changes') && !check_perm('facts') && !check_perm('packages') && !check_perm('services')) {
 			break;
 		}
 		$rows = db_fetch_assocs_prepare("SELECT `id`, `hostname` AS `text` FROM `hosts` WHERE `hostname` LIKE ? ORDER BY `hostname` $limit", array($like));
 		break;
 
 	case 'facts':
-		if (!$view_facts) {
+		if (!check_perm('facts')) {
 			break;
 		}
 		if (db_fetch_cell('SELECT 1 AS `e` FROM `fact_names` LIMIT 1', 'e')) {
@@ -43,13 +42,13 @@ switch ($what) {
 		break;
 
 	case 'packages':
-		if ($view_facts) {
+		if (check_perm('packages')) {
 			$rows = db_fetch_assocs_prepare("SELECT DISTINCT `name` AS `id`, `name` AS `text` FROM `packages` WHERE `name` LIKE ? ORDER BY `name` $limit", array($like));
 		}
 		break;
 
 	case 'services':
-		if ($view_facts) {
+		if (check_perm('services')) {
 			$rows = db_fetch_assocs_prepare("SELECT DISTINCT `name` AS `id`, `name` AS `text` FROM `services` WHERE `name` LIKE ? ORDER BY `name` $limit", array($like));
 		}
 		break;

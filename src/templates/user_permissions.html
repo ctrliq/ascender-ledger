@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% include 'parts/user_tabs.html' %}
+		<div class="shadow-sm border p-4">
+			<form method="post" action="/users/permissions/{{ user.id }}">
+				<p class="text-secondary">The user's own permissions.  They also have the permissions of their teams, which are changed on the team.</p>
+{% include 'parts/permission_switches.html' with { checked: own } %}
+				<a href="/users/" class="btn btn-secondary">Return</a>
+				<button class="btn btn-primary" type="submit">Save</button>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

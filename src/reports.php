@@ -1,6 +1,11 @@
 <?php
 include_once('includes/global.php');
 
+if (!check_perm('reports')) {
+	Header("Location: /\n\n");
+	exit;
+}
+
 $users = reindex_arr_by_id_col(db_fetch_assocs('SELECT `id`, `name` FROM `users`'), 'name');
 
 /*
@@ -8,12 +13,12 @@ $users = reindex_arr_by_id_col(db_fetch_assocs('SELECT `id`, `name` FROM `users`
 	CSRF token and is refused without it.  The rest are POSTed forms, which are checked for every
 	request.
 */
-if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('delete', 'removeuserperm', 'deletefilter', 'moveup', 'movedown', 'deletefact', 'scheduledelete', 'new'), true)) {
+if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('delete', 'removeuserperm', 'removeteamperm', 'deletefilter', 'moveup', 'movedown', 'deletefact', 'scheduledelete', 'new'), true)) {
 	csrf_verify();
 }
 
 // Form actions only ever arrive as POSTs, which is where the CSRF check applies
-if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('savesort', 'savename', 'addfilter', 'addcolumn', 'adduserperm', 'schedulesave'), true) && $_SERVER['REQUEST_METHOD'] != 'POST') {
+if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('savesort', 'savename', 'addfilter', 'addcolumn', 'adduserperm', 'addteamperm', 'schedulesave'), true) && $_SERVER['REQUEST_METHOD'] != 'POST') {
 	Header("Location: /reports/\n\n");
 	exit;
 }
@@ -24,11 +29,7 @@ if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('savesort'
 	or View Changes.
 */
 function report_type_allowed($type) {
-	global $account;
-	if (!empty($account['super'])) {
-		return true;
-	}
-	return ($type == 'changes' ? !empty($account['view_changes']) : !empty($account['view_facts']));
+	return check_perm($type == 'changes' ? 'changes' : 'facts');
 }
 
 if (isset($_REQUEST['action'])) {
@@ -52,6 +53,19 @@ if (isset($_REQUEST['action'])) {
 						// Owners are made by creating a report; sharing gives edit or view
 						$role = (isset($_POST['role']) && in_array($_POST['role'], array('edit', 'view'), true) ? $_POST['role'] : 'view');
 						$report->add_user($user, $role);
+					}
+					Header("Location: /reports/perms/" . $report->id . "\n\n");
+					exit;
+				case 'addteamperm':
+					if ($report->owner == $account['id'] || $account['super']) {
+						$role = (isset($_POST['role']) && in_array($_POST['role'], array('edit', 'view'), true) ? $_POST['role'] : 'view');
+						$report->add_team(intval($_POST['team']), $role);
+					}
+					Header("Location: /reports/perms/" . $report->id . "\n\n");
+					exit;
+				case 'removeteamperm':
+					if ($report->owner == $account['id'] || $account['super']) {
+						$report->remove_team(intval($_GET['team']));
 					}
 					Header("Location: /reports/perms/" . $report->id . "\n\n");
 					exit;
@@ -142,8 +156,10 @@ if (isset($_REQUEST['action'])) {
 				case 'perms':
 					if ($report->owner == $account['id'] || $account['super']) {
 						$perms = reindex_arr_by_col(db_fetch_assocs_prepare('SELECT * FROM `reports_perms` WHERE `report` = ?', array($report->id)), 'user');
+						$tperms = reindex_arr_by_col(db_fetch_assocs_prepare('SELECT * FROM `reports_team_perms` WHERE `report` = ?', array($report->id)), 'team');
+						$teams = reindex_arr_by_id_col(db_fetch_assocs('SELECT `id`, `name` FROM `teams` ORDER BY `name`'), 'name');
 						$roles = array('owner' => 'Owner', 'edit' => 'Editor', 'view' => 'Viewer');
-						echo $twig->render('report_perms.html', array_merge($twigarr, array('report' => $report, 'perms' => $perms, 'users' => $users, 'roles' => $roles)));
+						echo $twig->render('report_perms.html', array_merge($twigarr, array('report' => $report, 'perms' => $perms, 'tperms' => $tperms, 'users' => $users, 'teams' => $teams, 'roles' => $roles)));
 					}
 					exit;
 				case 'schedules':
@@ -264,7 +280,7 @@ if (isset($_REQUEST['action'])) {
 		switch ($_REQUEST['action']) {
 			case 'new':
 				$type = (isset($_REQUEST['type']) && $_REQUEST['type'] === 'changes' ? 'changes' : 'facts');
-				if (!report_type_allowed($type)) {
+				if (!report_type_allowed($type) || !check_perm('reports_create')) {
 					Header("Location: /reports/\n\n");
 					exit;
 				}
@@ -287,10 +303,29 @@ if (isset($_REQUEST['action'])) {
 	}
 }
 
-$reports = db_fetch_assocs_prepare("SELECT `reports`.*, `reports_perms`.`role` FROM `reports`
-							LEFT JOIN `reports_perms` ON `reports_perms`.`report` = `reports`.`id`
-							WHERE `reports_perms`.`user` = ?
-							ORDER BY `reports`.`name`", array($account['id']));
+/*
+	Reports shared with the user or with one of their enabled teams, each once with the best
+	role it is shared with
+*/
+$rank = array('view' => 1, 'edit' => 2, 'owner' => 3);
+$reports = array();
+$rows = db_fetch_assocs_prepare("SELECT `r`.*, `rp`.`role` FROM `reports` AS `r`
+							JOIN `reports_perms` AS `rp` ON `rp`.`report` = `r`.`id`
+							WHERE `rp`.`user` = ?
+						UNION ALL
+						SELECT `r`.*, `rt`.`role` FROM `reports` AS `r`
+							JOIN `reports_team_perms` AS `rt` ON `rt`.`report` = `r`.`id`
+							JOIN `team_user` AS `tu` ON `tu`.`team` = `rt`.`team`
+							JOIN `teams` AS `t` ON `t`.`id` = `rt`.`team` AND `t`.`enabled` = 1
+							WHERE `tu`.`user` = ?", array($account['id'], $account['id']));
+foreach ($rows as $row) {
+	$id = $row['id'];
+	if (!isset($reports[$id]) || $rank[$row['role']] > $rank[$reports[$id]['role']]) {
+		$reports[$id] = $row;
+	}
+}
+uasort($reports, function ($a, $b) { return strcasecmp($a['name'], $b['name']); });
+$reports = array_values($reports);
 
 
 echo $twig->render('reports.html', array_merge($twigarr, array('reports' => $reports, 'users' => $users, 'compares' => $compares)));

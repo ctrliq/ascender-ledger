@@ -2,7 +2,7 @@
 
 include_once('includes/global.php');
 
-if (empty($account['view_facts']) && empty($account['super'])) {
+if (!check_perm('services')) {
 	header("Location: /\n\n");
 	exit;
 }
@@ -12,8 +12,13 @@ $states   = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DIST
 $statuses = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `status` FROM `services` ORDER BY `status` ASC"), 'status');
 
 if (isset($_GET['clear'])) {
-	if (in_array($_GET['clear'], array('host', 'service', 'state', 'status'), true)) {
+	$names = array('host', 'service', 'state', 'status');
+	if (in_array($_GET['clear'], $names, true)) {
 		unset($_SESSION['services_' . $_GET['clear']]);
+	} elseif ($_GET['clear'] === 'all') {
+		foreach ($names as $f) {
+			unset($_SESSION['services_' . $f]);
+		}
 	}
 	header("Location: /services/");
 	exit;

@@ -44,3 +44,25 @@ main a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.card):h
 .login a:hover {
 	text-decoration: underline !important;
 }
+
+/* The "Add a Filter" bar: text and date inputs match the height of the select2 menus beside them, as in Ledger Pro */
+.ledger-filters .form-control {
+	height: 40px;
+	font-size: .875rem;
+}
+.ledger-filters .ledger-timespan-choice {
+	width: 14rem;
+	flex: none;
+}
+.ledger-filters .ledger-timespan-date {
+	width: 13.5rem;
+	flex: none;
+}
+
+/* Forms on the user and team pages keep to a readable width */
+.ledger-form {
+	max-width: 40rem;
+}
+.ledger-tab {
+	min-width: 9rem;
+}
