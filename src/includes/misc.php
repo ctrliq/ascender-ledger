@@ -649,3 +649,95 @@ function report_span_subtitle($id, $now = null) {
 	return 'From ' . date('m/d/Y H:i', $r[0]) . ' to ' . date('m/d/Y H:i', $r[1]);
 }
 
+
+/*
+	Saved filters, as in Ascender Ledger Pro.  Each user can name the filters set on a list page
+	(Changes, Facts, Packages, Services) and bring them back later.  A page keeps its filters in
+	the session as <page>_<name>, and which saved filter was last chosen as <page>_saved_filter,
+	so changing a filter after choosing one and pressing Save updates that saved filter.
+
+	Handles the saved filter actions for a page, sending the browser back to the page after one,
+	and returns what the page needs to draw the Saved Filters row.  Creating, saving and deleting
+	are POSTs (and so carry the CSRF token); choosing one is a link, like adding a filter.
+*/
+function saved_filters($page, $names) {
+	global $account;
+
+	$user = intval($account['id']);
+	$key = $page . '_saved_filter';
+	$current = array();
+	foreach ($names as $f) {
+		if (isset($_SESSION[$page . '_' . $f]) && $_SESSION[$page . '_' . $f] !== '') {
+			$current[$f] = $_SESSION[$page . '_' . $f];
+		}
+	}
+
+	$action = (isset($_REQUEST['action']) && is_string($_REQUEST['action']) ? $_REQUEST['action'] : '');
+	$id = (isset($_REQUEST['filter']) && is_scalar($_REQUEST['filter']) ? intval($_REQUEST['filter']) : 0);
+	$post = (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'POST');
+
+	if ($action == 'createfilter' && $post) {
+		$name = (isset($_POST['name']) && is_string($_POST['name']) ? trim(mb_substr(trim($_POST['name']), 0, 32)) : '');
+		if ($name != '' && !empty($current)) {
+			// A name already in use replaces that filter, as in Ascender Ledger Pro
+			$exists = db_fetch_cell_prepare('SELECT `id` FROM `saved_filters` WHERE `user` = ? AND `page` = ? AND `name` = ?', 'id', array($user, $page, $name));
+			if ($exists) {
+				db_execute_prepare('UPDATE `saved_filters` SET `filters` = ? WHERE `id` = ?', array(json_encode($current), $exists));
+				$_SESSION[$key] = intval($exists);
+			} else {
+				db_execute_prepare('INSERT INTO `saved_filters` (`user`, `page`, `name`, `filters`) VALUES (?, ?, ?, ?)', array($user, $page, $name, json_encode($current)));
+				$_SESSION[$key] = intval(db_fetch_cell_prepare('SELECT `id` FROM `saved_filters` WHERE `user` = ? AND `page` = ? AND `name` = ?', 'id', array($user, $page, $name)));
+			}
+		}
+	} elseif ($action == 'savefilter' && $post) {
+		if (!empty($current)) {
+			db_execute_prepare('UPDATE `saved_filters` SET `filters` = ? WHERE `id` = ? AND `user` = ? AND `page` = ?', array(json_encode($current), $id, $user, $page));
+		}
+	} elseif ($action == 'deletefilter' && $post) {
+		db_execute_prepare('DELETE FROM `saved_filters` WHERE `id` = ? AND `user` = ? AND `page` = ?', array($id, $user, $page));
+		if (isset($_SESSION[$key]) && $_SESSION[$key] == $id) {
+			unset($_SESSION[$key]);
+		}
+	} elseif ($action == 'applyfilter') {
+		$row = db_fetch_assoc_prepare('SELECT `filters` FROM `saved_filters` WHERE `id` = ? AND `user` = ? AND `page` = ?', array($id, $user, $page));
+		if (isset($row['filters'])) {
+			$data = json_decode($row['filters'], true);
+			foreach ($names as $f) {
+				unset($_SESSION[$page . '_' . $f]);
+				if (!is_array($data) || !isset($data[$f])) {
+					continue;
+				}
+				// Values were checked when the filter was set.  A timespan is the only array, of numbers.
+				if (is_array($data[$f])) {
+					$_SESSION[$page . '_' . $f] = array_map('intval', array_filter($data[$f], 'is_scalar'));
+				} elseif (is_scalar($data[$f])) {
+					$_SESSION[$page . '_' . $f] = $data[$f];
+				}
+			}
+			$_SESSION[$key] = $id;
+		}
+	} else {
+		$action = '';
+	}
+
+	if ($action != '') {
+		header('Location: /' . $page . '/');
+		exit;
+	}
+
+	$list = reindex_arr_by_id_col(db_fetch_assocs_prepare('SELECT `id`, `name` FROM `saved_filters` WHERE `user` = ? AND `page` = ? ORDER BY `name` ASC', array($user, $page)), 'name');
+
+	// Clearing every filter, or deleting the chosen saved filter, leaves none chosen
+	$selected = (isset($_SESSION[$key]) ? intval($_SESSION[$key]) : 0);
+	if (empty($current) || !isset($list[$selected])) {
+		unset($_SESSION[$key]);
+		$selected = 0;
+	}
+
+	return array(
+		'page'     => $page,
+		'list'     => $list,
+		'selected' => $selected,
+		'active'   => !empty($current),
+	);
+}

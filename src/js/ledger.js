@@ -119,6 +119,49 @@
 	};
 
 	/*
+		The Saved Filters row under the filter bar.  Choosing a saved filter applies it; Create
+		asks for a name and saves the current filters under it; Save updates the chosen one with
+		the current filters; Delete removes it.
+	*/
+	window.ledgerSavedFilters = function () {
+		var row = $('.ledger-saved-filters');
+		if (!row.length) {
+			return;
+		}
+		var page = row.data('page');
+		var form = $('#saved_filter_form');
+
+		function send(action, name) {
+			form.find('input[name="action"]').val(action);
+			if (name !== undefined) {
+				form.find('input[name="name"]').val(name);
+			}
+			form.trigger('submit');
+		}
+
+		$('#saved_filter').on('change', function () {
+			var id = $(this).val();
+			if (id) {
+				window.location = '/' + page + '/?action=applyfilter&filter=' + encodeURIComponent(id);
+			}
+		});
+		$('#saved_filter_create').on('click', function () {
+			var name = window.prompt('Enter a name for this Filter (up to 32 characters).', 'New Filter');
+			if (name !== null && $.trim(name) !== '') {
+				send('createfilter', $.trim(name));
+			}
+		});
+		$('#saved_filter_save').on('click', function () {
+			send('savefilter');
+		});
+		$('#saved_filter_delete').on('click', function () {
+			if (window.confirm('Are you sure you want to delete the saved filter "' + $(this).data('name') + '"?')) {
+				send('deletefilter');
+			}
+		});
+	};
+
+	/*
 		Every table puts its search box and row count at the top left, as Ascender Ledger Pro
 		does.  A table with export buttons puts them at the top right (layout.topEnd).
 	*/
@@ -260,5 +303,6 @@
 	$(function () {
 		window.ledgerSelect();
 		window.ledgerFilterBar();
+		window.ledgerSavedFilters();
 	});
 })(jQuery);

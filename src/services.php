@@ -11,8 +11,10 @@ if (!check_perm('services')) {
 $states   = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `state` FROM `services` ORDER BY `state` ASC"), 'state');
 $statuses = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `status` FROM `services` ORDER BY `status` ASC"), 'status');
 
+$names = array('host', 'service', 'state', 'status');
+$saved = (dt_is_request() ? array() : saved_filters('services', $names));
+
 if (isset($_GET['clear'])) {
-	$names = array('host', 'service', 'state', 'status');
 	if (in_array($_GET['clear'], $names, true)) {
 		unset($_SESSION['services_' . $_GET['clear']]);
 	} elseif ($_GET['clear'] === 'all') {
@@ -127,4 +129,5 @@ echo $twig->render('services.html', array_merge($twigarr, array(
 	'host'     => $host,
 	'hostname' => host_name($host),
 	'service'  => $service,
+	'saved'    => $saved,
 )));

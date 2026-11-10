@@ -16,8 +16,10 @@ if (!check_perm('facts')) {
 // The filter menus are only needed to draw the page, not for each page of table rows
 $types = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `type` FROM `facts` ORDER BY `type` ASC"), 'type');
 
+$names = array('host', 'fact', 'type', 'search');
+$saved = (dt_is_request() ? array() : saved_filters('facts', $names));
+
 if (isset($_GET['clear'])) {
-	$names = array('host', 'fact', 'type', 'search');
 	if (in_array($_GET['clear'], $names, true)) {
 		unset($_SESSION['facts_' . $_GET['clear']]);
 	} elseif ($_GET['clear'] === 'all') {
@@ -133,4 +135,5 @@ echo $twig->render('facts.html', array_merge($twigarr, array(
 	'hostname' => host_name($host),
 	'fact'     => $fact,
 	'search'   => $search,
+	'saved'    => $saved,
 )));

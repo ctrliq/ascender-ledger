@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 22;
+$new_db_version = 23;
 
 $db_version = read_setting('db_version', 1);
 
@@ -153,6 +153,16 @@ if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) 
 		$db_version = 22;
 	} catch (Exception $e) {
 		error_log('Ledger: database upgrade to version 22 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 22) {
+	try {
+		db_upgrade_23();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(23));
+		$db_version = 23;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 23 failed, and will be retried: ' . $e->getMessage());
 	}
 }
 
@@ -437,4 +447,21 @@ function db_upgrade_22() {
 		db_execute_prepare('UPDATE `reports` SET `filters` = ?, `options` = ?, `timespan` = ? WHERE `id` = ?',
 			array(base64_encode(serialize(array())), json_encode($options), $timespan, $r['id']));
 	}
+}
+
+/*
+	Version 23
+	- Saved filters, as in Ascender Ledger Pro: each user can name the filters set on the
+	  Changes, Facts, Packages and Services pages and choose them again later.
+*/
+function db_upgrade_23() {
+	db_execute("CREATE TABLE IF NOT EXISTS `saved_filters` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`user` int(11) NOT NULL,
+		`name` varchar(32) NOT NULL,
+		`page` varchar(32) NOT NULL,
+		`filters` text NOT NULL,
+		PRIMARY KEY (`id`),
+		KEY `user_page` (`user`, `page`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }

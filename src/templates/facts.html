@@ -49,6 +49,7 @@
 						<input type="text" class="form-control" data-url="/facts/?search=" value="{{ search }}" placeholder="Search all values">
 					</div>
 				</div>
+{% include 'parts/saved_filters.html' %}
 				{% if host or fact or type or search %}
 				<div class="pt-2">
 					Filters:

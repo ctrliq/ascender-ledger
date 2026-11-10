@@ -151,6 +151,7 @@ class User {
 		db_execute_prepare('DELETE FROM `team_user` WHERE `user` = ?', array($this->id));
 		db_execute_prepare('DELETE FROM `reports_perms` WHERE `user` = ?', array($this->id));
 		db_execute_prepare('DELETE FROM `reports` WHERE `owner` = ?', array($this->id));
+		db_execute_prepare('DELETE FROM `saved_filters` WHERE `user` = ?', array($this->id));
 		db_execute_prepare('DELETE FROM `users` WHERE `id` = ?', array($this->id));
 		db_execute_prepare('DELETE FROM `sessions` WHERE `user` = ?', array($this->id));
 	}

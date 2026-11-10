@@ -10,8 +10,10 @@ if (!check_perm('packages')) {
 // The filter menus are only needed to draw the page, not for each page of table rows
 $arches = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `arch` FROM `packages` ORDER BY `arch` ASC"), 'arch');
 
+$names = array('host', 'package', 'arch');
+$saved = (dt_is_request() ? array() : saved_filters('packages', $names));
+
 if (isset($_GET['clear'])) {
-	$names = array('host', 'package', 'arch');
 	if (in_array($_GET['clear'], $names, true)) {
 		unset($_SESSION['packages_' . $_GET['clear']]);
 	} elseif ($_GET['clear'] === 'all') {
@@ -113,4 +115,5 @@ echo $twig->render('packages.html', array_merge($twigarr, array(
 	'host'     => $host,
 	'hostname' => host_name($host),
 	'package'  => $package,
+	'saved'    => $saved,
 )));

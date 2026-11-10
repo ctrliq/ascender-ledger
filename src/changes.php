@@ -60,6 +60,8 @@ if (!dt_is_request()) {
 
 $filter_names = array('host', 'csearch', 'template', 'playbook', 'role', 'module', 'type', 'inventory', 'project', 'timespan');
 
+$saved = (dt_is_request() ? array() : saved_filters('changes', $filter_names));
+
 if (isset($_GET['clear'])) {
 	if (in_array($_GET['clear'], $filter_names, true)) {
 		unset($_SESSION['changes_' . $_GET['clear']]);
@@ -273,4 +275,4 @@ if ($ts['id'] == 0) {
 echo $twig->render('changes.html', array_merge($twigarr, array(
 		'timespans' => $timespans, 'spans' => $spans, 'ts' => $ts,
 		'playbooks' => $playbooks, 'templates' => $templates, 'modules' => $modules, 'types' => $types, 'inventories' => $inventories, 'projects' => $projects,
-		'roles' => $roles, 'current' => $current, 'hostname' => host_name($current['host']))));
+		'roles' => $roles, 'current' => $current, 'hostname' => host_name($current['host']), 'saved' => $saved)));

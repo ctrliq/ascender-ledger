@@ -1,0 +1,25 @@
+{# The Saved Filters row of a list page's filter bar, as in Ascender Ledger Pro.  saved comes from saved_filters() in misc.php. #}
+				<div class="row g-2 pt-2 align-items-center ledger-saved-filters" data-page="{{ saved.page }}">
+					<div class="col-2">
+						<select class="ledger-select" id="saved_filter" data-placeholder="Select Saved Filter" data-nosearch="true" data-noclear="true"{% if not saved.list %} disabled{% endif %}>
+							<option></option>
+{% for id,name in saved.list %}
+							<option value="{{ id }}"{% if saved.selected == id %} selected{% endif %}>{{ name }}</option>
+{% endfor %}
+						</select>
+					</div>
+					<div class="col-auto">
+						<form method="post" action="/{{ saved.page }}/" id="saved_filter_form" class="d-flex gap-2">
+							<input type="hidden" name="action" value="">
+							<input type="hidden" name="filter" value="{{ saved.selected }}">
+							<input type="hidden" name="name" value="">
+{% if saved.active %}
+							<button type="button" class="btn btn-primary btn-s" id="saved_filter_create" title="Save the current filters under a new name">Create</button>
+{% endif %}
+{% if saved.selected %}
+							<button type="button" class="btn btn-primary btn-s" id="saved_filter_save" title="Save the current filters to {{ saved.list[saved.selected] }}">Save</button>
+							<button type="button" class="btn btn-primary btn-s" id="saved_filter_delete" data-name="{{ saved.list[saved.selected] }}">Delete</button>
+{% endif %}
+						</form>
+					</div>
+				</div>
