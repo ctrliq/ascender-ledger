@@ -178,9 +178,13 @@ foreach (db_fetch_assocs('SELECT `team`, `user` FROM `team_user`') as $r) {
 		$member[$r['user']][] = $teams[$r['team']];
 	}
 }
+// Administrators by their own permission or an enabled team's, in one query rather than one per user
+$admins = array_flip(array_map('intval', array_column(db_fetch_assocs("SELECT `user` FROM `user_permission` WHERE `perm` = 'super'
+	UNION SELECT `tu`.`user` FROM `team_user` AS `tu`
+	JOIN `team_permission` AS `tp` ON `tp`.`team` = `tu`.`team` AND `tp`.`perm` = 'super'
+	JOIN `teams` AS `t` ON `t`.`id` = `tu`.`team` AND `t`.`enabled` = 1"), 'user')));
 foreach ($users as &$u) {
-	$p = user_permissions($u['id']);
-	$u['super'] = !empty($p['super']);
+	$u['super'] = isset($admins[intval($u['id'])]);
 	$u['teams'] = (isset($member[$u['id']]) ? $member[$u['id']] : array());
 	sort($u['teams']);
 }

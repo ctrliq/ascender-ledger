@@ -485,10 +485,19 @@ function timespan_range($id, $now = null) {
 	$back = array(
 		1 => 'PT30M', 2 => 'PT1H', 3 => 'PT2H', 4 => 'PT4H', 5 => 'PT6H', 6 => 'PT12H',
 		7 => 'P1D', 8 => 'P2D', 9 => 'P3D', 10 => 'P4D', 11 => 'P7D', 12 => 'P14D',
-		13 => 'P1M', 14 => 'P2M', 15 => 'P3M', 16 => 'P4M', 17 => 'P6M', 18 => 'P1Y', 19 => 'P2Y',
 	);
 	if (isset($back[$id])) {
 		return array($t->sub(new DateInterval($back[$id]))->getTimestamp(), $now);
+	}
+	/*
+		Months back land on the same day of the month, or the last day of a shorter month: a
+		month before March 31 is February 28, where PHP's own arithmetic gives March 3.
+	*/
+	$months = array(13 => 1, 14 => 2, 15 => 3, 16 => 4, 17 => 6, 18 => 12, 19 => 24);
+	if (isset($months[$id])) {
+		$first = $t->setDate((int) $t->format('Y'), (int) $t->format('n'), 1)->modify('-' . $months[$id] . ' months');
+		$day = min((int) $t->format('j'), (int) $first->format('t'));
+		return array($first->setDate((int) $first->format('Y'), (int) $first->format('n'), $day)->getTimestamp(), $now);
 	}
 
 	$day   = $t->setTime(0, 0);
