@@ -22,3 +22,9 @@ $permissions = array(
 	'reports'        => 'View Reports',
 	'reports_create' => 'Create Reports',
 );
+
+/*
+	Visual settings, with the choices Ascender Ledger Pro offers
+*/
+$export_limits   = array(1000, 2000, 3000, 4000, 5000, 10000, 20000, 30000, 40000, 50000);
+$callback_limits = array(10, 20, 50, 100);

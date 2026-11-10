@@ -586,3 +586,21 @@ function report_role($report, $user) {
 	}
 	return $best;
 }
+
+/*
+	The most rows a CSV or PDF export of a list page holds (Settings > Visual)
+*/
+function export_limit() {
+	global $export_limits;
+	$v = intval(read_setting('export_limit', 10000));
+	return (in_array($v, $export_limits, true) ? $v : 10000);
+}
+
+/*
+	How many matches a search-as-you-type menu loads at a time (Settings > Visual)
+*/
+function callback_limit() {
+	global $callback_limits;
+	$v = intval(read_setting('callback_limit', 20));
+	return (in_array($v, $callback_limits, true) ? $v : 20);
+}

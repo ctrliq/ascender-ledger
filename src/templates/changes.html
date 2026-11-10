@@ -170,6 +170,8 @@
 
 	ledgerTable('.datatable-changes', {
 		url: '/changes/',
+		exportTitle: 'Changes',
+		exportColumns: ':visible:not(:first-child)',
 		order: [[1, 'desc']],
 		createdRow: function (row, data) {
 			if (data.check) {

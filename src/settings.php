@@ -69,6 +69,18 @@ if (isset($_GET['action']) && $_GET['action'] == 'save' && $_SERVER['REQUEST_MET
 		exit;
 	}
 
+	if ($form == 'visual') {
+		if (isset($_POST['export_limit']) && in_array(intval($_POST['export_limit']), $export_limits, true)) {
+			write_setting('export_limit', intval($_POST['export_limit']));
+		}
+		if (isset($_POST['callback_limit']) && in_array(intval($_POST['callback_limit']), $callback_limits, true)) {
+			write_setting('callback_limit', intval($_POST['callback_limit']));
+		}
+
+		Header("Location: /settings/visual/?saved=1\n\n");
+		exit;
+	}
+
 	if ($form == 'maint') {
 		foreach ($retention_settings as $f) {
 			if (isset($_POST[$f])) {
@@ -123,6 +135,12 @@ $saved = isset($_GET['saved']);
 
 if (isset($_GET['action']) && $_GET['action'] == 'general') {
 	echo $twig->render('settings_general.html', array_merge($twigarr, array('settings' => $settings, 'default_modules' => $default_modules, 'saved' => $saved)));
+	exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] == 'visual') {
+	echo $twig->render('settings_visual.html', array_merge($twigarr, array('saved' => $saved, 'export_limits' => $export_limits, 'callback_limits' => $callback_limits,
+		'export_limit' => export_limit(), 'callback_limit' => callback_limit())));
 	exit;
 }
 

@@ -133,11 +133,61 @@
 	});
 
 	/*
+		Copy, CSV, PDF and Print buttons for a table whose rows come from the server, as in
+		Ascender Ledger Pro.  Copy and Print take the page on screen.  CSV and PDF take every row
+		the filters match, up to the export limit (Settings > Visual): the table loads them all
+		as one page, they are exported, and it goes back to the page it was on.  Cells are
+		exported as their data, not as shown, so a long fact value is not cut short.
+	*/
+	var exportLimit = parseInt($('meta[name="export-limit"]').attr('content'), 10) || 10000;
+
+	function exportAll(kind, title, columns) {
+		return {
+			extend: kind,
+			title: title,
+			orientation: (kind === 'pdf' ? 'landscape' : undefined),
+			exportOptions: { columns: columns, orthogonal: 'export' },
+			action: function (e, dt, node, config, cb) {
+				var self = this;
+				var len = dt.page.len();
+				var page = dt.page();
+				var want = Math.min(dt.page.info().recordsTotal, exportLimit);
+				var run = $.fn.dataTable.ext.buttons[kind + 'Html5'].action;
+				if (want <= len && page === 0) {
+					run.call(self, e, dt, node, config, cb);
+					return;
+				}
+				dt.one('draw', function () {
+					run.call(self, e, dt, node, config, function () {
+						dt.page.len(len).page(page).draw('page');
+						cb();
+					});
+				});
+				dt.page.len(want).draw();
+			}
+		};
+	}
+
+	window.ledgerExportButtons = function (title, columns) {
+		columns = columns || ':visible';
+		return [
+			{ extend: 'copy', exportOptions: { columns: columns, orthogonal: 'export' } },
+			exportAll('csv', title, columns),
+			exportAll('pdf', title, columns),
+			{ extend: 'print', title: title, exportOptions: { columns: columns, orthogonal: 'export' } }
+		];
+	};
+
+	/*
 		A DataTable whose rows come from the server a page at a time.  Every column is shown
 		as text unless it has its own render function.  The server stops counting rows at a
 		cap, so the info line says "more than" rather than giving a wrong total.
 	*/
 	window.ledgerTable = function (selector, options) {
+		// exportTitle adds the export buttons; exportColumns picks the columns they export
+		if (options.exportTitle) {
+			options = $.extend(true, {}, options, { layout: { topEnd: { buttons: window.ledgerExportButtons(options.exportTitle, options.exportColumns) } } });
+		}
 		var cols = options.columns.map(function (c) {
 			if (!c.render) {
 				c.render = $.fn.dataTable.render.text();

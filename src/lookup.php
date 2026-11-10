@@ -9,7 +9,8 @@
 
 include_once('includes/global.php');
 
-define('LOOKUP_PAGE', 25);
+// Matches per page, from Settings > Visual
+define('LOOKUP_PAGE', callback_limit());
 
 $what = (isset($_GET['what']) && is_string($_GET['what']) ? $_GET['what'] : '');
 $q    = (isset($_GET['q']) && is_string($_GET['q']) ? trim(substr($_GET['q'], 0, 128)) : '');

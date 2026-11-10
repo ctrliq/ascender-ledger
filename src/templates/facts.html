@@ -79,6 +79,7 @@
 {% block javascript %}
 	ledgerTable('.datatable-facts', {
 		url: '/facts/',
+		exportTitle: 'Facts',
 		order: [[1, 'asc']],
 		columns: [
 			{ data: 'hostname', className: 'text-nowrap', render: function (d, t, row) {
