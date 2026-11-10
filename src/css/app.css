@@ -66,3 +66,13 @@ main a:not(.btn):not(.nav-link):not(.dropdown-item):not(.page-link):not(.card):h
 .ledger-tab {
 	min-width: 9rem;
 }
+
+/* Text inputs and plain selects beside select2 menus and buttons match their 40px height */
+.ledger-controls .form-control,
+.ledger-controls .form-select {
+	height: 40px;
+	font-size: .875rem;
+}
+.ledger-controls .ledger-sort-dir {
+	width: 7rem;
+}
