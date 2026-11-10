@@ -1,129 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" data-bs-theme="dark">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="csrf-token" content="{{ csrf_token }}">
 	<title>Ascender Ledger</title>
-	<link rel="stylesheet" type="text/css" href="/css/bootstrap/bootstrap-5.2.3.min.css" />
-	<link rel="stylesheet" type="text/css" href="/css/font-awesome-5.7.2/all.css" />
-	<link rel="stylesheet" type="text/css" href="/css/bootstrap/dataTables.bootstrap.5-1.12.1.min.css" />
-	<link rel="stylesheet" type="text/css" href="/css/bootstrap/buttons.bootstrap5-2.2.3.min.css" />
-	<link rel="stylesheet" type="text/css" href="/css/chosen-1.8.7/chosen.min.css" />
-	<link href="/css/app.css" rel="stylesheet">
+	<link rel="icon" type="image/png" sizes="192x192" href="/img/android-chrome-192x192.png">
+	<link rel="stylesheet" type="text/css" href="/css/bootstrap-5.3.8/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/font-awesome-6.7.2/css/all.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/datatables-2.3.3/dataTables.bootstrap5.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/datatables-buttons-3.2.4/buttons.bootstrap5.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/select2-4.0.13/select2.min.css" />
+	<link rel="stylesheet" type="text/css" href="/css/select2-4.0.13/select2-bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="/css/themes/ciq/app.css?v={{ version }}" />
+	<link rel="stylesheet" type="text/css" href="/css/app.css?v={{ version }}" />
 	<style>
 	{% block css %}{% endblock %}
 	</style>
 
 	<script type="text/javascript" src="/js/jquery-3.7.0.min.js"></script>
 	<script type="text/javascript" src="/js/chartjs-4.4.0/chart.umd.min.js"></script>
-	<script type="text/javascript" src="/js/jszip-2.5.0/jszip.min.js"></script>
-	<script type="text/javascript" src="/js/pdfmake-0.1.36/pdfmake.min.js"></script>
-	<script type="text/javascript" src="/js/pdfmake-0.1.36/vfs_fonts.js"></script>
-	<script type="text/javascript" src="/js/datatables-1.12.1/jquery.dataTables.min.js"></script>
-	<script type="text/javascript" src="/js/datatables-1.12.1/dataTables.bootstrap5.min.js"></script>
-	<script type="text/javascript" src="/js/datatables-buttons-2.2.3/dataTables.buttons.min.js"></script>
-	<script type="text/javascript" src="/js/datatables-buttons-2.2.3/buttons.bootstrap5.min.js"></script>
-	<script type="text/javascript" src="/js/datatables-buttons-2.2.3/buttons.html5.min.js"></script>
-	<script type="text/javascript" src="/js/datatables-buttons-2.2.3/buttons.print.min.js"></script>
-
+	<script type="text/javascript" src="/js/jszip-3.10.1/jszip.min.js"></script>
+	<script type="text/javascript" src="/js/pdfmake-0.2.7/pdfmake.min.js"></script>
+	<script type="text/javascript" src="/js/pdfmake-0.2.7/vfs_fonts.js"></script>
+	<script type="text/javascript" src="/js/datatables-2.3.3/dataTables.min.js"></script>
+	<script type="text/javascript" src="/js/datatables-2.3.3/dataTables.bootstrap5.min.js"></script>
+	<script type="text/javascript" src="/js/datatables-buttons-3.2.4/dataTables.buttons.min.js"></script>
+	<script type="text/javascript" src="/js/datatables-buttons-3.2.4/buttons.bootstrap5.min.js"></script>
+	<script type="text/javascript" src="/js/datatables-buttons-3.2.4/buttons.html5.min.js"></script>
+	<script type="text/javascript" src="/js/datatables-buttons-3.2.4/buttons.print.min.js"></script>
 </head>
 <body class="d-flex flex-column vh-100 overflow-hidden">
-	<header class="navbar navbar-expand-lg navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
-		<a href="/" class="navbar-brand col-md-3 col-lg-2 me-0 px-3 text-white text-decoration-none">
-			<span class="fs-4 d-sm-inline"><img src="/img/AscenderLedger_logo_rev.svg" class="img-fluid" style="min-height: 30px; height: auto"></span>
-		</a>
-		<div class="topnav navbar-nav justify-content-end ms-auto" tole="navigation">
-			<div class="nav-item text-nowrap">
-				<li class="nav-item dropdown ms-auto">
-					<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-						<i class="navicon fa fa-user"></i> {{ account.name }}
-					</a>
-					<ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-						<li>
-							<a class="dropdown-item" href="/profile/">Profile</a>
-						</li>
-						<li>
-							<a class="dropdown-item" href="/logout/">Logout</a>
-						</li>
-					</ul>
-				</li>
+	<nav class="navbar navbar-expand navbar-dark sticky-top flex-md-nowrap p-0 shadow d-flex flex-row flex-nowrap">
+		<div class="col-7 d-flex align-items-center">
+			<div class="d-md-none ps-2">
+				<button class="btn btn-transparent text-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenuXS" aria-label="Menu">
+					<i class="fas fa-bars"></i>
+				</button>
 			</div>
+			<a href="/" class="ps-3 text-decoration-none">
+				<img class="navbar-brand-logo" src="/img/AscenderLedger_logo_rev.svg" alt="Ascender Ledger" style="height: 40px">
+			</a>
 		</div>
-	</header>
-
-	<div class="container-fluid flex-grow-1 d-flex flex-column flex-sm-row overflow-auto w-100 px-0">
-		<div class="row flex-grow-sm-1 flex-grow-sm-0 w-100 mx-0">
-			<aside class="col-sm-2 flex-grow-sm-1 flex-shrink-sm-1 flex-grow-sm-0 page-sidebar">
-				<div class="p-1 pt-3 h-100 sticky-top">
-					<ul class="nav nav-pills flex-sm-column flex-row mb-auto justify-content-between text-truncate">
-						<li class="nav-item pf-c-nav__link mb-1">
-							<a href="/dashboard/" class="nav-link px-2 text-truncate align-middle{% if server == '/dashboard.php' or server == '/index.php' %} active{%endif %}">
-								<i class="fas fa-chart-line"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span> </a>
-						</li>
-						<li class="nav-item pf-c-nav__link mb-1">
-							<a href="/reports/" class="nav-link px-2 text-truncate align-middle{% if server == '/reports.php' %} active{%endif %}">
-								<i class="navicon fa fa-table"></i> <span class="ms-1 d-none d-sm-inline">Reports</span>
+		<div class="col-5 d-flex justify-content-end">
+			<div class="navbar-nav my-auto" role="navigation">
+				<div class="nav-item text-nowrap">
+					<ul class="navbar-nav">
+						<li class="nav-item dropdown pe-2">
+							<a class="nav-link dropdown-toggle p-1" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+								<i class="navicon fa fa-user"></i> {{ account.name }}
 							</a>
-						</li>
-{% if account.view_changes %}
-						<li class="nav-item pf-c-nav__link mb-1">
-							<a href="/changes/" class="nav-link px-2 text-truncate align-middle{% if server == '/changes.php' %} active{%endif %}">
-								<i class="navicon fa fa-file"></i> <span class="ms-1 d-none d-sm-inline">Changes</span>
-							</a>
-						</li>
-{% endif %}
-{% if account.view_facts %}
-						<li class="nav-item pf-c-nav__link mb-1">
-							<a href="/facts/" class="nav-link px-2 text-truncate align-middle{% if server == '/facts.php' %} active{%endif %}">
-								<i class="navicon fa fa-puzzle-piece"></i> <span class="ms-1 d-none d-sm-inline">Facts</span>
-							</a>
-						</li>
-
-						<li class="nav-item pf-c-nav__link mb-1">
-							<a href="/packages/" class="nav-link px-2 text-truncate align-middle{% if server == '/packages.php' %} active{%endif %}">
-								<i class="navicon fas fa-box"></i> <span class="ms-1 d-none d-sm-inline">Packages</span>
-							</a>
-						</li>
-
-						<li class="nav-item pf-c-nav__link mb-1">
-							<a href="/services/" class="nav-link px-2 text-truncate align-middle{% if server == '/services.php' %} active{%endif %}">
-								<i class="fas fa-database"></i> <span class="ms-1 d-none d-sm-inline">Services</span>
-							</a>
-						</li>
-{% endif %}
-{% if account.super %}
-						<li>
-							<a href="#submenu4" data-bs-toggle="collapse" class="pf-c-nav__link nav-link px-2 text-truncate align-middle mb-1" aria-expanded="true">
-								<i class="navicon fa fa-cog"></i> <span class="ms-1 d-none d-sm-inline">Admin</span>
-							</a>
-							<ul class="{% if server != '/users.php' and server != '/settings.php' and server != '/servers.php' %}collapse {%endif %} nav flex-column ms-4" id="submenu4" data-bs-parent="#menu">
-								<li class="pf-c-nav__link w-100 mb-1">
-									<a href="/users/" class="nav-link px-0{% if server == '/users.php' %} active{%endif %}"> <i class="navicon fa fa-users"></i> <span class="d-none d-sm-inline">Users</span></a>
-								</li>
-								<li class="pf-c-nav__link w-100 mb-1">
-									<a href="/servers/" class="nav-link px-0{% if server == '/servers.php' %} active{%endif %}"> <i class="navicon fas fa-network-wired"></i> <span class="d-none d-sm-inline">Servers</span></a>
-								</li>
-								<li class="pf-c-nav__link w-100 mb-1">
-									<a href="/settings/" class="nav-link px-0{% if server == '/settings.php' %} active{%endif %}"> <i class="navicon fas fa-wrench"></i> <span class="d-none d-sm-inline">Settings</span></a>
-								</li>
+							<ul class="dropdown-menu dropdown-menu-end mx-2">
+								<li><a class="dropdown-item" href="/profile/">Profile</a></li>
+								<li><a class="dropdown-item" href="/logout/">Logout</a></li>
 							</ul>
 						</li>
-{% endif %}
-{% if is_dev %}
-						<br><center><font color=red><strong>*** DEV SITE ***</strong></font></center>
-{% endif %}
 					</ul>
 				</div>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container-fluid flex-grow-1 d-flex flex-column flex-sm-row overflow-auto w-100 px-0">
+		<div class="row flex-grow-sm-1 flex-grow-sm-0 w-100 mx-0 flex-nowrap">
+
+			{# Small screens: the menu slides out from the button in the top bar #}
+			<div class="offcanvas offcanvas-start page-sidebar" tabindex="-1" id="sidebarMenuXS">
+				<div class="offcanvas-header pb-0">
+					<button type="button" class="btn-close ms-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+				</div>
+				<div class="offcanvas-body p-1 pt-2">
+{% include 'parts/nav.html' with { menu_id: 'menuXS' } %}
+				</div>
+			</div>
+
+			<aside class="d-none d-md-flex flex-column page-sidebar px-1 py-2" style="min-width: 200px; max-width: 200px; position: sticky; top: 0; height: 100vh; overflow-y: auto;">
+				<div class="p-1 pt-2">
+{% include 'parts/nav.html' with { menu_id: 'menu' } %}
+				</div>
 			</aside>
+
 			<main class="col overflow-auto h-100 pt-3">
 {% block body %}{% endblock %}
 			</main>
 		</div>
 	</div>
 
-	<script src="/js/bootstrap-5.2.3/bootstrap.bundle.min.js"></script>
-	<script src="/js/chosen-1.8.7/chosen.jquery.min.js"></script>
+	<script src="/js/bootstrap-5.3.8/bootstrap.bundle.min.js"></script>
+	<script src="/js/select2-4.0.13/select2.full.min.js"></script>
+	<script src="/js/ledger.js?v={{ version }}"></script>
 
 <!-- Custom and plugin javascript -->
 {% block javascriptinc %}{% endblock %}

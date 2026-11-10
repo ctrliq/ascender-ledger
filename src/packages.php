@@ -2,47 +2,24 @@
 
 include_once('includes/global.php');
 
-if (!$account['view_facts'] && !$account['super']) {
-    header("Location: /\n\n");
-    exit;
+if (empty($account['view_facts']) && empty($account['super'])) {
+	header("Location: /\n\n");
+	exit;
 }
 
-$hosts = reindex_arr_by_id(db_fetch_assocs("SELECT * FROM `hosts` ORDER BY `hostname`"));
-$upackages = reindex_col(db_fetch_assocs("SELECT DISTINCT `name` FROM `packages` ORDER BY `name` ASC"), 'name');
-$arches = reindex_col(db_fetch_assocs("SELECT DISTINCT `arch` FROM `packages` ORDER BY `arch` ASC"), 'arch');
-
-$filters = array();
-$host = '';
-$package = '';
-$arch = '';
-$fullname = '';
-$errata = 0;
-
-if (isset($_GET['clearf'])) {
-	$_SESSION['packages_host'] = '';
-	$_SESSION['packages_package'] = '';
-	$_SESSION['packages_arch'] = '';
-	$_SESSION['packages_fullname'] = '';
-}
+// The filter menus are only needed to draw the page, not for each page of table rows
+$arches = dt_is_request() ? array() : reindex_col(db_fetch_assocs("SELECT DISTINCT `arch` FROM `packages` ORDER BY `arch` ASC"), 'arch');
 
 if (isset($_GET['clear'])) {
-	if ($_GET['clear'] == 'host') {
-		unset($_SESSION['packages_host']);
+	if (in_array($_GET['clear'], array('host', 'package', 'arch'), true)) {
+		unset($_SESSION['packages_' . $_GET['clear']]);
 	}
-	if ($_GET['clear'] == 'package') {
-		unset($_SESSION['packages_package']);
-	}
-	if ($_GET['clear'] == 'arch') {
-		unset($_SESSION['packages_arch']);
-	}
-}
-
-if (isset($_GET['errata'])) {
-	$_SESSION['errata'] = 1;
+	header("Location: /packages/");
+	exit;
 }
 
 if (isset($_GET['host'])) {
-	if (intval($_GET['host']) == $_GET['host'] && isset($hosts[$_GET['host']])) {
+	if (host_name($_GET['host']) != '') {
 		$_SESSION['packages_host'] = intval($_GET['host']);
 	} else {
 		unset($_SESSION['packages_host']);
@@ -51,9 +28,10 @@ if (isset($_GET['host'])) {
 	exit;
 }
 
-if (isset($_GET['package'])) {
-	if (in_array(sql_clean_package($_GET['package']), $upackages)) {
-		$_SESSION['packages_package'] = sql_clean_package($_GET['package']);
+if (isset($_GET['package']) && is_string($_GET['package'])) {
+	$p = sql_clean_package($_GET['package']);
+	if ($p != '') {
+		$_SESSION['packages_package'] = $p;
 	} else {
 		unset($_SESSION['packages_package']);
 	}
@@ -61,9 +39,9 @@ if (isset($_GET['package'])) {
 	exit;
 }
 
-if (isset($_GET['arch'])) {
-	if (in_array(sql_clean_package($_GET['arch']), $arches)) {
-		$_SESSION['packages_arch'] = sql_clean_package($_GET['arch']);
+if (isset($_GET['arch']) && is_string($_GET['arch'])) {
+	if (in_array($_GET['arch'], $arches, true)) {
+		$_SESSION['packages_arch'] = $_GET['arch'];
 	} else {
 		unset($_SESSION['packages_arch']);
 	}
@@ -71,32 +49,63 @@ if (isset($_GET['arch'])) {
 	exit;
 }
 
-// Create filters
-if (isset($_SESSION['packages_host']) && $_SESSION['packages_host'] != '') {
-	$filters[] = " `host` = " . intval($_SESSION['packages_host']);
-	$host = intval($_SESSION['packages_host']);
+$host    = (isset($_SESSION['packages_host']) ? intval($_SESSION['packages_host']) : 0);
+$package = (isset($_SESSION['packages_package']) ? $_SESSION['packages_package'] : '');
+$arch    = (isset($_SESSION['packages_arch']) ? $_SESSION['packages_arch'] : '');
+
+if (dt_is_request()) {
+	$where = array();
+	$params = array();
+
+	if ($host) {
+		$where[] = '`p`.`host` = ?';
+		$params[] = $host;
+	}
+	if ($package != '') {
+		$where[] = '`p`.`name` = ?';
+		$params[] = $package;
+	}
+	if ($arch != '') {
+		$where[] = '`p`.`arch` = ?';
+		$params[] = $arch;
+	}
+
+	dt_serve(
+		'`p`.`host`, `h`.`hostname`, `p`.`name`, `p`.`version`, `p`.`release`, `p`.`epoch`, `p`.`arch`, `p`.`source`',
+		'FROM `packages` AS `p` LEFT JOIN `hosts` AS `h` ON `h`.`id` = `p`.`host`',
+		$where,
+		$params,
+		array(
+			0 => array('`h`.`hostname`', '`p`.`name`'),
+			1 => array('`p`.`name`', '`p`.`host`'),
+			2 => array('`p`.`version`'),
+			3 => array('`p`.`release`'),
+			4 => array('`p`.`epoch`'),
+			5 => array('`p`.`arch`'),
+			6 => array('`p`.`source`'),
+		),
+		'`p`.`name`, `p`.`host`',
+		array('`h`.`hostname`', '`p`.`name`', '`p`.`version`', '`p`.`release`'),
+		function ($r) {
+			return array(
+				'host_id'  => intval($r['host']),
+				'hostname' => $r['hostname'],
+				'name'     => $r['name'],
+				'version'  => $r['version'],
+				'release'  => $r['release'],
+				'epoch'    => $r['epoch'],
+				'arch'     => $r['arch'],
+				'source'   => $r['source'],
+			);
+		},
+		array('`p`.`host`', '`p`.`name`', '`p`.`version`', '`p`.`release`', '`p`.`epoch`', '`p`.`arch`')
+	);
 }
 
-if (isset($_SESSION['packages_package']) && $_SESSION['packages_package'] != '') {
-	$filters[] = " `name` = '" . sql_clean_package($_SESSION['packages_package']) . "'";
-	$package = sql_clean_package($_SESSION['packages_package']);
-}
-
-if (isset($_SESSION['packages_arch']) && $_SESSION['packages_arch'] != '') {
-	$filters[] = " `arch` = '" . sql_clean_package($_SESSION['packages_arch']) . "'";
-	$arch = sql_clean_package($_SESSION['packages_arch']);
-}
-
-$h = array();
-foreach ($hosts as $h2) {
-	$h[$h2['id']] = $h2['hostname'];
-}
-if (!empty($filters)) {
-	$filters = "WHERE " . implode(' AND ', $filters);
-} else {
-	$filters = '';
-}
-
-$packages = db_fetch_assocs("SELECT * FROM `packages` $filters ORDER BY `host`, `name` ASC, `version`, `release`" . ($filters == '' ? ' LIMIT 0,500' : ''));
-
-echo $twig->render('packages.html', array_merge($twigarr, array('arches' => $arches, 'arch' => $arch, 'upackages' => $upackages, 'hosts' => $h, 'host' => $host, 'package' => $package, 'packages' => $packages)));
+echo $twig->render('packages.html', array_merge($twigarr, array(
+	'arches'   => $arches,
+	'arch'     => $arch,
+	'host'     => $host,
+	'hostname' => host_name($host),
+	'package'  => $package,
+)));

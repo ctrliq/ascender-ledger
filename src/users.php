@@ -16,15 +16,23 @@ if (isset($_GET['user']) && $_GET['user'] == intval($_GET['user']) && intval($_G
 if (isset($_GET['action'])) {
 	switch ($_GET['action']) {
 		case 'invite':
-			$email = $user->clean_username($_POST['email']);
+			if ($_SERVER['REQUEST_METHOD'] != 'POST' || !isset($_POST['email'])) {
+				Header("Location: /users/\n\n");
+				exit;
+			}
+			$email = strtolower($user->clean_username(post_str('email')));
 			if (!filter_var($email , FILTER_VALIDATE_EMAIL)) {
 				Header("Location: /users/?error=invalidemail\n\n");
+				exit;
+			}
+			if (db_fetch_cell_prepare('SELECT `id` FROM `users` WHERE `username` = ? OR `email` = ?', 'id', array($email, $email))) {
+				Header("Location: /users/?error=exists\n\n");
 				exit;
 			}
 			$code = random_str(32);
 			$user->set_username($email);
 			$user->set_email($email);
-			$user->set_code($code);
+			$user->set_code($code, 7 * 86400);
 			$user->save();
 
 			$html = $twig->render('emails/user_invite.html', array_merge($twigarr, array('email' => $email, 'code' => $code))); 
@@ -34,7 +42,9 @@ if (isset($_GET['action'])) {
 			exit;
 
 		case 'delete':
-			if ($user->id) {
+			csrf_verify();
+			// Deleting yourself would leave the session pointing at nobody
+			if ($user->id && $user->id != $account['id']) {
 				$user->delete();
 			}
 			Header("Location: /users/\n\n");
@@ -48,24 +58,26 @@ if (isset($_GET['action'])) {
 			exit;
 
 		case 'save':
-			if ($user->id) {
-				if (isset($_POST['name'])) {
+			if ($user->id && $_SERVER['REQUEST_METHOD'] == 'POST') {
+				$self = ($user->id == $account['id']);
+				if (isset($_POST['name']) && $user->clean_name($_POST['name']) != '') {
 					$user->set_name($_POST['name']);
 				}
 
-				if (isset($_POST['username'])) {
+				if (isset($_POST['username']) && $user->clean_username($_POST['username']) != '') {
 					$user->set_username($_POST['username']);
 				}
 
-				if (isset($_POST['email'])) {
+				if (isset($_POST['email']) && $user->clean_username($_POST['email']) != '') {
 					$user->set_email($_POST['email']);
 				}
 
-				if (isset($_POST['enabled'])) {
+				// An administrator cannot disable or demote themselves, and so lock everyone out
+				if (isset($_POST['enabled']) && !$self) {
 					$user->set_enabled(intval($_POST['enabled']));
 				}
 
-				if (isset($_POST['super'])) {
+				if (isset($_POST['super']) && !$self) {
 					$user->set_super($_POST['super']);
 				}
 
@@ -77,8 +89,8 @@ if (isset($_GET['action'])) {
 					$user->set_view_facts($_POST['view_facts']);
 				}
 
-				$newpass = $_POST['newpass'];
-				$newpass2 = $_POST['newpass2'];
+				$newpass = (isset($_POST['newpass']) ? (string) $_POST['newpass'] : '');
+				$newpass2 = (isset($_POST['newpass2']) ? (string) $_POST['newpass2'] : '');
 				if ($newpass != '' && strlen($newpass) > 7 && $newpass == $newpass2) {
 					$user->set_password($newpass);
 					$user->set_code('');
@@ -96,6 +108,9 @@ if (isset($_GET['error'])) {
 	switch ($_GET['error']) {
 		case 'invalidemail':
 			$error = 'Invalid Email Address';
+			break;
+		case 'exists':
+			$error = 'A user with that email address already exists';
 	}
 }
 

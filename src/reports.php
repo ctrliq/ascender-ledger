@@ -3,9 +3,41 @@ include_once('includes/global.php');
 
 $users = reindex_arr_by_id_col(db_fetch_assocs('SELECT `id`, `name` FROM `users`'), 'name');
 
+/*
+	These actions change a report but are still plain links, so the link carries the session's
+	CSRF token and is refused without it.  The rest are POSTed forms, which are checked for every
+	request.
+*/
+if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('delete', 'removeuserperm', 'deletefilter', 'moveup', 'movedown', 'deletefact', 'scheduledelete', 'new'), true)) {
+	csrf_verify();
+}
+
+// Form actions only ever arrive as POSTs, which is where the CSRF check applies
+if (isset($_REQUEST['action']) && in_array($_REQUEST['action'], array('savesort', 'savename', 'addfilter', 'addcolumn', 'adduserperm', 'schedulesave'), true) && $_SERVER['REQUEST_METHOD'] != 'POST') {
+	Header("Location: /reports/\n\n");
+	exit;
+}
+
+/*
+	A facts report shows facts and a changes report shows changes, so each needs the same
+	permission as the page it mirrors: being shared a report does not get round View Facts
+	or View Changes.
+*/
+function report_type_allowed($type) {
+	global $account;
+	if (!empty($account['super'])) {
+		return true;
+	}
+	return ($type == 'changes' ? !empty($account['view_changes']) : !empty($account['view_facts']));
+}
+
 if (isset($_REQUEST['action'])) {
 	if (isset($_REQUEST['report']) && $_REQUEST['report'] == intval($_REQUEST['report']) && $_REQUEST['report']) {
 		$report = new Report(intval($_REQUEST['report']));
+		if ($report->id && !report_type_allowed($report->type) && $_REQUEST['action'] != 'delete') {
+			Header("Location: /reports/\n\n");
+			exit;
+		}
 		if ($report->id && isset($_REQUEST['action'])) {
 			switch ($_REQUEST['action']) {
 				case 'delete':
@@ -17,7 +49,8 @@ if (isset($_REQUEST['action'])) {
 				case 'adduserperm':
 					if ($report->owner == $account['id'] || $account['super']) {
 						$user = intval($_POST['user']);
-						$role = $_POST['role'];
+						// Owners are made by creating a report; sharing gives edit or view
+						$role = (isset($_POST['role']) && in_array($_POST['role'], array('edit', 'view'), true) ? $_POST['role'] : 'view');
 						$report->add_user($user, $role);
 					}
 					Header("Location: /reports/perms/" . $report->id . "\n\n");
@@ -67,9 +100,9 @@ if (isset($_REQUEST['action'])) {
 								$report->add_changes_filter($_POST['field'], $_POST['value']);
 							}
 						} else {
-							$value = $_POST['value'];
-							$compare = $_POST['compare'];
-							$fact = $_POST['fact'];
+							$value = post_str('value');
+							$compare = post_str('compare');
+							$fact = post_str('fact');
 							$report->add_filter($fact, $compare, $value);
 						}
 					}
@@ -122,33 +155,46 @@ if (isset($_REQUEST['action'])) {
 					echo $twig->render('report_schedules.html', array_merge($twigarr, array('report' => $report, 'schedules' => $schedules, 'reoccur' => $reoccur, 'users' => $users)));
 					exit;
 				case 'schedulesave':
+					if ($_SERVER['REQUEST_METHOD'] != 'POST' || !($report->owner == $account['id'] || $report->role == 'edit' || $account['super'])) {
+						Header("Location: /reports/\n\n");
+						exit;
+					}
 					if (isset($_GET['schedule'])) {
 						$sid = intval($_GET['schedule']);
 					} else {
 						$sid = 0;
 					}
-					$subject = sql_clean_username($_POST['subject']);
-					$start = strtotime($_POST['start']);
+					$subject = substr(trim(preg_replace('/[^A-Za-z0-9 \-_\.:,@\(\)\[\]]/', '', (string) $_POST['subject'])), 0, 128);
+					$start = strtotime((string) $_POST['start']);
+					if ($start === false) {
+						$start = time();
+					}
 					$enabled = (isset($_POST['enabled']) ? 1 : 0);
-					$repeat = (isset($reoccur[$_POST['repeat']]) ? intval($_POST['repeat']) : 86400);
+					$repeat = (isset($_POST['repeat']) && isset($reoccur[$_POST['repeat']]) ? intval($_POST['repeat']) : 86400);
 					$next = $start;
 					while ($next < time()) {
 						$next += $repeat;
 					}
-					$emails = sql_clean_emails($_POST['emails']);
+					// Whole addresses only: an address cut short could be someone else's
+					$emails = '';
+					foreach (array_unique(preg_split('/[\s,;]+/', (string) $_POST['emails'])) as $e) {
+						if (filter_var($e, FILTER_VALIDATE_EMAIL) && strlen($emails) + strlen($e) + 2 <= 65535) {
+							$emails .= ($emails === '' ? '' : ', ') . $e;
+						}
+					}
 					if ($sid == 0) {
 						db_execute_prepare('INSERT INTO `reports_schedules` (`report`, `start`, `enabled`, `repeat`, `next`, `emails`, `owner`, `subject`)
 												VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
 												array($report->id, $start, $enabled, $repeat, $next, $emails, $account['id'], $subject));
 					} else {
 						if ($account['super']) {
-							$schedule = db_fetch_assoc_prepare('SELECT * FROM `reports_schedules` WHERE `id` = ?', array($sid));
+							$schedule = db_fetch_assoc_prepare('SELECT * FROM `reports_schedules` WHERE `report` = ? AND `id` = ?', array($report->id, $sid));
 						} else {
-							$schedule = db_fetch_assoc_prepare('SELECT * FROM `reports_schedules` WHERE `owner` = ? AND `id` = ?', array($account['id'], $sid));
+							$schedule = db_fetch_assoc_prepare('SELECT * FROM `reports_schedules` WHERE `report` = ? AND `owner` = ? AND `id` = ?', array($report->id, $account['id'], $sid));
 						}
 						if (isset($schedule['id'])) {
-							db_execute_prepare('UPDATE `reports_schedules` SET `start` = ?, `enabled` = ?, `repeat` = ?, `next` = ?, `emails` = ?, `subject` = ? WHERE `id` = ?',
-							array($start, $enabled, $repeat, $next, $emails, $subject, $sid));
+							db_execute_prepare('UPDATE `reports_schedules` SET `start` = ?, `enabled` = ?, `repeat` = ?, `next` = ?, `emails` = ?, `subject` = ? WHERE `id` = ? AND `report` = ?',
+							array($start, $enabled, $repeat, $next, $emails, $subject, $sid, $report->id));
 						}
 					}
 					Header("Location: /reports/" . $report->id . "/schedule/\n\n");
@@ -157,9 +203,9 @@ if (isset($_REQUEST['action'])) {
 					if (isset($_GET['schedule'])) {
 						$sid = intval($_GET['schedule']);
 						if ($account['super']) {
-							db_execute_prepare('DELETE FROM `reports_schedules` WHERE `id` = ?', array($sid));
+							db_execute_prepare('DELETE FROM `reports_schedules` WHERE `id` = ? AND `report` = ?', array($sid, $report->id));
 						} else {
-							db_execute_prepare('DELETE FROM `reports_schedules` WHERE `id` = ? AND `owner` = ?', array($sid, $account['id']));
+							db_execute_prepare('DELETE FROM `reports_schedules` WHERE `id` = ? AND `report` = ? AND `owner` = ?', array($sid, $report->id, $account['id']));
 						}
 					}
 					Header("Location: /reports/" . $report->id . "/schedule/\n\n");
@@ -201,15 +247,12 @@ if (isset($_REQUEST['action'])) {
 								}
 							}
 							echo $twig->render('report_changes_edit.html', array_merge($twigarr, array('report' => $report, 'current' => $current,
+									'current_hostname' => (isset($current['host']) ? host_name($current['host']) : ''),
 									'columns' => $report->columns, 'fields' => changes_report_filter_fields(), 'options' => changes_report_filter_options())));
 							exit;
 						}
-						$allfacts = db_fetch_assocs('SELECT DISTINCT `fact` FROM facts');
-						$facts = array();
-						foreach ($allfacts as $f) {
-							$facts[] = $f['fact'];
-						}
-						echo $twig->render('report_edit.html', array_merge($twigarr, array('report' => $report, 'facts' => $facts, 'filters' => $report->filters, 
+						// The fact pickers search the server as you type, so no list of facts is sent
+						echo $twig->render('report_edit.html', array_merge($twigarr, array('report' => $report, 'filters' => $report->filters,
 								'columns' => $report->columns, 'compares' => $compares)));
 						exit;
 					}
@@ -220,7 +263,11 @@ if (isset($_REQUEST['action'])) {
 	} else {
 		switch ($_REQUEST['action']) {
 			case 'new':
-				$type = (isset($_REQUEST['type']) ? $_REQUEST['type'] : 'facts');
+				$type = (isset($_REQUEST['type']) && $_REQUEST['type'] === 'changes' ? 'changes' : 'facts');
+				if (!report_type_allowed($type)) {
+					Header("Location: /reports/\n\n");
+					exit;
+				}
 				$report = new Report();
 				$report->set_owner($account['id']);
 				$report->set_created(time());

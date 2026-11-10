@@ -20,7 +20,13 @@ CREATE TABLE IF NOT EXISTS `changes` (
   KEY `task_action` (`task_action`),
   KEY `playbook` (`playbook`),
   KEY `job` (`job`),
-  KEY `host` (`host`)
+  KEY `host` (`host`),
+  KEY `role` (`role`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `fact_names` (
+  `fact` varchar(128) NOT NULL,
+  PRIMARY KEY (`fact`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `facts` (
@@ -38,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `facts` (
 CREATE TABLE IF NOT EXISTS `jobs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `job` int(11) NOT NULL,
+  `server` varchar(128) NOT NULL DEFAULT '',
   `job_template_id` int(11) NOT NULL,
   `timestamp` varchar(32) DEFAULT '',
   `host` varchar(128) DEFAULT '',
@@ -51,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   `limit` text DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `job` (`job`),
+  KEY `job_server` (`job`,`server`),
   KEY `job_template_id` (`job_template_id`),
   KEY `actor` (`actor`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -60,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `hosts` (
   `hostname` varchar(128) NOT NULL,
   `time` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
-  KEY `hostname` (`hostname`)
+  UNIQUE KEY `hostname` (`hostname`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `log_emails` (
@@ -83,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `mail_queue` (
   `from` varchar(64) NOT NULL,
   `fromname` varchar(64) NOT NULL,
   `subject` varchar(512) NOT NULL,
-  `message` text NOT NULL,
+  `message` mediumtext NOT NULL,
   `error` text NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `created` (`created`),
@@ -130,7 +138,8 @@ CREATE TABLE IF NOT EXISTS `reports_schedules` (
   `repeat` int(11) NOT NULL,
   `next` int(11) NOT NULL,
   `process` int(11) NOT NULL DEFAULT 0,
-  `emails` tinytext NOT NULL,
+  `claimed` int(11) NOT NULL DEFAULT 0,
+  `emails` text NOT NULL,
   `subject` varchar(256) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `report` (`report`),
@@ -143,12 +152,14 @@ CREATE TABLE IF NOT EXISTS `reports_schedules` (
 CREATE TABLE IF NOT EXISTS `servers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(128) NOT NULL,
-  `ip` varchar(15) NOT NULL,
+  `uuid` varchar(64) NULL DEFAULT NULL,
+  `ip` varchar(45) NOT NULL DEFAULT '',
   `url` varchar(128) NOT NULL DEFAULT '',
-  `trusted` int(11) NOT NULL DEFAULT 0,
+  `lastseen` int(11) NOT NULL DEFAULT 0,
+  `auth_ok` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `ip` (`ip`),
-  KEY `trusted` (`trusted`)
+  UNIQUE KEY `uuid` (`uuid`),
+  KEY `ip` (`ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `sessions` (
@@ -176,6 +187,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `view_changes` tinyint(1) NOT NULL DEFAULT 1,
   `view_facts` tinyint(1) NOT NULL DEFAULT 1,
   `code` varchar(256) NOT NULL DEFAULT '',
+  `code_expires` int(11) NOT NULL DEFAULT 0,
   `super` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),

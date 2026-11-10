@@ -1,0 +1,16 @@
+/* Inter, one variable font file per style covering every weight (SIL Open Font License, see /css/fonts/inter/LICENSE.txt) */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/css/fonts/inter/InterVariable.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/css/fonts/inter/InterVariable-Italic.woff2') format('woff2');
+}

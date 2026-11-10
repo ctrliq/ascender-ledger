@@ -3,7 +3,11 @@
 {% block body %}
 <div class="wrapper">
 	<div class="container-fluid animated fadeInRight">
+{% if saved %}
+		<div class="alert alert-success py-2">Settings saved.</div>
+{% endif %}
 		<form method="post" action=/settings/save/ id=settingform class="form-horizontal">
+			<input type="hidden" name="form" value="mail">
 			<div class="shadow-sm border row justify-content-center p-4 mb-3">
 				<div class="float-start w-50">
 					<div class="mb-3">
@@ -46,11 +50,19 @@
 					<div class="mb-3">
 						<label class="form-label fs-6 fw-bold">SMTP Security</label>
 						<div>
-							<select class="form-control w-75" name=smtp_security id=smtp_security>
+							<select class="form-select w-75" name=smtp_security id=smtp_security>
 								<option value="">None</option>
 								<option value=tls {% if settings.smtp_security == "tls" %} selected{% endif %}>TLS</option>
 							</select>
 						</div>
+					</div>
+
+					<div class="mb-3">
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=smtp_verify_cert id=smtp_verify_cert {% if settings.smtp_verify_cert == '1' %}checked{% endif %}>
+							<label class="form-check-label fs-6 fw-bold" for="smtp_verify_cert">Verify SMTP Certificate</label>
+						</div>
+						<div class="form-text w-75">Turn off only for a mail server with a self-signed certificate.</div>
 					</div>
 
 					<div class="mb-3">
@@ -63,8 +75,14 @@
 					<div class="mb-3">
 						<label class="form-label fs-6 fw-bold">SMTP Password</label>
 						<div>
-							<input type="password" class="form-control w-75" name=smtp_password id=smtp_password autocomplete="new-password">
+							<input type="password" class="form-control w-75" name=smtp_password id=smtp_password autocomplete="new-password" placeholder="{% if settings.smtp_password_saved %}[ saved ] leave blank to keep{% else %}[ not saved ]{% endif %}">
 						</div>
+{% if settings.smtp_password_saved %}
+						<div class="form-check mt-1">
+							<input type="checkbox" class="form-check-input" name=smtp_password_clear id=smtp_password_clear>
+							<label class="form-check-label" for="smtp_password_clear">Clear the saved password</label>
+						</div>
+{% endif %}
 					</div>
 				</div>
 
@@ -79,24 +97,5 @@
 		</form>
 	</div>
 </div>
-
-{% endblock %}
-{% block javascript %}
-$(function() {
-	var select = [], chosen = [];
-	$(".chosen-select").each(function(index) {
-		select[index] = $(this);
-		select[index].chosen({ no_results_text: 'Press Enter to add new entry:' });
-		chosen[index] = select[index].data('chosen');
-		chosen[index].search_field.on('keyup', function(e) {
-			if (e.which === 13 && chosen[index].dropdown.find('li.no-results').length > 0) {
-				var option = $("<option>").val(this.value).text(this.value);
-				select[index].prepend(option);
-				select[index].find(option).prop('selected', true);
-				select[index].trigger("chosen:updated");
-			}
-		});
-	});
-});
 
 {% endblock %}

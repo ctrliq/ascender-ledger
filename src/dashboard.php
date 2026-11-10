@@ -17,14 +17,25 @@ for ($a = 0; $a < 30; $a++) {
 }
 ksort($changes);
 
-$untrusted = db_fetch_cell('SELECT count(`id`) as count FROM `servers` WHERE `trusted` = 0', 'count');
+/*
+	Counting every row of the facts table takes seconds on a large fleet, so the minute cron
+	keeps the totals and the dashboard reads them.  They are counted here only until it has.
+*/
+$counts = json_decode((string) read_setting('dashboard_counts', ''), true);
+if (!is_array($counts) || !isset($counts['hosts'])) {
+	$counts = dashboard_counts();
+}
 
+// Tell administrators when Ascender's data is being refused, which is otherwise silent
+$rejected = null;
+if (!empty($account['super'])) {
+	// Cleared by the parser once the refused server sends a record that is accepted (see parse.php)
+	$r = json_decode((string) read_setting('auth_rejected', '{}'), true);
+	if (isset($r['time']) && $r['time'] > time() - 86400) {
+		$rejected = $r;
+	}
+}
 
-$counts = array('hosts' => 0, 'facts' => 0, 'changes' => 0);
-$counts['hosts'] = db_fetch_cell('SELECT count(`id`) as count FROM `hosts`', 'count');
-$counts['facts'] = db_fetch_cell('SELECT count(`host`) as count FROM `facts`', 'count');
-$counts['changes'] = db_fetch_cell('SELECT count(`id`) as count FROM `changes`', 'count');
-$counts['packages'] = db_fetch_cell('SELECT count(`host`) as count FROM `packages`', 'count');
+$token_off = (!empty($account['super']) && read_setting('require_auth_token', '0') != '1');
 
-
-echo $twig->render('dashboard.html', array_merge($twigarr, array('changes' => $changes, 'counts' => $counts, 'untrusted' => $untrusted)));
+echo $twig->render('dashboard.html', array_merge($twigarr, array('changes' => $changes, 'counts' => $counts, 'rejected' => $rejected, 'token_off' => $token_off)));

@@ -1,27 +1,40 @@
 {% extends 'layout.html' %}
 {% block body %}
-<div class="wrapper text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
-{% if account.super and untrusted %}
-		<div class="bd-example d-flex justify-content-center" style="margin-bottom: 10px; background-color: rgb(255,255,233)">
-			<h4><a href='/servers/' style="text-decoration: none">There {{  untrusted > 1 ? 'are' : 'is' }} {{ untrusted }} untrusted Server{{  untrusted > 1 ? 's' : '' }}</a></h4>
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% if token_off %}
+		<div class="alert alert-warning mb-3" role="alert">
+			Ledger is accepting data from anything that can reach it.  Give Ascender the Authorization Token, then turn on
+			<b>Require Token Authorization</b> under <a href="/settings/general/">Settings &rarr; General</a>.
+			<a href="/servers/">Servers</a> shows which servers are already sending it.
 		</div>
 {% endif %}
-		<div class=" border row justify-content-center p-3 mx-0 mb-3">
-			<div class="border col col-lg-2 p-1 me-4" style="background-color: #fbfbfb;">
-				<center><h1>Hosts</h1><h3>{{ counts.hosts }}</h3></center>
-			</div>
-			<div class="border col col-lg-2 p-1 me-4" style="background-color: #fbfbfb;">
-				<center><h1>Changes</h1><h3>{{ counts.changes }}</h3></center>
-			</div>
-			<div class="border col col-lg-2 p-1 me-4" style="background-color: #fbfbfb;">
-				<center><h1>Facts</h1><h3>{{ counts.facts }}</h3></center>
-			</div>
-			<div class="border col col-lg-2 p-1" style="background-color: #fbfbfb;">
-				<center><h1>Packages</h1><h3>{{ counts.packages }}</h3></center>
-			</div>
+{% if rejected %}
+		<div class="alert alert-warning mb-3" role="alert">
+			<h5 class="mb-1">Ledger is refusing data from {{ rejected.ip }}: {{ rejected.reason }}</h5>
+			Last refused {{ rejected.time|date("m/d/Y H:i T") }}.  In Ascender, under Settings &rarr; Logging, set the Logging Aggregator Type to
+			<code>ledger</code> and the Logging Aggregator Password / Token to the Authorization Token shown under
+			<a href="/settings/general/">Settings &rarr; General</a>.
 		</div>
-		<div class="border mh-50">
+{% endif %}
+		<div class="shadow-sm border row justify-content-center p-2 mx-0 mb-2">
+			<div class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 ledger-count">
+				<center><h5 class="text-success">{{ counts.hosts }}</h5><h6 class="text-body">Hosts</h6></center>
+			</div>
+			{% set tag = account.view_changes ? 'a' : 'div' %}
+			<{{ tag }}{% if account.view_changes %} href="/changes/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
+				<center><h5 class="text-success">{{ counts.changes }}</h5><h6 class="text-body">Changes</h6></center>
+			</{{ tag }}>
+			{% set tag = account.view_facts ? 'a' : 'div' %}
+			<{{ tag }}{% if account.view_facts %} href="/facts/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
+				<center><h5 class="text-success">{{ counts.facts }}</h5><h6 class="text-body">Facts</h6></center>
+			</{{ tag }}>
+			{% set tag = account.view_facts ? 'a' : 'div' %}
+			<{{ tag }}{% if account.view_facts %} href="/packages/"{% endif %} class="card shadow border col-sm-4 col-md-2 p-1 mx-2 my-1 text-decoration-none ledger-count">
+				<center><h5 class="text-success">{{ counts.packages }}</h5><h6 class="text-body">Packages</h6></center>
+			</{{ tag }}>
+		</div>
+		<div class="shadow-sm border mh-50">
 	   		 <canvas id="changes" height="300"></canvas>
 		</div>
 	</div>
@@ -47,15 +60,19 @@
 				{
 					label: 'Changes per day',
 					data: data.map(row => row.count),
-					backgroundColor: 'rgba(2, 68, 98, 0.5)',
-					borderColor: 'rgba(2, 68, 98)',
-                         borderWidth: 1
+					backgroundColor: 'rgba(11, 135, 89, 0.6)',
+					borderColor: 'rgb(19, 22, 27)',
+					borderWidth: 1
 				}
 				]
 			},
 			options: {
 				maintainAspectRatio: false,
 				responsive: true,
+				scales: {
+					x: { grid: { color: 'rgba(200, 200, 200, 0.1)' } },
+					y: { grid: { color: 'rgba(200, 200, 200, 0.1)' }, beginAtZero: true }
+				},
 				plugins: {
 					legend: {
 						labels: {

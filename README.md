@@ -21,7 +21,7 @@ docker compose up -d
 
 ## Using Ledger
 
-Once a server is trusted, Ledger records two kinds of data as jobs run, both searchable from the web interface.
+Once Ascender is sending its log stream with Ledger's token, Ledger records two kinds of data as jobs run, both searchable from the web interface.
 
 ### Facts
 
@@ -46,11 +46,13 @@ scheduled report covers the changes of the last night rather than everything eve
 
 ## Authentication
 
-Ledger ignores data from servers it has not been told to trust, so a new server sends nothing useful until you approve it.
+Ascender authenticates to Ledger with a token, so it keeps working when Ascender's pods are rescheduled and come back with new addresses.
 
-- A server appears under Admins then Servers the first time it sends data
-- Click the lock icon on that entry to trust it, after which facts and changes populate live
-- Edit the entry to set the server's Ascender URL, linking changes back to their job
+- Copy the **Authorization Token** from Admin, Settings, General in Ledger
+- In Ascender, under Settings, Logging, set **Logging Aggregator Type** to `ledger` and paste the token into **Logging Aggregator Password / Token**
+- The server appears under Admin, Servers as soon as it sends data, identified by its install UUID. Edit the entry to change the Ascender URL that changes link back to; it is filled in from Ascender's own URL when Ascender sends one
+
+**Require Token Authorization** is off by default, so an upgraded Ledger keeps receiving data until Ascender has the token. The Servers page shows whether each server is sending a valid token; once they all are, turn it on under Settings, General, and Ledger refuses data without the token from then on. The most recent refusal is shown on the dashboard and the Servers page. **Reset Token** issues a new token, after which each Ascender server needs the new one.
 
 ## Configuration
 

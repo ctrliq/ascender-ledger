@@ -38,7 +38,10 @@ class Report {
 	}
 
 	function set_name($name) {
-		$this->name = $this->clean_name($name);
+		$name = trim($this->clean_name($name));
+		if ($name != '') {
+			$this->name = $name;
+		}
 	}
 
 	function set_created($created) {
@@ -79,8 +82,15 @@ class Report {
 			$this->owner   = $u['owner'];
 			$this->name    = $u['name'];
 			$this->created = $u['created'];
-			$this->filters = unserialize(base64_decode($u['filters']));
-			$this->columns = unserialize(base64_decode($u['columns']));
+			// Only ever arrays of strings: refuse objects, so a tampered row cannot instantiate one
+			$this->filters = unserialize(base64_decode($u['filters']), array('allowed_classes' => false));
+			$this->columns = unserialize(base64_decode($u['columns']), array('allowed_classes' => false));
+			if (!is_array($this->filters)) {
+				$this->filters = array();
+			}
+			if (!is_array($this->columns)) {
+				$this->columns = array();
+			}
 			$this->sortc   = $u['sortc'];
 			$this->sortd   = $u['sortd'];
 			$this->role    = (isset($u['role']) ? $u['role'] : 'view');
@@ -94,19 +104,13 @@ class Report {
 	function add_filter($fact, $compare, $value) {
 		global $compares;
 
-		$value = $this->clean_filter($value);
+		$value = $this->clean_filter((string) $value);
 
-		$allfacts = db_fetch_assocs('SELECT DISTINCT `fact` FROM facts');
-		$afs = array();
-		foreach ($allfacts as $f) {
-			$afs[] = $f['fact'];
-		}
-
-		if (!in_array($fact, $afs)) {
+		if (!fact_exists($fact)) {
 			return false;
 		}
 
-		if (!isset($compares[$compare])) {
+		if (!is_string($compare) || !isset($compares[$compare])) {
 			return false;
 		}
 
@@ -122,7 +126,7 @@ class Report {
 	function add_changes_filter($field, $value) {
 		$fields = changes_report_filter_fields();
 
-		if (!isset($fields[$field])) {
+		if (!is_string($field) || !isset($fields[$field]) || !is_scalar($value)) {
 			return false;
 		}
 
@@ -168,16 +172,16 @@ class Report {
 
 	function add_column($display, $facts) {
 		$display = $this->clean_column($display);
-		$allfacts = db_fetch_assocs('SELECT DISTINCT `fact` FROM facts');
-		$afs = array();
-		foreach ($allfacts as $f) {
-			$afs[] = $f['fact'];
-		}
-
-		for ($a = 0; $a < count($facts); $a++) {
-			if (!in_array($facts[$a], $afs)) {
-				unset($facts[$a]);
+		$valid = array();
+		foreach ((array) $facts as $f) {
+			if (fact_exists($f) && !in_array($f, $valid, true)) {
+				$valid[] = $f;
 			}
+		}
+		$facts = $valid;
+
+		if (empty($facts) || $display == '') {
+			return false;
 		}
 
 		if (count($facts) > 1) {
@@ -200,7 +204,7 @@ class Report {
 	}
 
 	function move_column_up($i) {
-		$new = array();
+		$n = array();
 		$a = 0;
 		$ok = '';
 		$od = '';
@@ -221,7 +225,7 @@ class Report {
 	}
 
 	function move_column_down($i) {
-		$new = array();
+		$n = array();
 		$a = 0;
 		$ok = '';
 		$od = '';
@@ -251,21 +255,22 @@ class Report {
 	function add_user($user, $role) {
 		$user = intval($user);
 		$roles = array('owner', 'edit', 'view');
-		if ($this->id && $user > 0 && in_array($role, $roles)) {
-			db_execute_prepare('INSERT INTO `reports_perms` (`report`, `user`, `role`) VALUES (?, ?, ?)', array($this->id, $user, $role));
+		if ($this->id && $user > 0 && in_array($role, $roles, true) && db_fetch_cell_prepare('SELECT `id` FROM `users` WHERE `id` = ?', 'id', array($user))) {
+			db_execute_prepare('INSERT INTO `reports_perms` (`report`, `user`, `role`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `role` = VALUES(`role`)', array($this->id, $user, $role));
 		}
 	}
 
+	// Form fields can arrive as arrays (name[]=x); those clean to nothing rather than "Array"
 	function clean_name($text) {
-		return preg_replace('/[^A-Za-z0-9 \-_\.:]/', '', $text);
+		return (is_scalar($text) ? preg_replace('/[^A-Za-z0-9 \-_\.:]/', '', (string) $text) : '');
 	}
 
 	function clean_filter($text) {
-		return preg_replace('/[^A-Za-z0-9 \-_\.:]/', '', $text);
+		return (is_scalar($text) ? preg_replace('/[^A-Za-z0-9 \-_\.:]/', '', (string) $text) : '');
 	}
 
 	function clean_column($text) {
-		return preg_replace('/[^A-Za-z0-9\-_\.:]/', '', $text);
+		return (is_scalar($text) ? preg_replace('/[^A-Za-z0-9\-_\.:]/', '', (string) $text) : '');
 	}
 
 

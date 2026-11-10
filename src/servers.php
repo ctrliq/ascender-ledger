@@ -2,64 +2,55 @@
 
 include_once('includes/global.php');
 
-if (!$account['super']) {
+if (empty($account['super'])) {
     header("Location: /\n\n");
     exit;
 }
 
-if (isset($_GET['action']) && isset($_GET['id']) && intval($_GET['id']) == $_GET['id']) {
-	switch ($_GET['action']) {
-		case 'trust':
-			$id = intval($_GET['id']);
-			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
-			if (isset($server['id'])) {
-				$trust = ($server['trusted'] ? 0 : 1);
-				db_execute_prepare('UPDATE `servers` SET `trusted` = ? WHERE `id` = ?', array($trust, $id));
-			}
-			break;
+/*
+	The servers that have sent data.  Ascender authenticates with the Authorization Token from
+	Settings -> General, so there is nothing to approve here; the list is for setting each
+	server's URL, which the change pages link jobs back to.
+*/
 
+if (isset($_GET['action']) && isset($_GET['id']) && intval($_GET['id'])) {
+	$id = intval($_GET['id']);
+	$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
+
+	switch ($_GET['action']) {
 		case 'edit':
-			$id = intval($_GET['id']);
-			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
 			if (isset($server['id'])) {
-				echo $twig->render('server_edit.html', array_merge($twigarr, array('server' => $server)));
+				echo $twig->render('server_edit.html', array_merge($twigarr, array('server' => $server, 'app_error' => (isset($_GET['error']) && $_GET['error'] == 'url' ? 'url' : ''))));
 				exit;
 			}
 			break;
 
 		case 'save':
-			$id = intval($_GET['id']);
-			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
-			if (isset($server['id'])) {
-				$url = sql_clean_url($_POST['url']);
-				if ($url != '' && $url[-1] == '/') {
-					$url = sql_clean_url(substr($url, 0, -1));
+			if (isset($server['id']) && $_SERVER['REQUEST_METHOD'] == 'POST') {
+				$url = (isset($_POST['url']) && is_string($_POST['url']) ? rtrim(trim($_POST['url']), '/') : '');
+				if ($url == '' || valid_http_url($url)) {
+					db_execute_prepare('UPDATE `servers` SET `url` = ? WHERE `id` = ?', array(substr($url, 0, 128), $id));
+				} else {
+					Header("Location: /servers/edit/$id?error=url\n\n");
+					exit;
 				}
-				db_execute_prepare('UPDATE `servers` SET `url` = ? WHERE `id` = ?', array($url, $id));
 			}
 			break;
+
 		case 'delete':
-			$id = intval($_GET['id']);
-			$server = db_fetch_assoc_prepare('SELECT * FROM `servers` WHERE `id` = ?', array($id));
+			csrf_verify();
 			if (isset($server['id'])) {
 				db_execute_prepare('DELETE FROM `servers` WHERE `id` = ?', array($id));
 			}
 			break;
-
 	}
 	Header("Location: /servers/\n\n");
 	exit;
 }
 
+$servers = db_fetch_assocs("SELECT * FROM `servers` ORDER BY `name`");
 
-$msg = '';
-if (isset($_GET['msg'])) {
-	switch ($_GET['msg']) {
-		case 'invited':
-			$msg = 'Invite sent';
-	}
-}
+$rejected = json_decode((string) read_setting('auth_rejected', '{}'), true);
 
-$servers = db_fetch_assocs("SELECT * FROM `servers` ORDER BY `ip`");
-
-echo $twig->render('servers.html', array_merge($twigarr, array('servers' => $servers, 'msg' => $msg)));
+echo $twig->render('servers.html', array_merge($twigarr, array('servers' => $servers, 'rejected' => (isset($rejected['time']) ? $rejected : null),
+	'require_auth_token' => read_setting('require_auth_token', '0'))));

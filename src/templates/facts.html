@@ -1,72 +1,66 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper  text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
 		<div class="shadow-sm border p-4">
 			<div class="shadow-sm border p-2">
-				<form action="/facts/">
-					<div class="row">
-						<div class="col-2">
-								<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
-									<option class="fst-italic" selected disabled>Add a Filter</option>
-									<option value="hosts">Hosts</option>
-									<option value="facts">Facts</option>
-									<option value="types">Types</option>
-									<option value="search">Search</option>
-
-								</select>
-						</div>
-
-						<div id="filter_hosts" class="col-4" style="display: none">
-								<select class="form-control form-select-sm chosen-select" name="hosts" id="hosts" data-placeholder="Choose a Host...">
-									<option></option>
-			{% for i,h in hosts %}
-									<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
-			{% endfor %}
-								</select>
-						</div>
-
-						<div id="filter_facts" class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name="facts" id="facts" data-placeholder="Choose a Fact...">
-								<option></option>
-			{% for p in ufacts %}
-								<option{% if fact == p %} selected{% endif %}>{{ p }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id="filter_types" class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name="types" id="types" data-placeholder="Choose a Type...">
-								<option></option>
-			{% for t in types %}
-								<option {% if type == t %} selected{% endif %}>{{ t }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_search class="col-4" style="display: none">
-							<input type="text" class="form-control form-control-sm" name="search" id="search" value="{{ search }}" placeholder="Search all values">
-						</div>
-
-						<div class="col-1 align-text-bottom">
-							<a onclick="addfilters()" href="#"><button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button></a>
-						</div>
+				<div class="row">
+					<div class="col-2">
+						<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
+							<option class="fst-italic" value="" selected disabled>Add a Filter</option>
+							<option value="hosts">Hosts</option>
+							<option value="facts">Facts</option>
+							<option value="types">Types</option>
+							<option value="search">Search</option>
+						</select>
 					</div>
-				</form>
+
+					<div class="col-4 filter-input" data-filter="hosts" style="display: none">
+						<select class="form-control form-select-sm ledger-lookup" data-lookup="hosts" data-url="/facts/?host=" data-placeholder="Choose a Host...">
+{% if host %}
+							<option value="{{ host }}" selected>{{ hostname }}</option>
+{% endif %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="facts" style="display: none">
+						<select class="form-control form-select-sm ledger-lookup" data-lookup="facts" data-url="/facts/?fact=" data-placeholder="Choose a Fact...">
+{% if fact %}
+							<option value="{{ fact }}" selected>{{ fact }}</option>
+{% endif %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="types" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/facts/?type=" data-placeholder="Choose a Type...">
+							<option></option>
+{% for t in types %}
+							<option value="{{ t }}"{% if type == t %} selected{% endif %}>{{ t }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="search" style="display: none">
+						<input type="text" class="form-control form-control-sm" data-url="/facts/?search=" value="{{ search }}" placeholder="Search all values">
+					</div>
+
+					<div class="col-1 align-text-bottom">
+						<button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button>
+					</div>
+				</div>
 				<br>
 				<div class="col-12">
-					Filters: 
-					{% if host %}<a href=/facts/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
-					{% if fact %}<a href=/facts/?clear=fact title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">FACT: <i>{{ fact }}</i></button></a>{% endif %}
-					{% if type %}<a href=/facts/?clear=type title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">TYPE: <i>{{ type }}</i></button></a>{% endif %}
-					{% if search %}<a href=/facts/?clear=search title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ search }}</i></button></a>{% endif %}
-
+					Filters:
+					{% if host %}<a href="/facts/?clear=host" title="Remove" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hostname }}</i></a>{% endif %}
+					{% if fact %}<a href="/facts/?clear=fact" title="Remove" class="btn btn-primary btn-xs ms-1">FACT: <i>{{ fact }}</i></a>{% endif %}
+					{% if type %}<a href="/facts/?clear=type" title="Remove" class="btn btn-primary btn-xs ms-1">TYPE: <i>{{ type }}</i></a>{% endif %}
+					{% if search %}<a href="/facts/?clear=search" title="Remove" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ search }}</i></a>{% endif %}
 				</div>
 			</div>
 			<br><br>
 			<div class="table-responsive">
-				<table class="table table-striped datatable-changes w-100">
+				<table class="table table-striped datatable-facts w-100">
 					<thead>
 						<tr>
 							<th>Host</th>
@@ -75,89 +69,25 @@
 							<th>Type</th>
 						</tr>
 					</thead>
-					<tbody>
-{% for r in facts %}
-						<tr>
-							<td nowrap>{{ hosts[r['host']] }}</td>
-							<td nowrap>{{ r['fact'] }}</td>
-							<td>{{ r['data'] }}</td>
-							<td>{{ r['type'] }}</td>
-						</tr>
-{% endfor %}
-					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
 </div>
-
-
-
-{% endblock %}
-{% block javascriptinc %}
-	<script>
-	function addfilters () {
-		var filter = $("#addfilter").find(":selected").attr("value");
-		if (filter != undefined) {
-			var func = "change_" + filter + "_filter";
-			eval(func + "()"); 
-		}
-	}
-
-	function change_addfilter () {
-		var filter = $("#addfilter").find(":selected").attr("value");
-		$("#filter_hosts").hide();
-		$("#filter_facts").hide();
-		$("#filter_types").hide();
-		$("#filter_search").hide();
-		if (filter != undefined && filter != "") {
-			$("#filter_" +	 filter).show()
-		}
-	}
-
-	function change_hosts_filter () {
-		var host = $("#hosts").find(":selected").attr("id");
-		if (host == undefined) {
-			host = "";
-		}
-		window.location = "/facts/?host=" + host;
-	}
-
-	function change_facts_filter () {
-		var fact = $("#facts").find(":selected").val();
-		if (fact == undefined) {
-			fact = "";
-		}
-		window.location = "/facts/?fact=" + fact;
-	}
-
-	function change_types_filter () {
-		var type = $("#types").find(":selected").val();
-		if (type == undefined) {
-			type = "";
-		}
-		window.location = "/facts/?type=" + type;
-	}
-
-	function change_search_filter () {
-		var search = $("#search").val();
-		if (search == undefined) {
-			search = "";
-		}
-		window.location = "/facts/?search=" + search;
-	}
-
-	$("#addfilter").change(change_addfilter);
-	change_addfilter ();
-	</script>
 {% endblock %}
 {% block javascript %}
-	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true, width: '100%' });
-
-	$('.datatable-changes').DataTable({
+	ledgerTable('.datatable-facts', {
+		url: '/facts/',
 		order: [[1, 'asc']],
-		pageLength: 25,
-		responsive: true,
-		buttons: []
+		columns: [
+			{ data: 'hostname', className: 'text-nowrap', render: function (d, t, row) {
+				return t === 'display' ? '<a href="/facts/?host=' + row.host_id + '" title="Filter on this host">' + ledgerEscape(d) + '</a>' : d;
+			} },
+			{ data: 'fact', className: 'text-break ledger-col-name', render: function (d, t) {
+				return t === 'display' ? '<a href="/facts/?fact=' + encodeURIComponent(d) + '" title="Filter on this fact">' + ledgerEscape(d) + '</a>' : d;
+			} },
+			{ data: 'data', orderable: false, className: 'text-break', render: ledgerLongText(300) },
+			{ data: 'type' }
+		]
 	});
 {% endblock %}

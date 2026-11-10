@@ -1,12 +1,12 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper  text-bg-light">
-{% if msg %}<font color=green><center>{{ msg }}</center></font><br>{% endif %}
-{% if error %}<font color=red><center>{{ error }}</center></font><br>{% endif %}
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+<div class="wrapper">
+{% if msg %}<span class="text-success"><center>{{ msg }}</center></span><br>{% endif %}
+{% if error %}<span class="text-danger"><center>{{ error }}</center></span><br>{% endif %}
+	<div class="container-fluid animated fadeInRight">
 		<div class="shadow-sm border p-4 table-responsive">
-			<table class="table table-striped datatable-users">
+			<table class="table table-striped datatable-users w-100">
 				<thead>
 					<tr>
 						<th></th>
@@ -14,9 +14,9 @@
 						<th>Username</th>
 						<th>Email</th>
 						<th>Enabled</th>
-						<th style="display:none;"></th>
+						<th></th>
 						<th>Admin</th>
-						<th style="display:none;"></th>
+						<th></th>
 						<th></th>
 					</tr>
 				</thead>
@@ -30,11 +30,11 @@
 						<td nowrap>{{ u.username }}</td>
 						<td>{{ u.email }}</td>
 						<td>{% if u.enabled %}Yes{% else %}No{% endif %}</td>
-						<td style="display:none;">{% if u.enabled %}Enabled{% else %}Disabled{% endif %}</td>
+						<td>{% if u.enabled %}Enabled{% else %}Disabled{% endif %}</td>
 						<td>{% if u.super %}Yes{% else %}No{% endif %}</td>
-						<td style="display:none;">{% if u.super %}Admin{% else %}User{% endif %}</td>
+						<td>{% if u.super %}Admin{% else %}User{% endif %}</td>
 						<td width="30">
-                            <a href='/users/delete/{{ u['id'] }}' class="btn btn-danger btn-xs dltlink"  type="button" name=delete id=delete><i class="fa fa-trash"></i></a>
+                            {% if u.id != account.id %}<a href="/users/delete/{{ u.id }}?csrf_token={{ csrf_token|url_encode }}" class="btn btn-danger btn-xs dltlink" data-confirm="Are you sure you want to delete this User?" title="Delete"><i class="fa fa-trash"></i></a>{% endif %}
                         </td>
 					</tr>
 {% endfor %}
@@ -77,18 +77,10 @@
 	$('.datatable-users').DataTable({
 		order: [[1, 'asc']],
 		pageLength: 25,
-		responsive: true,
-		buttons: []
+		columnDefs: [
+			{ targets: [0, 8], orderable: false },
+			{ targets: [5, 7], visible: false }
+		]
 	});
 
-    var classname = document.getElementsByClassName("dltlink");
-	for (var i = 0; i < classname.length; i++) {
-		classname[i].addEventListener('click',
-			function(event) {
-				var t = confirm("Are you sure you want to delete this User?");
-				if (!t) {
-					event.preventDefault();
-				}
-			}, false);
-	}
 {% endblock %}

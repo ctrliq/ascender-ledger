@@ -1,126 +1,121 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
 		<div class="shadow-sm border p-4">
 			<div class="shadow-sm border p-2">
-				<form action="/changes/">
-					<div class="row">
-						<div class="col-2">
-								<select class="form-control form-select form-select-sm" name=addfilter id=addfilter>
-									<option class="fst-italic" selected disabled>Add a Filter</option>
-									<option value="csearch">Search</option>
-									<option value="hosts">Hosts</option>
-									<option value="templates">Templates</option>
-									<option value="playbooks">Playbooks</option>
-									<option value="roles">Roles</option>
-									<option value="modules">Modules</option>
-									<option value="types">Job Type</option>
-									<option value="inventories">Inventory</option>
-									<option value="projects">Project</option>
-								</select>
-						</div>
-
-						<div id=filter_hosts class="col-4" style="display: none">
-								<select class="form-control form-select-sm chosen-select" name=hosts id=hosts >
-									<option></option>
-			{% for i,h in hosts %}
-									<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
-			{% endfor %}
-								</select>
-						</div>
-
-						<div id=filter_playbooks class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name=playbooks id=playbooks>
-								<option></option>
-			{% for p in playbooks %}
-								<option{% if playbook == p %} selected{% endif %}>{{ p }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_templates class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name=templates id=templates>
-								<option></option>
-			{% for t in templates %}
-								<option value={{ t.job_template_id }} {% if template == t.job_template_id %} selected{% endif %}>{{ t.name }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_roles class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name=roles id=roles>
-								<option></option>
-			{% for r in roles %}
-								<option value={{ r }} {% if role == r %} selected{% endif %}>{{ r }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_modules class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name=modules id=modules>
-								<option></option>
-			{% for m in modules %}
-								<option{% if module == m %} selected{% endif %}>{{ m }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_types class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name=types id=types>
-								<option></option>
-			{% for t,n in types %}
-								<option value="{{ t }}" {% if type == t %} selected{% endif %}>{{ n }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_inventories class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name=inventories id=inventories>
-								<option></option>
-			{% for t,n in inventories %}
-								<option value="{{ t }}" {% if type == t %} selected{% endif %}>{{ n }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_projects class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name=projects id=projects>
-								<option></option>
-			{% for t,n in projects %}
-								<option value="{{ t }}" {% if type == t %} selected{% endif %}>{{ n }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-
-
-						<div id=filter_csearch class="col-4" style="display: none">
-							<input type="text" class="form-control form-control-sm" name=csearch id=csearch value="{{ csearch }}" placeholder="Search all Changes">
-						</div>
-						<div class="col-1 align-text-bottom">
-							<a onclick="addfilters()" href="#"><button type="button" class="btn btn-primary btn-s" name=add id=add>Add</button></a>
-						</div>
+				<div class="row">
+					<div class="col-2">
+						<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
+							<option class="fst-italic" value="" selected disabled>Add a Filter</option>
+							<option value="csearch">Search</option>
+							<option value="hosts">Hosts</option>
+							<option value="templates">Templates</option>
+							<option value="playbooks">Playbooks</option>
+							<option value="roles">Roles</option>
+							<option value="modules">Modules</option>
+							<option value="types">Job Type</option>
+							<option value="inventories">Inventory</option>
+							<option value="projects">Project</option>
+						</select>
 					</div>
-				</form>
+
+					<div class="col-4 filter-input" data-filter="hosts" style="display: none">
+						<select class="form-control form-select-sm ledger-lookup" data-lookup="hosts" data-url="/changes/?action=addfilter&amp;host=" data-placeholder="Choose a Host...">
+{% if current.host %}
+							<option value="{{ current.host }}" selected>{{ hostname }}</option>
+{% endif %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="playbooks" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/changes/?action=addfilter&amp;playbook=" data-placeholder="Choose a Playbook...">
+							<option></option>
+{% for p in playbooks %}
+							<option value="{{ p }}"{% if current.playbook == p %} selected{% endif %}>{{ p }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="templates" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/changes/?action=addfilter&amp;template=" data-placeholder="Choose a Template...">
+							<option></option>
+{% for id,name in templates %}
+							<option value="{{ id }}"{% if current.template == id %} selected{% endif %}>{{ name }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="roles" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/changes/?action=addfilter&amp;role=" data-placeholder="Choose a Role...">
+							<option></option>
+{% for r in roles %}
+							<option value="{{ r }}"{% if current.role == r %} selected{% endif %}>{{ r }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="modules" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/changes/?action=addfilter&amp;module=" data-placeholder="Choose a Module...">
+							<option></option>
+{% for m in modules %}
+							<option value="{{ m }}"{% if current.module == m %} selected{% endif %}>{{ m }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="types" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/changes/?action=addfilter&amp;type=" data-placeholder="Choose a Job Type...">
+							<option></option>
+{% for t,n in types %}
+							<option value="{{ t }}"{% if current.type == t %} selected{% endif %}>{{ n }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="inventories" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/changes/?action=addfilter&amp;inventory=" data-placeholder="Choose an Inventory...">
+							<option></option>
+{% for t,n in inventories %}
+							<option value="{{ t }}"{% if current.inventory == t %} selected{% endif %}>{{ n }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="projects" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/changes/?action=addfilter&amp;project=" data-placeholder="Choose a Project...">
+							<option></option>
+{% for t,n in projects %}
+							<option value="{{ t }}"{% if current.project == t %} selected{% endif %}>{{ n }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="csearch" style="display: none">
+						<input type="text" class="form-control form-control-sm" data-url="/changes/?action=addfilter&amp;csearch=" value="{{ current.csearch }}" placeholder="Search all Changes">
+					</div>
+					<div class="col-1 align-text-bottom">
+						<button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button>
+					</div>
+				</div>
 				<br>
 				<div class="col-12">
-					Filters: 
-					{%if host %}<a href=/changes/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
-					{%if template %}<a href=/changes/?clear=template title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">TEMPLATE: <i>{{ templates[template].name }}</i></button></a>{% endif %}
-					{%if playbook %}<a href=/changes/?clear=playbook title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">PLAYBOOK: <i>{{ playbook }}</i></button></a>{% endif %}
-					{%if role %}<a href=/changes/?clear=role title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">ROLE: <i>{{ role }}</i></button></a>{% endif %}
-					{%if module %}<a href=/changes/?clear=module title="Remove"e><button type="button" class="btn btn-primary btn-xs ms-1">MODULE: <i>{{ module }}</i></button></a>{% endif %}
-					{%if type %}<a href=/changes/?clear=type title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">JOB TYPE: <i>{{ types[type] }}</i></button></a>{% endif %}
-					{%if inventory %}<a href=/changes/?clear=inventory title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">INVENTORY: <i>{{ inventories[inventory] }}</i></button></a>{% endif %}
-					{%if project %}<a href=/changes/?clear=project title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">PROJECT: <i>{{ projects[project] }}</i></button></a>{% endif %}
-					{%if csearch %}<a href=/changes/?clear=csearch title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ csearch }}</i></button></a>{% endif %}
+					Filters:
+					{% if current.host %}<a href="/changes/?clear=host" title="Remove" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hostname }}</i></a>{% endif %}
+					{% if current.template %}<a href="/changes/?clear=template" title="Remove" class="btn btn-primary btn-xs ms-1">TEMPLATE: <i>{{ templates[current.template] }}</i></a>{% endif %}
+					{% if current.playbook %}<a href="/changes/?clear=playbook" title="Remove" class="btn btn-primary btn-xs ms-1">PLAYBOOK: <i>{{ current.playbook }}</i></a>{% endif %}
+					{% if current.role %}<a href="/changes/?clear=role" title="Remove" class="btn btn-primary btn-xs ms-1">ROLE: <i>{{ current.role }}</i></a>{% endif %}
+					{% if current.module %}<a href="/changes/?clear=module" title="Remove" class="btn btn-primary btn-xs ms-1">MODULE: <i>{{ current.module }}</i></a>{% endif %}
+					{% if current.type %}<a href="/changes/?clear=type" title="Remove" class="btn btn-primary btn-xs ms-1">JOB TYPE: <i>{{ types[current.type] }}</i></a>{% endif %}
+					{% if current.inventory %}<a href="/changes/?clear=inventory" title="Remove" class="btn btn-primary btn-xs ms-1">INVENTORY: <i>{{ inventories[current.inventory] }}</i></a>{% endif %}
+					{% if current.project %}<a href="/changes/?clear=project" title="Remove" class="btn btn-primary btn-xs ms-1">PROJECT: <i>{{ projects[current.project] }}</i></a>{% endif %}
+					{% if current.csearch %}<a href="/changes/?clear=csearch" title="Remove" class="btn btn-primary btn-xs ms-1">SEARCH: <i>{{ current.csearch }}</i></a>{% endif %}
 				</div>
 			</div>
 			<br><br>
 			<div class="table-responsive">
-				<table class="table table-striped datatable-facts w-100">
+				<table class="table table-striped datatable-changes w-100">
 					<thead>
 						<tr>
 							<th></th>
@@ -130,146 +125,33 @@
 							<th>Task</th>
 							<th>Module</th>
 						</tr>
-						</thead>
-						<tbody>
-	{% for r in changes %}
-						<tr>
-							<td width=30><a href='/changes/view/{{ r['id'] }}' class="btn btn-primary btn-xs"  type="button" name=edit id=edit><i class="fa fa-eye"></i></a></td>
-							<td nowrap{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['time']|date("m/d/Y H:i") }}</td>
-							<td nowrap{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ hosts[r['host']] }}</td>
-							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['playbook'] }}</td>
-							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['task'] }}</td>
-							<td{% if r.job_type == 'check' %} class="fst-italic"{% endif %}>{{ r['task_action'] }}</td>
-						</tr>
-	{% endfor %}
-					</tbody>
+					</thead>
 				</table>
 			</div>
 		</div>
 	</div>
 </div>
-
-
-
-{% endblock %}
-{% block javascriptinc %}
-<script>
-
-	function change_addfilter () {
-		var filter = $("#addfilter").find(":selected").attr("value");
-		$("#filter_hosts").hide();
-		$("#filter_playbooks").hide();
-		$("#filter_templates").hide();
-		$("#filter_roles").hide();
-		$("#filter_modules").hide();
-		$("#filter_types").hide();
-		$("#filter_inventories").hide();
-		$("#filter_projects").hide();
-		$("#filter_csearch").hide();
-		if (filter != undefined && filter != "") {
-			$("#filter_" +	 filter).show()
-		}
-	}
-
-	function addfilters () {
-		var filter = $("#addfilter").find(":selected").attr("value");
-		if (filter != undefined) {
-			var func = "change_" + filter + "_filter";
-			eval(func + "()"); 
-		}
-	}
-
-	function change_hosts_filter () {
-		var host = $("#hosts").find(":selected").attr("id");
-		if (host == undefined) {
-			host = "";
-		}
-		window.location = "/changes/addfilter/host/" + host;
-	}
-
-	function change_playbooks_filter () {
-		var playbook = $("#playbooks").find(":selected").val();
-		if (playbook == undefined) {
-			playbook = "";
-		}
-		window.location = "/changes/addfilter/playbook/" + playbook;
-	}
-
-	function change_templates_filter () {
-		var template = $("#templates").find(":selected").val();
-		if (template == undefined) {
-			template = "";
-		}
-		window.location = "/changes/addfilter/template/" + template ;
-	}
-
-	function change_roles_filter () {
-		var role = $("#roles").find(":selected").val();
-		if (role == undefined) {
-			role = "";
-		}
-		window.location = "/changes/addfilter/role/" + role;
-	}
-
-	function change_modules_filter () {
-		var module = $("#modules").find(":selected").val();
-		if (module == undefined) {
-			module = "";
-		}
-		window.location = "/changes/addfilter/module/" + module;
-	}
-
-	function change_types_filter () {
-		var type = $("#types").find(":selected").val();
-		if (type == undefined) {
-			type= "";
-		}
-		window.location = "/changes/addfilter/type/" + type;
-	}
-
-	function change_inventories_filter () {
-		var inventory = $("#inventories").find(":selected").attr("value");
-		if (inventory == undefined) {
-			inventory = "";
-		}
-		window.location = "/changes/addfilter/inventory/" + inventory;
-	}
-
-	function change_projects_filter () {
-		var project = $("#projects").find(":selected").attr("value");
-		if (project == undefined) {
-			project = "";
-		}
-		window.location = "/changes/addfilter/project/" + project;
-	}
-
-	function change_csearch_filter () {
-		var csearch = $("#csearch").val();
-		if (csearch == undefined) {
-			csearch = "";
-		}
-		window.location = "/changes/addfilter/csearch/" + csearch;
-	}
-
-	$("#addfilter").change(change_addfilter);
-	change_addfilter ();
-
-</script>
-
 {% endblock %}
 {% block javascript %}
-
-	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true });
-
-
-	$('.datatable-facts').DataTable({
-		"columnDefs" : [{"targets":1, "type":"date-us"},{"targets":7, "visible":false}],
-		pageLength: 25,
-		responsive: true,
-		"columnDefs" : [{"targets":1, "type":"date-us"}],
-		buttons: [],
-		language: {
-			searchPlaceholder: "Search in table"
-		}
+	ledgerTable('.datatable-changes', {
+		url: '/changes/',
+		order: [[1, 'desc']],
+		createdRow: function (row, data) {
+			if (data.check) {
+				$(row).addClass('fst-italic');
+			}
+		},
+		columns: [
+			{ data: 'id', orderable: false, width: 30, render: function (d, t) {
+				return t === 'display' ? '<a href="/changes/view/' + parseInt(d, 10) + '" class="btn btn-primary btn-xs" title="View"><i class="fa fa-eye"></i></a>' : d;
+			} },
+			{ data: 'date', className: 'text-nowrap' },
+			{ data: 'hostname', className: 'text-nowrap', render: function (d, t, row) {
+				return t === 'display' ? '<a href="/changes/?action=addfilter&host=' + row.host_id + '" title="Filter on this host">' + ledgerEscape(d) + '</a>' : d;
+			} },
+			{ data: 'playbook' },
+			{ data: 'task' },
+			{ data: 'task_action' }
+		]
 	});
 {% endblock %}

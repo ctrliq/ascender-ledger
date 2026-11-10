@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff; width: 50%">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight" style="width: 50%">
 		<div class="shadow-sm bd-example col-sm-3">
 			<form method="post" action="/reports/{{ report.id }}/schedule/{{ schedule.id }}/save" id=scheduleform class="form-horizontal">
 					<div class="mb-3">
@@ -26,7 +26,7 @@
 					<div class="mb-3">
 						<label class="form-label">Repeat</label>
 						<div>
-							<select class="form-control" name=repeat id=repeat>
+							<select class="form-select" name=repeat id=repeat>
 								{% for k,i in reoccur %}
 								<option{% if schedule.repeat == i %} selected{% endif %} value="{{ k }}">{{ i }}</option>
 								{% endfor %}
@@ -44,7 +44,7 @@
 					<div class="hr-line-dashed"></div>
 					<div class="mb-3">
 						<div class="col-sm-offset-2">
-							<a href=/ class="btn btn-white" name=cancel>Cancel</a>
+							<a href="/reports/{{ report.id }}/schedule/" class="btn btn-secondary" name=cancel>Cancel</a>
 							<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
 						</div>
 					</div>

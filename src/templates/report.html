@@ -2,12 +2,12 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper  text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
 		<div class="shadow-sm border p-4 table-responsive">
 			<h1>{{ report.name }}</h1>
 
-			<table class="table table-striped datatable-reports">
+			<table class="table table-striped datatable-reports w-100">
 				<thead>
 					<tr>
 {% for d,k in columns %}
@@ -37,28 +37,28 @@
 {% endblock %}
 {% block javascript %}
 	$('.datatable-reports').DataTable({
-		order: [[{{ report.sortc }}, '{{ report.sortd }}']],
-{% if report.type == 'changes' %}
-		"columnDefs" : [{"targets":0, "type":"date-us"}],
-{% endif %}
+		order: [[{{ report.sortc|default(0) + 0 }}, '{{ report.sortd == 'desc' ? 'desc' : 'asc' }}']],
 		pageLength: 50,
 		responsive: true,
-		dom: '<"html5buttons d-flex justify-content-center"B>lTfgitp',
-		buttons: [
-			'copy',
-			'csv',
-			{extend: 'excel', title: '{{ report.name }}'},
-			{extend: 'pdf', title: '{{ report.name }}'},
-			{extend: 'print',
-				customize: function (win){
-					$(win.document.body).addClass('white-bg');
-					$(win.document.body).css('font-size', '10px');
+		layout: {
+			topEnd: {
+				buttons: [
+					'copy',
+					{extend: 'csv', title: '{{ report.name|e('js') }}'},
+					{extend: 'excel', title: '{{ report.name|e('js') }}'},
+					{extend: 'pdf', title: '{{ report.name|e('js') }}'},
+					{extend: 'print',
+						customize: function (win){
+							$(win.document.body).addClass('white-bg');
+							$(win.document.body).css('font-size', '10px');
 
-					$(win.document.body).find('table')
-							.addClass('compact')
-							.css('font-size', 'inherit');
+							$(win.document.body).find('table')
+									.addClass('compact')
+									.css('font-size', 'inherit');
+					}
+					}
+				]
 			}
-			}
-		]
+		}
 	});
 {% endblock %}

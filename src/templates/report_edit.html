@@ -4,7 +4,7 @@
 			<div class="row">
 				<div class="col">
 					<div class="shadow-sm row bd-example">
-						<div class="col-sm-2 text-nowrap">
+						<div class="col-auto text-nowrap">
 							<label class="col-form-label text-end">Report Name</label>
 						</div>
 
@@ -24,14 +24,14 @@
 
 				<div class="col">
 					<div class="shadow-sm row bd-example">
-						<div class="col-sm-2 text-nowrap">
+						<div class="col-auto text-nowrap">
 							<label class="col-form-label text-end">Sort Field</label>
 						</div>
 						<div class="col">
 							<form method="post" action=/reports/ id=sortform class="form-horizontal">
 								<input type=hidden name=action value=savesort>
 								<input type=hidden name=report value={{ report.id }}>
-								<select class="form-control  chosen-select" name=sortc id=sortc>
+								<select class="form-control ledger-select" data-noclear="true" name=sortc id=sortc>
 {% set c = 0 %}
 {% for d,k in columns %}
 									<option value={{ c }} {% if report.sortc == c %}selected{% endif %}>{{ d }}</option>
@@ -40,7 +40,7 @@
 								</select>
 						</div>
 						<div class="col-sm-2">
-							<select class="form-control form-control-sm" name=sortd id=sortd>
+							<select class="form-select form-select-sm" name=sortd id=sortd>
 								<option value='asc' {% if report.sortd == 'asc' %}selected{% endif %}>ASC</option>
 								<option value='desc' {% if report.sortd == 'desc' %}selected{% endif %}>DESC</option>
 							</select>
@@ -59,7 +59,7 @@
 						<div class="col">
 							<h3>Columns</h3>
 							<div class="table-responsive">
-								<table class="table table-striped datatable-columns">
+								<table class="table table-striped datatable-columns w-100">
 									<thead>
 										<tr>
 											<th>Fact</th>
@@ -83,14 +83,14 @@
 											<td>{{ d }}</td>
 											<td>
 {% if c > 0 %}
-												<a href="{{ server }}?action=moveup&report={{ report.id }}&fact={{ c }}" class='btn btn-primary btn-xs' type='button' name=moveup id=moveup><i class="fa fa-chevron-up"></i></a>
+												<a href="/reports.php?action=moveup&amp;report={{ report.id }}&amp;fact={{ c }}&amp;csrf_token={{ csrf_token|url_encode }}" class='btn btn-primary btn-xs' type='button' name=moveup id=moveup><i class="fa fa-chevron-up"></i></a>
 {% else %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 {% endif %}
 {% if c < (columns | length) - 1 %}
-												<a href="{{ server }}?action=movedown&report={{ report.id }}&fact={{ c }}" class='btn btn-primary btn-xs' type='button' name=movedown id=movedown><i class="fa fa-chevron-down"></i></a>
+												<a href="/reports.php?action=movedown&amp;report={{ report.id }}&amp;fact={{ c }}&amp;csrf_token={{ csrf_token|url_encode }}" class='btn btn-primary btn-xs' type='button' name=movedown id=movedown><i class="fa fa-chevron-down"></i></a>
 {% else %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 {% endif %}
-												<a href="{{ server }}?action=deletefact&report={{ report.id }}&fact={{ c }}" class='btn btn-primary btn-xs' type='button' name=deletefact id=deletefact><i class="fa fa-trash"></i></a>
+												<a href="/reports.php?action=deletefact&amp;report={{ report.id }}&amp;fact={{ c }}&amp;csrf_token={{ csrf_token|url_encode }}" class='btn btn-primary btn-xs' type='button' name=deletefact id=deletefact><i class="fa fa-trash"></i></a>
 {% set c = c + 1 %}
 
 											</td>
@@ -110,7 +110,7 @@
 						<div class="col">
 							<h3>Filters</h3>
 							<div class="table-responsive">
-								<table class="table table-striped datatable-columns">
+								<table class="table table-striped datatable-columns w-100">
 									<thead>
 										<tr>
 											<th>Fact</th>
@@ -127,7 +127,7 @@
 											<td>{{ compares[f.compare] }}</td>
 											<td>{{ f.value }}</td>
 											<td>
-												<a href="{{ server }}?action=deletefilter&report={{ report.id }}&filter={{ c }}" class='btn btn-primary btn-xs' type='button' name=deletefact id=deletefact><i class="fa fa-trash"></i></a>
+												<a href="/reports.php?action=deletefilter&amp;report={{ report.id }}&amp;filter={{ c }}&amp;csrf_token={{ csrf_token|url_encode }}" class='btn btn-primary btn-xs' type='button' name=deletefact id=deletefact><i class="fa fa-trash"></i></a>
 											</td>
 										</tr>
 {% set c = c + 1 %}
@@ -164,16 +164,12 @@
 					</div>
 					<div class="form-group"><label class="col-sm-3 control-label">Facts</label>
 					    <div class="col-sm-8">
-							<select multiple class="form-control chosen-select" name=facts[] id=facts size=20 style="width:100%; overflow-x:auto;">
-								{% for f in facts %}
-					        	<option>{{ f }}</option>
-								{% endfor %}
-				      		</select>
+							<select multiple class="form-control ledger-lookup" data-lookup="facts" data-placeholder="Type to search facts..." name=facts[] id=column_facts></select>
 						</div>
 					</div>
         		</div>
         		<div class="modal-footer">
-                    <button type="button" class="btn btn-white" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Add</button>
                     </form>
 	            </div>
@@ -195,17 +191,13 @@
 
 			<div class="form-group"><label class="col-sm-3 control-label">Fact</label>
 			    <div class="col-sm-8">
-					<select class="form-control chosen-select" name=fact id=facts>
-{% for f in facts %}
-			        	<option>{{ f }}</option>
-{% endfor %}
-			        </select>
+					<select class="form-control ledger-lookup" data-lookup="facts" data-placeholder="Type to search facts..." name=fact id=filter_fact></select>
 			    </div>
 			</div>
 
 			<div class="form-group"><label class="col-sm-3 control-label">Compare</label>
 			    <div class="col-sm-8">
-				<select class="form-control" name=compare id=compare>
+				<select class="form-select" name=compare id=compare>
 			        <option value="eq">Equals</option>
 			        <option value="ne">Not Equals</option>
 			        <option value="gt">Greater Than</option>
@@ -222,7 +214,7 @@
 			</div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-white" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Add</button>
                     </form>
                 </div>
@@ -234,5 +226,4 @@
 {% block javascriptinc %}
 {% endblock %}
 {% block javascript %}
-$(".chosen-select").chosen({ search_contains: true });
 {% endblock %}

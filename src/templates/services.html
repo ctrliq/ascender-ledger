@@ -1,70 +1,66 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
 		<div class="shadow-sm border p-4">
 			<div class="shadow-sm border p-2">
-				<form action="/services/">
-					<div class="row">
-						<div class="col-2">
-								<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
-									<option class="fst-italic" selected disabled>Add a Filter</option>
-									<option value="hosts">Hosts</option>
-									<option value="services">Services</option>
-									<option value="states">State</option>
-									<option value="statuses">Status</option>
-								</select>
-						</div>
-
-						<div id=filter_hosts class="col-4" style="display: none">
-								<select class="form-control form-select-sm chosen-select" name="hosts" id="hosts">
-									<option></option>
-			{% for i,h in hosts %}
-									<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
-			{% endfor %}
-								</select>
-						</div>
-
-						<div id=filter_services class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name="services" id="services" data-placeholder="Choose a service...">
-								<option></option>
-			{% for p in uservices %}
-								<option{% if service == p %} selected{% endif %}>{{ p }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_states class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name="states" id="states">
-								<option></option>
-			{% for t in states %}
-								<option {% if state == t %} selected{% endif %}>{{ t }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_statuses class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name="statuses" id="statuses">
-								<option></option>
-			{% for t in statuses %}
-								<option {% if status == t %} selected{% endif %}>{{ t }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div class="col-1 align-text-bottom">
-							<a onclick="addfilters()" href="#"><button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button></a>
-						</div>
+				<div class="row">
+					<div class="col-2">
+						<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
+							<option class="fst-italic" value="" selected disabled>Add a Filter</option>
+							<option value="hosts">Hosts</option>
+							<option value="services">Services</option>
+							<option value="states">State</option>
+							<option value="statuses">Status</option>
+						</select>
 					</div>
-				</form>
+
+					<div class="col-4 filter-input" data-filter="hosts" style="display: none">
+						<select class="form-control form-select-sm ledger-lookup" data-lookup="hosts" data-url="/services/?host=" data-placeholder="Choose a Host...">
+{% if host %}
+							<option value="{{ host }}" selected>{{ hostname }}</option>
+{% endif %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="services" style="display: none">
+						<select class="form-control form-select-sm ledger-lookup" data-lookup="services" data-url="/services/?service=" data-placeholder="Choose a Service...">
+{% if service %}
+							<option value="{{ service }}" selected>{{ service }}</option>
+{% endif %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="states" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/services/?state=" data-placeholder="Choose a State...">
+							<option></option>
+{% for t in states %}
+							<option value="{{ t }}"{% if state == t %} selected{% endif %}>{{ t | title }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="statuses" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/services/?status=" data-placeholder="Choose a Status...">
+							<option></option>
+{% for t in statuses %}
+							<option value="{{ t }}"{% if status == t %} selected{% endif %}>{{ t | title }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-1 align-text-bottom">
+						<button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button>
+					</div>
+				</div>
 				<br>
 				<div class="col-12">
-					Filters: 
-					{% if host %}<a href=/services/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
-					{% if service %}<a href=/services/?clear=service title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">SERVICE: <i>{{ service }}</i></button></a>{% endif %}
-					{% if state %}<a href=/services/?clear=state title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">STATE: <i>{{ state | title }}</i></button></a>{% endif %}
-					{% if status %}<a href=/services/?clear=status title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">STATUS: <i>{{ status | title }}</i></button></a>{% endif %}
+					Filters:
+					{% if host %}<a href="/services/?clear=host" title="Remove" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hostname }}</i></a>{% endif %}
+					{% if service %}<a href="/services/?clear=service" title="Remove" class="btn btn-primary btn-xs ms-1">SERVICE: <i>{{ service }}</i></a>{% endif %}
+					{% if state %}<a href="/services/?clear=state" title="Remove" class="btn btn-primary btn-xs ms-1">STATE: <i>{{ state | title }}</i></a>{% endif %}
+					{% if status %}<a href="/services/?clear=status" title="Remove" class="btn btn-primary btn-xs ms-1">STATUS: <i>{{ status | title }}</i></a>{% endif %}
 				</div>
 			</div>
 			<br><br>
@@ -79,106 +75,26 @@
 							<th>Type</th>
 						</tr>
 					</thead>
-					<tbody>
-{% for r in services %}
-						<tr>
-							<td nowrap>{{ hosts[r['host']] }}</td>
-							<td nowrap>{{ r['name'] }}</td>
-							<td nowrap>{{ r['state'] | title }}</td>
-							<td nowrap>{{ r['status'] | title }}</td>
-							<td nowrap>{{ r['source'] | title }}</td>
-						</tr>
-{% endfor %}
-					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
 </div>
-
-
-
-{% endblock %}
-{% block javascriptinc %}
-	<script>
-	function addfilters () {
-		var filter = $("#addfilter").find(":selected").attr("value");
-		if (filter != undefined) {
-			var func = "change_" + filter + "_filter";
-			eval(func + "()"); 
-		}
-	}
-
-	function change_addfilter () {
-		var filter = $("#addfilter").find(":selected").attr("value");
-		$("#filter_hosts").hide();
-		$("#filter_services").hide();
-		$("#filter_states").hide();
-		$("#filter_statuses").hide();
-		if (filter != undefined && filter != "") {
-			$("#filter_" +	 filter).show()
-		}
-	}
-
-
-	function change_hosts_filter () {
-		var host = $("#hosts").find(":selected").attr("id");
-		if (host == undefined) {
-			host = "";
-		}
-		window.location = "/services/?host=" + host;
-	}
-
-	function change_services_filter () {
-		var service = $("#services").find(":selected").val();
-		if (service == undefined) {
-			service = "";
-		}
-		window.location = "/services/?service=" + service;
-	}
-
-	function change_states_filter () {
-		var state = $("#states").find(":selected").val();
-		if (state == undefined) {
-			state = "";
-		}
-		window.location = "/services/?state=" + state;
-	}
-
-	function change_statuses_filter () {
-		var status = $("#statuses").find(":selected").val();
-		if (status == undefined) {
-			status = "";
-		}
-		window.location = "/services/?status=" + status;
-	}
-
-	$("#addfilter").change(change_addfilter);
-	change_addfilter ();
-	</script>
 {% endblock %}
 {% block javascript %}
-	$(".chosen-select").chosen({ allow_single_deselect:true, sestate_contains: true, width: '100%' });
-
-	$('.datatable-services').DataTable({
-		order: [[1, 'asc']],
-		pageLength: 25,
-		responsive: true,
-		dom: '<"html5buttons d-flex justify-content-end"B>lfgtip',
-		buttons: [
-			'copy',
-			'csv',
-			{extend: 'pdf', title: 'Services'},
-			{extend: 'print',
-				customize: function (win){
-					$(win.document.body).addClass('white-bg');
-					$(win.document.body).css('font-size', '10px');
-
-					$(win.document.body).find('table')
-							.addClass('compact')
-							.css('font-size', 'inherit');
-			}
-			}
+	ledgerTable('.datatable-services', {
+		url: '/services/',
+		order: [[0, 'asc']],
+		columns: [
+			{ data: 'hostname', className: 'text-nowrap', render: function (d, t, row) {
+				return t === 'display' ? '<a href="/services/?host=' + row.host_id + '" title="Filter on this host">' + ledgerEscape(d) + '</a>' : d;
+			} },
+			{ data: 'name', className: 'text-nowrap', render: function (d, t) {
+				return t === 'display' ? '<a href="/services/?service=' + encodeURIComponent(d) + '" title="Filter on this service">' + ledgerEscape(d) + '</a>' : d;
+			} },
+			{ data: 'state' },
+			{ data: 'status' },
+			{ data: 'source' }
 		]
 	});
 {% endblock %}

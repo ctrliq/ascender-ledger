@@ -26,6 +26,20 @@ function stripUnwantedTagsAndAttrs($html_str){
 	return strip_tags($d);
 }
 
+/*
+	Row totals for the dashboard.  Slow on a large fleet, which is why the minute cron runs it
+	and stores the result.
+*/
+function dashboard_counts() {
+	return array(
+		'hosts'    => intval(db_fetch_cell('SELECT COUNT(*) AS `count` FROM `hosts`', 'count')),
+		'facts'    => intval(db_fetch_cell('SELECT COUNT(*) AS `count` FROM `facts`', 'count')),
+		'changes'  => intval(db_fetch_cell('SELECT COUNT(*) AS `count` FROM `changes`', 'count')),
+		'packages' => intval(db_fetch_cell('SELECT COUNT(*) AS `count` FROM `packages`', 'count')),
+		'time'     => time(),
+	);
+}
+
 function random_str($length) {
 	$keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	$str = '';
@@ -90,101 +104,146 @@ function ppre($arr) {
 	print "</pre>";
 }
 
+/*
+	Turns the filters of a facts report into a query for the ids of the matching hosts.  Each
+	filter joins the one fact it tests (host and fact are the facts table's primary key), so a
+	host matches when it has every filtered fact with a value that passes.
+*/
 function build_filter($filters) {
-
-	$sql = "SELECT DISTINCT f.`host` FROM `facts` as f\n";
+	$sql = "SELECT `h`.`id` AS `host` FROM `hosts` AS `h`\n";
 	$p = array();
 	$c = 0;
 	foreach ($filters as $f) {
+		if (!isset($f['fact']) || !isset($f['compare']) || !isset($f['value'])) {
+			continue;
+		}
 		$c++;
+		$col = "`f$c`.`data`";
+		$v = $f['value'];
+		$num = (is_numeric($v) ? $v + 0 : $v);
 
-		$sql .= "INNER JOIN (SELECT * FROM `facts` WHERE `fact`= ? AND ";
-
-		$p[] = $f['fact'];
 		switch ($f['compare']) {
 			case 'eq':
-				$sql .= '`data` = ?';
-				$p[] = $f['value'];
+				$cond = "$col = ?";
 				break;
 			case 'ne':
-				$sql .= '`data` != ?';
-				$p[] = $f['value'];
+				$cond = "$col != ?";
 				break;
 			case 'gt':
-				$sql .= 'cast(`data` as signed) > ?';
-				$p[] = $f['value'];
+				$cond = "CAST($col AS SIGNED) > ?";
+				$v = $num;
 				break;
 			case 'lt':
-				$sql .= '`cast(data` as signed) < ?';
-				$p[] = $f['value'];
+				$cond = "CAST($col AS SIGNED) < ?";
+				$v = $num;
 				break;
 			case 'contains':
-				$sql .= '`data` LIKE ?';
-				$p[] = "%" . $f['value'] . "%";
+				$cond = "$col LIKE ?";
+				$v = '%' . dt_like_escape($v) . '%';
 				break;
 			case 'starts':
-				$sql .= '`data` LIKE ?';
-				$p[] = "%" . $f['value'];
+				$cond = "$col LIKE ?";
+				$v = dt_like_escape($v) . '%';
 				break;
 			case 'ends':
-				$sql .= '`data` LIKE ?';
-				$p[] = "%" . $f['value'];
+				$cond = "$col LIKE ?";
+				$v = '%' . dt_like_escape($v);
 				break;
+			default:
+				$c--;
+				continue 2;
 		}
-		$sql .= ') as f' . $c . ' ON f.host = f' . $c . ".host\n";
+
+		$sql .= "INNER JOIN `facts` AS `f$c` ON `f$c`.`host` = `h`.`id` AND `f$c`.`fact` = ? AND $cond\n";
+		$p[] = $f['fact'];
+		$p[] = $v;
 	}
 
 	return array($sql, $p);
 }
 
+function sql_placeholders($n) {
+	return implode(', ', array_fill(0, max(1, $n), '?'));
+}
+
+/*
+	The ON condition joining a change ($c) to its job ($j).  Job numbers are per Ascender
+	server, so a job matches on number and server.  Jobs recorded before Ledger kept the server
+	have none, and are used only when the change's server has no job with that number, so a
+	change never joins to two jobs (and is never listed twice).
+*/
+function jobs_join_on($j = 'j', $c = 'c') {
+	return "`$j`.`job` = `$c`.`job` AND (`$j`.`server` = `$c`.`server` OR (`$j`.`server` = '' AND NOT EXISTS (SELECT 1 FROM `jobs` AS `jx` WHERE `jx`.`job` = `$c`.`job` AND `jx`.`server` = `$c`.`server`)))";
+}
+
+/*
+	Builds a facts report: one row per matching host, holding the value of each column.  A
+	column made of several facts shows their values joined with commas.  Only the facts the
+	columns use are read, a few hundred hosts at a time.
+*/
 function build_report ($id) {
 	$id = intval($id);
 	$report = new Report($id);
-	if ($report->id) {
-		$w = build_filter($report->filters);
-		
-		$sql = $w[0];
-		$pr = $w[1];
+	$data = array();
 
-		$hosts = db_fetch_assocs_prepare($sql, $pr);
-    }
+	if (!$report->id || !is_array($report->columns)) {
+		return $data;
+	}
 
-    $data = array();
-    foreach ($hosts as $h) {
-        $facts = db_fetch_assocs_prepare('SELECT `fact`,`data` FROM `facts` WHERE `host` = ?', array($h['host']));
-        $x = 0;
-        $data[$h['host']] = array();
-        if (count($facts)) {
-            foreach ($report->columns as $d => $k) {
-                $data[$h['host']][$x] = '';
-                foreach ($facts as $f) {
-                    if (is_array($k)) {
-                        if (in_array($f['fact'], $k)) {
-                            if ($data[$h['host']][$x] != '') {
-                                $data[$h['host']][$x] .= ', ';
-                            }
-                            $data[$h['host']][$x] .= $f['data'];
-                        }
-                    } else {
-                        if ($k == $f['fact']) {
-                            $data[$h['host']][$x] = $f['data'];
-                        }
-                    }
-                }
-                $x++;
-            }
-        }
-        $e = true;
-        foreach ($data[$h['host']] as $d) {
-            if ($d != '') {
-                $e = false;
-            }
-        }
-        if ($e) {
-            unset($data[$h['host']]);
-        }
-    }
-    return $data;
+	$w = build_filter(is_array($report->filters) ? $report->filters : array());
+	$hosts = reindex_col(db_fetch_assocs_prepare($w[0], $w[1]), 'host');
+
+	$needed = array();
+	foreach ($report->columns as $k) {
+		foreach ((array) $k as $f) {
+			$needed[$f] = true;
+		}
+	}
+	$needed = array_keys($needed);
+
+	if (empty($hosts) || empty($needed)) {
+		return $data;
+	}
+
+	foreach (array_chunk($hosts, 500) as $chunk) {
+		$values = array();
+		$rows = db_fetch_assocs_prepare('SELECT `host`, `fact`, `data` FROM `facts`
+			WHERE `host` IN (' . sql_placeholders(count($chunk)) . ') AND `fact` IN (' . sql_placeholders(count($needed)) . ')
+			ORDER BY `host`, `fact`', array_merge($chunk, $needed));
+		foreach ($rows as $r) {
+			$values[$r['host']][$r['fact']] = $r['data'];
+		}
+
+		foreach ($chunk as $h) {
+			if (!isset($values[$h])) {
+				continue;
+			}
+			$row = array();
+			$empty = true;
+			foreach ($report->columns as $k) {
+				if (is_array($k)) {
+					$parts = array();
+					foreach ($values[$h] as $fact => $v) {
+						if (in_array($fact, $k) && $v != '') {
+							$parts[] = $v;
+						}
+					}
+					$cell = implode(', ', $parts);
+				} else {
+					$cell = (isset($values[$h][$k]) ? $values[$h][$k] : '');
+				}
+				if ($cell != '') {
+					$empty = false;
+				}
+				$row[] = $cell;
+			}
+			if (!$empty) {
+				$data[$h] = $row;
+			}
+		}
+	}
+
+	return $data;
 }
 
 /*
@@ -240,7 +299,7 @@ function build_changes_filter($filters) {
 	$p = array();
 
 	foreach ($filters as $f) {
-		if (!isset($f['field']) || !isset($f['value'])) {
+		if (!isset($f['field']) || !isset($f['value']) || !is_scalar($f['value'])) {
 			continue;
 		}
 
@@ -321,7 +380,7 @@ function build_changes_report($id, $limit = 1000) {
 	$sql = "SELECT `changes`.`id`, `changes`.`time`, `changes`.`playbook`, `changes`.`role`, `changes`.`task`, `changes`.`task_action`,
 					`hosts`.`hostname`, `jobs`.`name` as `template`
 			FROM `changes`
-			LEFT JOIN `jobs` ON `jobs`.`job` = `changes`.`job`
+			LEFT JOIN `jobs` ON " . jobs_join_on('jobs', 'changes') . "
 			LEFT JOIN `hosts` ON `hosts`.`id` = `changes`.`host`
 			" . $w[0] . "
 			ORDER BY `changes`.`time` DESC
@@ -349,20 +408,15 @@ function build_changes_report($id, $limit = 1000) {
 	actually recorded, the same way the changes page builds its own menus.
 */
 function changes_report_filter_options() {
-	$hosts = array();
-	foreach (db_fetch_assocs('SELECT `id`, `hostname` FROM `hosts` ORDER BY `hostname`') as $h) {
-		$hosts[$h['id']] = $h['hostname'];
-	}
-
 	$templates = array();
-	foreach (db_fetch_assocs("SELECT DISTINCT `jobs`.`job_template_id`, `jobs`.`name` FROM `changes` LEFT JOIN `jobs` ON `jobs`.`job` = `changes`.`job` ORDER BY `jobs`.`name` ASC") as $t) {
+	foreach (db_fetch_assocs("SELECT DISTINCT `j`.`job_template_id`, `j`.`name` FROM `jobs` AS `j` WHERE EXISTS (SELECT 1 FROM `changes` AS `c` WHERE `c`.`job` = `j`.`job` AND (`c`.`server` = `j`.`server` OR `j`.`server` = '')) ORDER BY `j`.`name` ASC") as $t) {
 		if ($t['job_template_id']) {
 			$templates[$t['job_template_id']] = $t['name'];
 		}
 	}
 
 	$inventories = array();
-	foreach (db_fetch_assocs("SELECT DISTINCT `jobs`.`inventory` FROM `changes` LEFT JOIN `jobs` ON `jobs`.`job` = `changes`.`job` ORDER BY `jobs`.`inventory` ASC") as $i) {
+	foreach (db_fetch_assocs("SELECT DISTINCT `j`.`inventory` FROM `jobs` AS `j` WHERE EXISTS (SELECT 1 FROM `changes` AS `c` WHERE `c`.`job` = `j`.`job` AND (`c`.`server` = `j`.`server` OR `j`.`server` = '')) ORDER BY `j`.`inventory` ASC") as $i) {
 		$i = explode('-', $i['inventory']);
 		$id = array_pop($i);
 		if (intval($id)) {
@@ -371,7 +425,7 @@ function changes_report_filter_options() {
 	}
 
 	$projects = array();
-	foreach (db_fetch_assocs("SELECT DISTINCT `jobs`.`project` FROM `changes` LEFT JOIN `jobs` ON `jobs`.`job` = `changes`.`job` ORDER BY `jobs`.`project` ASC") as $i) {
+	foreach (db_fetch_assocs("SELECT DISTINCT `j`.`project` FROM `jobs` AS `j` WHERE EXISTS (SELECT 1 FROM `changes` AS `c` WHERE `c`.`job` = `j`.`job` AND (`c`.`server` = `j`.`server` OR `j`.`server` = '')) ORDER BY `j`.`project` ASC") as $i) {
 		$i = explode('-', $i['project']);
 		$id = array_pop($i);
 		if (intval($id)) {
@@ -380,7 +434,6 @@ function changes_report_filter_options() {
 	}
 
 	return array(
-		'host'      => $hosts,
 		'template'  => $templates,
 		'playbook'  => changes_report_option_list("SELECT DISTINCT `playbook` FROM `changes` ORDER BY `playbook` ASC", 'playbook'),
 		'role'      => changes_report_option_list("SELECT DISTINCT `role` FROM `changes` ORDER BY `role` ASC", 'role'),

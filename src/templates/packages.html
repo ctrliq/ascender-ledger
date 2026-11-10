@@ -1,62 +1,55 @@
 {% extends 'layout.html' %}
 
 {% block body %}
-<div class="wrapper text-bg-light">
-	<div class="container-fluid animated fadeInRight" style="background-color: #fff;">
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
 		<div class="shadow-sm border p-4">
 			<div class="shadow-sm border p-2">
-				<form action="/packages/">
-					<div class="row">
-						<div class="col-2">
-								<select class="form-control form-select form-select-sm" name=addfilter id=addfilter>
-									<option class="fst-italic" selected disabled>Add a Filter</option>
-									<option value="hosts">Hosts</option>
-									<option value="packages">Packages</option>
-									<option value="arches">Arches</option>
-								</select>
-						</div>
-
-						<div id=filter_hosts class="col-4" style="display: none">
-								<select class="form-control form-select-sm chosen-select" name="hosts" id="hosts">
-									<option></option>
-			{% for i,h in hosts %}
-									<option id="{{ i }}"{% if host == i %} selected{% endif %}>{{ h }}</option>
-			{% endfor %}
-								</select>
-						</div>
-
-						<div id=filter_packages class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name="packages" id="packages" data-placeholder="Choose a package...">
-								<option></option>
-			{% for p in upackages %}
-								<option{% if package == p %} selected{% endif %}>{{ p }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-						<div id=filter_arches class="col-4" style="display: none">
-							<select class="form-control form-select-sm chosen-select" name="arch" id="arch">
-								<option></option>
-			{% for t in arches %}
-								<option {% if arch == t %} selected{% endif %}>{{ t }}</option>
-			{% endfor %}
-							</select>
-						</div>
-
-
-						<div class="col-1 align-text-bottom">
-							<a onclick="addfilters()" href="#"><button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button></a>
-						</div>
+				<div class="row">
+					<div class="col-2">
+						<select class="form-control form-select form-select-sm" name="addfilter" id="addfilter">
+							<option class="fst-italic" value="" selected disabled>Add a Filter</option>
+							<option value="hosts">Hosts</option>
+							<option value="packages">Packages</option>
+							<option value="arches">Arches</option>
+						</select>
 					</div>
-				</form>
+
+					<div class="col-4 filter-input" data-filter="hosts" style="display: none">
+						<select class="form-control form-select-sm ledger-lookup" data-lookup="hosts" data-url="/packages/?host=" data-placeholder="Choose a Host...">
+{% if host %}
+							<option value="{{ host }}" selected>{{ hostname }}</option>
+{% endif %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="packages" style="display: none">
+						<select class="form-control form-select-sm ledger-lookup" data-lookup="packages" data-url="/packages/?package=" data-placeholder="Choose a package...">
+{% if package %}
+							<option value="{{ package }}" selected>{{ package }}</option>
+{% endif %}
+						</select>
+					</div>
+
+					<div class="col-4 filter-input" data-filter="arches" style="display: none">
+						<select class="form-control form-select-sm ledger-select" data-url="/packages/?arch=" data-placeholder="Choose an Arch...">
+							<option></option>
+{% for t in arches %}
+							<option value="{{ t }}"{% if arch == t %} selected{% endif %}>{{ t }}</option>
+{% endfor %}
+						</select>
+					</div>
+
+					<div class="col-1 align-text-bottom">
+						<button type="button" class="btn btn-primary btn-s" name="add" id="add">Add</button>
+					</div>
+				</div>
 				<br>
 				<div class="col-12">
-					Filters: 
-					{% if host %}<a href=/packages/?clear=host title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hosts[host] }}</i></button></a>{% endif %}
-					{% if package %}<a href=/packages/?clear=package title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">PACKAGE: <i>{{ package }}</i></button></a>{% endif %}
-					{% if arch %}<a href=/packages/?clear=arch title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">ARCH: <i>{{ arch }}</i></button></a>{% endif %}
-					{% if fullname %}<a href=/packages/?clear=fullname title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">FULLNAME: <i>{{ fullname }}</i></button></a>{% endif %}
-					{% if errata %}<a href=/packages/?clear=errata title="Remove"><button type="button" class="btn btn-primary btn-xs ms-1">ERRATA: <i>YES</i></button></a>{% endif %}
+					Filters:
+					{% if host %}<a href="/packages/?clear=host" title="Remove" class="btn btn-primary btn-xs ms-1">HOST: <i>{{ hostname }}</i></a>{% endif %}
+					{% if package %}<a href="/packages/?clear=package" title="Remove" class="btn btn-primary btn-xs ms-1">PACKAGE: <i>{{ package }}</i></a>{% endif %}
+					{% if arch %}<a href="/packages/?clear=arch" title="Remove" class="btn btn-primary btn-xs ms-1">ARCH: <i>{{ arch }}</i></a>{% endif %}
 				</div>
 			</div>
 			<br><br>
@@ -73,100 +66,28 @@
 							<th>Type</th>
 						</tr>
 					</thead>
-					<tbody>
-{% for r in packages %}
-						<tr>
-							<td nowrap>{{ hosts[r['host']] }}</td>
-							<td nowrap>{{ r['name'] }}</td>
-							<td nowrap>{{ r['version'] }}</td>
-							<td nowrap>{{ r['release'] }}</td>
-							<td nowrap>{{ r['epoch'] }}</td>
-							<td nowrap>{{ r['arch'] }}</td>
-							<td nowrap>{{ r['source'] }}</td>
-						</tr>
-{% endfor %}
-					</tbody>
 				</table>
 			</div>
 		</div>
 	</div>
 </div>
-
-
-
-{% endblock %}
-{% block javascriptinc %}
-	<script>
-	function addfilters () {
-		var filter = $("#addfilter").find(":selected").attr("value");
-		if (filter != undefined) {
-			var func = "change_" + filter + "_filter";
-			eval(func + "()"); 
-		}
-	}
-
-	function change_addfilter () {
-		var filter = $("#addfilter").find(":selected").attr("value");
-		$("#filter_hosts").hide();
-		$("#filter_packages").hide();
-		$("#filter_arches").hide();
-		if (filter != undefined && filter != "") {
-			$("#filter_" +	 filter).show()
-		}
-	}
-
-	function change_hosts_filter () {
-		var host = $("#hosts").find(":selected").attr("id");
-		if (host == undefined) {
-			host = "";
-		}
-		window.location = "/packages/?host=" + host;
-	}
-
-	function change_packages_filter () {
-		var package = $("#packages").find(":selected").val();
-		if (package == undefined) {
-			package = "";
-		}
-		window.location = "/packages/?package=" + encodeURIComponent(package);
-	}
-
-	function change_arches_filter () {
-		var arch = $("#arch").find(":selected").val();
-		if (arch == undefined) {
-			arch = "";
-		}
-		window.location = "/packages/?arch=" + encodeURIComponent(arch);
-	}
-
-	$("#addfilter").change(change_addfilter);
-	change_addfilter ();
-
-	</script>
 {% endblock %}
 {% block javascript %}
-
-	$(".chosen-select").chosen({ allow_single_deselect:true, search_contains: true, width: '100%' });
-
-	$('.datatable-packages').DataTable({
+	ledgerTable('.datatable-packages', {
+		url: '/packages/',
 		order: [[1, 'asc']],
-		pageLength: 25,
-		responsive: true,
-		dom: '<"html5buttons d-flex justify-content-end"B>lfgtip',
-		buttons: [
-			'copy',
-			'csv',
-			{extend: 'pdf', title: 'Packages'},
-			{extend: 'print',
-				customize: function (win){
-					$(win.document.body).addClass('white-bg');
-					$(win.document.body).css('font-size', '10px');
-
-					$(win.document.body).find('table')
-							.addClass('compact')
-							.css('font-size', 'inherit');
-			}
-			}
+		columns: [
+			{ data: 'hostname', className: 'text-nowrap', render: function (d, t, row) {
+				return t === 'display' ? '<a href="/packages/?host=' + row.host_id + '" title="Filter on this host">' + ledgerEscape(d) + '</a>' : d;
+			} },
+			{ data: 'name', className: 'text-nowrap', render: function (d, t) {
+				return t === 'display' ? '<a href="/packages/?package=' + encodeURIComponent(d) + '" title="Filter on this package">' + ledgerEscape(d) + '</a>' : d;
+			} },
+			{ data: 'version', className: 'text-nowrap' },
+			{ data: 'release', className: 'text-nowrap' },
+			{ data: 'epoch' },
+			{ data: 'arch' },
+			{ data: 'source' }
 		]
 	});
 {% endblock %}

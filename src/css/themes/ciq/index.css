@@ -1,0 +1,220 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+img,
+picture,
+svg {
+  max-width: 100%;
+  display: block;
+}
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+    transition-duration: 0.01ms;
+    scroll-behavior: auto;
+  }
+}
+input,
+textarea,
+select {
+  border: 1px solid;
+  padding: 0.25em 0.5em;
+  margin: 0;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.33;
+}
+
+a {
+  text-decoration: none !important;
+  color: inherit;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+code,
+pre,
+kbd {
+  font-family: monospace;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+html {
+  scrollbar-width: thin;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+a, button {
+  touch-action: manipulation;
+}
+
+html,
+body {
+  font-family: var(--quantic-font-family-body), sans-serif;
+  color: var(--quantic-text-tertiary);
+  background-color: var(--quantic-bg-primary);
+  font-family: var(--quantic-font-family-body);
+  font-size: var(--quantic-font-size-body-md, 1rem);
+  line-height: var(--quantic-line-height-body-md, 1.5rem);
+}
+
+html,
+body {
+  font-family: var(--quantic-font-family-body);
+  font-size: var(--quantic-font-size-body-md, 1rem);
+  line-height: var(--quantic-line-height-body-md, 1.5rem);
+}
+
+h1 {
+  color: var(--quantic-text-primary);
+  font-weight: var(--quantic-font-weight-semibold);
+  font-family: var(--quantic-font-family-display);
+  font-size: var(--quantic-font-size-display-lg, 2.25rem);
+  line-height: var(--quantic-line-height-display-lg, 2.75rem);
+  margin-block: var(--quantic-spacing-6);
+}
+
+h2 {
+  color: var(--quantic-text-primary);
+  font-weight: var(--quantic-font-weight-semibold);
+  font-family: var(--quantic-font-family-display);
+  font-size: var(--quantic-font-size-display-md, 1.875rem);
+  line-height: var(--quantic-line-height-display-md, 2.375rem);
+  margin-block: var(--quantic-spacing-6);
+}
+
+h3 {
+  color: var(--quantic-text-primary);
+  font-weight: var(--quantic-font-weight-semibold);
+  font-family: var(--quantic-font-family-display);
+  font-size: var(--quantic-font-size-display-sm, 1.5rem);
+  line-height: var(--quantic-line-height-display-sm, 2rem);
+  margin-block: var(--quantic-spacing-6);
+}
+
+h4 {
+  color: var(--quantic-text-primary);
+  font-weight: var(--quantic-font-weight-semibold);
+  font-family: var(--quantic-font-family-display);
+  font-size: var(--quantic-font-size-display-xs, 1.25rem);
+  line-height: var(--quantic-line-height-display-xs, 1.875rem);
+  margin-block: var(--quantic-spacing-6);
+}
+
+h5 {
+  font-family: var(--quantic-font-family-body);
+  font-size: var(--quantic-font-size-body-lg, 1.125rem);
+  line-height: var(--quantic-line-height-body-lg, 1.75rem);
+}
+
+h6 {
+  font-family: var(--quantic-font-family-body);
+  font-size: var(--quantic-font-size-body-md, 1rem);
+  line-height: var(--quantic-line-height-body-md, 1.5rem);
+}
+
+h1 em,
+h2 em {
+  font-style: normal;
+}
+
+a {
+  color: inherit;
+}
+a:focus-visible {
+  outline: 2px solid var(--quantic-focus-ring);
+  outline-offset: var(--quantic-spacing-1);
+  border-radius: var(--quantic-radius-xxs);
+}
+
+a:hover {
+  text-decoration: underline;
+}
