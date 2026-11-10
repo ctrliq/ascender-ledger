@@ -76,6 +76,10 @@ if (isset($_GET['action']) && $_GET['action'] == 'save' && $_SERVER['REQUEST_MET
 		if (isset($_POST['callback_limit']) && in_array(intval($_POST['callback_limit']), $callback_limits, true)) {
 			write_setting('callback_limit', intval($_POST['callback_limit']));
 		}
+		if (isset($_POST['custom_login']) && is_string($_POST['custom_login'])) {
+			// Plain text: the login page escapes it and keeps its line breaks
+			write_setting('custom_login', mb_substr(trim(str_replace("\r\n", "\n", $_POST['custom_login'])), 0, 2000));
+		}
 
 		Header("Location: /settings/visual/?saved=1\n\n");
 		exit;
@@ -140,7 +144,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'general') {
 
 if (isset($_GET['action']) && $_GET['action'] == 'visual') {
 	echo $twig->render('settings_visual.html', array_merge($twigarr, array('saved' => $saved, 'export_limits' => $export_limits, 'callback_limits' => $callback_limits,
-		'export_limit' => export_limit(), 'callback_limit' => callback_limit())));
+		'export_limit' => export_limit(), 'callback_limit' => callback_limit(), 'custom_login' => read_setting('custom_login', ''))));
 	exit;
 }
 

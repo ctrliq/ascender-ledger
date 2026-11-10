@@ -20,4 +20,7 @@
 			<div class="text-center mt-3">
 				<a href="/forgot_password/" class="link-primary small">Forgot password?</a>
 			</div>
+{% if custom_login|trim != '' %}
+			<p class="pt-3 mb-0 small" style="white-space: pre-line;">{{ custom_login }}</p>
+{% endif %}
 {% endblock %}
