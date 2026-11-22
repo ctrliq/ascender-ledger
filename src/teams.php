@@ -68,8 +68,9 @@ if (isset($_GET['action'])) {
 					exit;
 				}
 				$enabled = (isset($_POST['enabled']) && intval($_POST['enabled']) ? 1 : 0);
-				$ok = change_keeping_admin(function () use ($id, $name, $enabled) {
-					db_execute_prepare('UPDATE `teams` SET `name` = ?, `enabled` = ? WHERE `id` = ?', array($name, $enabled, $id));
+				$oidc_group = oidc_clean_group(post_str('oidc_group'));
+				$ok = change_keeping_admin(function () use ($id, $name, $enabled, $oidc_group) {
+					db_execute_prepare('UPDATE `teams` SET `name` = ?, `enabled` = ?, `oidc_group` = ? WHERE `id` = ?', array($name, $enabled, $oidc_group, $id));
 				});
 				Header("Location: $back?" . ($ok ? 'msg=saved' : 'error=lockout') . "\n\n");
 			}

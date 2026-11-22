@@ -10,6 +10,7 @@ class User {
 	var $registered = 0;
 	var $code = '';
 	var $code_expires = 0;
+	var $oidc_sub = null;
 	var $super = 0;
 	var $perms = array();
 
@@ -49,6 +50,11 @@ class User {
 	function set_code($code, $ttl = 0) {
 		$this->code = $this->clean_code($code);
 		$this->code_expires = ($this->code != '' && $ttl > 0 ? time() + intval($ttl) : 0);
+	}
+
+	// The user's subject at the OIDC provider, null to unlink
+	function set_oidc_sub($sub) {
+		$this->oidc_sub = ($sub === null || $sub === '' ? null : substr((string) $sub, 0, 255));
 	}
 
 	function set_name($name) {
@@ -114,6 +120,7 @@ class User {
 			$this->password = $u['password'];
 			$this->code = $u['code'];
 			$this->code_expires = (isset($u['code_expires']) ? intval($u['code_expires']) : 0);
+			$this->oidc_sub = (isset($u['oidc_sub']) ? $u['oidc_sub'] : null);
 			$this->perms = user_permissions($this->id);
 			$this->super = (int) isset($this->perms['super']);
 
@@ -158,11 +165,11 @@ class User {
 
 	function save() {
 		if ($this->id) {
-			db_execute_prepare('UPDATE `users` SET `name` = ?, `email` = ?, `username` = ?, `password` = ?, `enabled` = ?, `registered` = ?, `code` = ?, `code_expires` = ? WHERE `id` = ?',
-						array($this->name, $this->email, $this->username, $this->password, $this->enabled, $this->registered, $this->code, $this->code_expires, $this->id));
+			db_execute_prepare('UPDATE `users` SET `name` = ?, `email` = ?, `username` = ?, `password` = ?, `enabled` = ?, `registered` = ?, `code` = ?, `code_expires` = ?, `oidc_sub` = ? WHERE `id` = ?',
+						array($this->name, $this->email, $this->username, $this->password, $this->enabled, $this->registered, $this->code, $this->code_expires, $this->oidc_sub, $this->id));
 		} else {
-			db_execute_prepare('INSERT INTO `users` (`name`, `email`, `username`, `password`, `enabled`, `registered`, `code`, `code_expires`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-						array($this->name, $this->email, $this->username, $this->password, $this->enabled, $this->registered, $this->code, $this->code_expires));
+			db_execute_prepare('INSERT INTO `users` (`name`, `email`, `username`, `password`, `enabled`, `registered`, `code`, `code_expires`, `oidc_sub`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+						array($this->name, $this->email, $this->username, $this->password, $this->enabled, $this->registered, $this->code, $this->code_expires, $this->oidc_sub));
 			$this->id = intval(db_fetch_cell_prepare('SELECT `id` FROM `users` WHERE `username` = ?', 'id', array($this->username)));
 		}
 	}

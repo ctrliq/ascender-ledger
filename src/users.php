@@ -34,7 +34,7 @@ if (isset($_GET['action'])) {
 
 	switch ($_GET['action']) {
 		case 'invite':
-			if (!$posted || !isset($_POST['email'])) {
+			if (!$posted || !isset($_POST['email']) || !local_auth_enabled()) {
 				Header("Location: /users/\n\n");
 				exit;
 			}
@@ -108,6 +108,10 @@ if (isset($_GET['action'])) {
 			if ($newpass != '' && strlen($newpass) > 7 && $newpass == $newpass2) {
 				$user->set_password($newpass);
 				$user->set_code('');
+			}
+
+			if (isset($_POST['oidc_unlink'])) {
+				$user->set_oidc_sub(null);
 			}
 			$user->save();
 			Header("Location: /users/edit/" . $user->id . "?msg=saved\n\n");
@@ -191,4 +195,5 @@ foreach ($users as &$u) {
 unset($u);
 
 $default_team = array_search('Normal Users', $teams, true);
-echo $twig->render('users.html', array_merge($twigarr, admin_messages(), array('users' => $users, 'teams' => $teams, 'default_team' => $default_team)));
+echo $twig->render('users.html', array_merge($twigarr, admin_messages(), array('users' => $users, 'teams' => $teams, 'default_team' => $default_team,
+	'local_auth' => local_auth_enabled())));

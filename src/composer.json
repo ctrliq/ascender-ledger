@@ -12,6 +12,7 @@
         "php": ">=8.3",
         "ext-dom": "*",
         "ext-openssl": "*",
+        "jumbojett/openid-connect-php": "^1.0",
         "phpmailer/phpmailer": "*",
         "sebastian/diff": "*",
         "twig/twig": "^3.26"

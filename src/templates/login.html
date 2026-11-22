@@ -1,5 +1,9 @@
 {% extends 'login_layout.html' %}
 {% block body %}
+{% if oidc_failed %}
+			<p class="small text-danger">OIDC login failed</p>
+{% endif %}
+{% if local_auth %}
 			<form class="login" role="form" action="/" method="post">
 				<div class="form-group mb-1">
 					<label for="username">Email</label>
@@ -17,9 +21,17 @@
 					<button type="submit" class="btn btn-primary btn-sm p-2 fw-bold fs-6">Log in</button>
 				</div>
 			</form>
+{% endif %}
+{% if oidc %}
+			<div class="d-grid gap-2{% if local_auth %} mt-3{% endif %}">
+				<a href="/oidc/" class="btn {% if local_auth %}btn-secondary{% else %}btn-primary{% endif %} btn-sm p-2 fw-bold fs-6">Log in with OIDC</a>
+			</div>
+{% endif %}
+{% if local_auth %}
 			<div class="text-center mt-3">
 				<a href="/forgot_password/" class="link-primary small">Forgot password?</a>
 			</div>
+{% endif %}
 {% if custom_login|trim != '' %}
 			<p class="pt-3 mb-0 small" style="white-space: pre-line;">{{ custom_login }}</p>
 {% endif %}

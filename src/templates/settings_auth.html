@@ -1,0 +1,108 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="wrapper">
+	<div class="container-fluid animated fadeInRight">
+{% if saved %}
+		<div class="alert alert-success py-2">Settings saved.</div>
+{% endif %}
+{% if nooidc %}
+		<div class="alert alert-danger py-2">There are no remote authentication systems configured.</div>
+{% endif %}
+		<form method="post" action=/settings/save/ id=settingform class="form-horizontal">
+			<input type="hidden" name="form" value="auth">
+			<div class="shadow-sm border row justify-content-center p-4 mb-3">
+				<div class="float-start w-50">
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">OIDC Key</label>
+						<div>
+							<input type="text" class="form-control w-75" name=oidc_key id=oidc_key value='{{ settings.oidc_key }}' autocomplete="off">
+						</div>
+						<div class="form-text w-75">The OIDC key (Client ID) from your IDP.</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">OIDC Secret</label>
+						<div>
+							<input type="password" class="form-control w-75" name=oidc_secret id=oidc_secret autocomplete="new-password" placeholder="{% if settings.oidc_secret_saved %}[ saved ] leave blank to keep{% else %}[ not saved ]{% endif %}">
+						</div>
+{% if settings.oidc_secret_saved %}
+						<div class="form-check mt-1">
+							<input type="checkbox" class="form-check-input" name=oidc_secret_clear id=oidc_secret_clear>
+							<label class="form-check-label" for="oidc_secret_clear">Clear the saved secret</label>
+						</div>
+{% endif %}
+						<div class="form-text w-75">The OIDC secret (Client Secret) from your IDP.</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">OIDC Provider URL</label>
+						<div>
+							<input type="text" class="form-control w-75" name=oidc_provider_url id=oidc_provider_url value='{{ settings.oidc_provider_url }}' placeholder="https://keycloak.example.com/realms/example">
+						</div>
+						<div class="form-text w-75">The URL for your OIDC provider including the path up to /.well-known/openid-configuration</div>
+					</div>
+
+					<div class="mb-3">
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=oidc_verify_ssl id=oidc_verify_ssl {% if settings.oidc_verify_ssl == '1' %}checked{% endif %}>
+							<label class="form-check-label fs-6 fw-bold" for="oidc_verify_ssl">Verify OIDC Provider Certificate</label>
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Redirect URI</label>
+						<div>
+							<input type="text" class="form-control w-75" value='{{ redirect_url }}' readonly>
+						</div>
+						<div class="form-text w-75">{% if redirect_url %}Add this to the allowed redirect URIs in your IDP.{% else %}Set the Base URL under General first.{% endif %}</div>
+					</div>
+				</div>
+				<div class="w-50">
+
+					<div class="mb-3">
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=oidc_create_users id=oidc_create_users {% if settings.oidc_create_users == '1' %}checked{% endif %}>
+							<label class="form-check-label fs-6 fw-bold" for="oidc_create_users">Create Users on Login</label>
+						</div>
+						<div class="form-text w-75">Create the user on their first OIDC login.</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Username Claim</label>
+						<div>
+							<input type="text" class="form-control w-75" name=oidc_username_claim id=oidc_username_claim value='{{ settings.oidc_username_claim }}'>
+						</div>
+						<div class="form-text w-75">The claim used as username.</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label fs-6 fw-bold">Groups Claim</label>
+						<div>
+							<input type="text" class="form-control w-75" name=oidc_groups_claim id=oidc_groups_claim value='{{ settings.oidc_groups_claim }}'>
+						</div>
+						<div class="form-text w-75">The claim with the user's groups, for teams with an OIDC Group.</div>
+					</div>
+
+					<div class="mb-3">
+						<div class="form-check form-switch">
+							<input type="checkbox" class="form-check-input" name=disable_local_auth id=disable_local_auth {% if settings.disable_local_auth == '1' %}checked{% endif %}>
+							<label class="form-check-label fs-6 fw-bold" for="disable_local_auth">Disable the built-in authentication system</label>
+						</div>
+						<div class="form-text w-75">Only OIDC logins are allowed.  To enable local logins again run <code>php utility/local_auth.php enable</code> in the web container.</div>
+					</div>
+				</div>
+
+
+			</div>
+
+			<div class="mb-3">
+				<div class="col-sm-offset-2">
+					<button class="btn btn-primary" type="submit" name=save id=save>Save</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}

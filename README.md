@@ -54,6 +54,16 @@ Ascender authenticates to Ledger with a token, so it keeps working when Ascender
 
 **Require Token Authorization** is off by default, so an upgraded Ledger keeps receiving data until Ascender has the token. The Servers page shows whether each server is sending a valid token; once they all are, turn it on under Settings, General, and Ledger refuses data without the token from then on. The most recent refusal is shown on the dashboard and the Servers page. **Reset Token** issues a new token, after which each Ascender server needs the new one.
 
+## OIDC Authentication
+
+Users can log in through an OIDC provider such as Keycloak, Microsoft Entra ID or Okta. Configure it under Admin, Settings, Authentication.
+
+- Create a confidential client at the provider with the **Redirect URI** shown on the settings page, and the Base URL followed by `/login/` as post logout redirect URI
+- Users are linked by username on their first OIDC login, and by their OIDC subject after that
+- Teams with an **OIDC Group** get their members from the groups claim at every login
+- OIDC sessions are checked against the provider every 5 minutes
+- When local authentication is disabled and the provider is unavailable, enable it again from the web container with `php /var/www/html/utility/local_auth.php enable`
+
 ## Configuration
 
 Container configuration lives in [`files/`](./files), and credentials are passed as Docker secrets rather than environment values. `secrets/admin_password.txt` seeds the initial admin account, and the MySQL password is read from `/run/secrets/db-ledger-password`.
