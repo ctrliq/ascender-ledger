@@ -2,6 +2,11 @@
 $account = array();
 include_once('includes/global.php');
 
+if (!local_auth_enabled()) {
+	Header("Location: /login/\n\n");
+	exit;
+}
+
 if (isset($_POST['email']) && is_string($_POST['email'])) {
 	sleep(1);
 	if (filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {

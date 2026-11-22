@@ -17,6 +17,11 @@
 					</select>
 					<div class="form-text">A disabled team gives its users no permissions and no access to the reports shared with it.</div>
 				</div>
+				<div class="mb-3">
+					<label for="oidc_group" class="form-label">OIDC Group</label>
+					<input type="text" class="form-control" name="oidc_group" id="oidc_group" maxlength="255" value="{{ team.oidc_group }}">
+					<div class="form-text">Members of this OIDC group are added to the team when they log in.</div>
+				</div>
 				<a href="/teams/" class="btn btn-secondary">Return</a>
 				<button class="btn btn-primary" type="submit">Save</button>
 			</form>

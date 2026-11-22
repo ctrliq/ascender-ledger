@@ -31,7 +31,7 @@ if ($logged && isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] =
 	csrf_verify();
 }
 
-if (isset($_SERVER['PHP_SELF']) && $_SERVER['PHP_SELF'] != '/login.php' && $_SERVER['PHP_SELF'] != '/forgot_password.php') {
+if (isset($_SERVER['PHP_SELF']) && $_SERVER['PHP_SELF'] != '/login.php' && $_SERVER['PHP_SELF'] != '/forgot_password.php' && $_SERVER['PHP_SELF'] != '/oidc.php') {
 	auth_check();
 }
 
@@ -125,10 +125,19 @@ function auth_check() {
 			$account = array();
 			auth_reset_session();
 		}
+		// Local sessions end when local authentication is disabled
+		if (!local_auth_enabled() && empty($_SESSION['oidc'])) {
+			$account = array();
+			auth_reset_session();
+		}
+		if (!oidc_session_valid()) {
+			$account = array();
+			auth_reset_session();
+		}
 		return true;
 	}
 	$_SESSION['auth'] = 0;
-	if (isset($_GET['code']) && is_string($_GET['code']) && sql_clean_code($_GET['code']) != '') {
+	if (local_auth_enabled() && isset($_GET['code']) && is_string($_GET['code']) && sql_clean_code($_GET['code']) != '') {
 		$code = sql_clean_code($_GET['code']);
 		$user = new User();
 		$account = $user->retrieve_by_code($code);
@@ -137,6 +146,7 @@ function auth_check() {
 			$_SESSION['auth'] = TRUE;
 			$_SESSION['username'] = $account['username'];
 			$_SESSION['code'] = $code;
+			unset($_SESSION['oidc']);
 			return true;
 		} else {
 			sleep(5);
@@ -155,6 +165,11 @@ function auth_check() {
 		return false;
 	}
 
+	if (!local_auth_enabled()) {
+		showloginbox(1);
+		exit;
+	}
+
 	$check = check_user_password(trim($username), trim($_POST['password']));
 
 	if ($check) {
@@ -165,6 +180,7 @@ function auth_check() {
 		$_SESSION['username'] = $username;
 		$_SESSION['code'] = '';
 		$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+		unset($_SESSION['oidc']);
 
 		$logged = true;
 		$user = new User();

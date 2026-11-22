@@ -30,6 +30,16 @@ $smtp_username = read_setting('smtp_username', '');
 $smtp_password = read_setting('smtp_password', '');
 $smtp_verify_cert = read_setting('smtp_verify_cert', '1');
 
+// Authentication
+$oidc_key = read_setting('oidc_key', '');
+$oidc_secret = read_setting('oidc_secret', '');
+$oidc_provider_url = read_setting('oidc_provider_url', '');
+$oidc_verify_ssl = read_setting('oidc_verify_ssl', '1');
+$oidc_create_users = read_setting('oidc_create_users', '1');
+$oidc_username_claim = read_setting('oidc_username_claim', 'preferred_username');
+$oidc_groups_claim = read_setting('oidc_groups_claim', 'groups');
+$disable_local_auth = read_setting('disable_local_auth', '0');
+
 $retention_settings = array('hosts_retention', 'facts_retention', 'changes_retention', 'packages_retention');
 
 /*
@@ -120,6 +130,38 @@ if (isset($_GET['action']) && $_GET['action'] == 'save' && $_SERVER['REQUEST_MET
 		exit;
 	}
 
+	if ($form == 'auth') {
+		write_setting('oidc_key', trim(post_str('oidc_key')));
+
+		$url = preg_replace('#/\.well-known/openid-configuration$#', '', rtrim(trim(post_str('oidc_provider_url')), '/'));
+		if ($url == '' || valid_http_url($url)) {
+			write_setting('oidc_provider_url', $url);
+		}
+
+		// A blank secret keeps the saved one
+		if (isset($_POST['oidc_secret_clear'])) {
+			write_setting('oidc_secret', '');
+		} elseif (isset($_POST['oidc_secret']) && is_string($_POST['oidc_secret']) && $_POST['oidc_secret'] != '') {
+			write_setting('oidc_secret', secured_encrypt($_POST['oidc_secret']));
+		}
+
+		write_setting('oidc_verify_ssl', (isset($_POST['oidc_verify_ssl']) ? '1' : '0'));
+		write_setting('oidc_create_users', (isset($_POST['oidc_create_users']) ? '1' : '0'));
+		foreach (array('oidc_username_claim' => 'preferred_username', 'oidc_groups_claim' => 'groups') as $f => $default) {
+			$claim = oidc_clean_claim(post_str($f));
+			write_setting($f, ($claim == '' ? $default : $claim));
+		}
+
+		if (isset($_POST['disable_local_auth']) && !oidc_configured()) {
+			Header("Location: /settings/auth/?error=nooidc\n\n");
+			exit;
+		}
+		write_setting('disable_local_auth', (isset($_POST['disable_local_auth']) ? '1' : '0'));
+
+		Header("Location: /settings/auth/?saved=1\n\n");
+		exit;
+	}
+
 	Header("Location: /settings/\n\n");
 	exit;
 }
@@ -133,6 +175,8 @@ foreach ($set as $s) {
 // Never sent back to the browser
 $settings['smtp_password_saved'] = ($settings['smtp_password'] != '');
 unset($settings['smtp_password']);
+$settings['oidc_secret_saved'] = ($settings['oidc_secret'] != '');
+unset($settings['oidc_secret']);
 
 $default_modules = array('gather_facts');
 $saved = isset($_GET['saved']);
@@ -150,6 +194,12 @@ if (isset($_GET['action']) && $_GET['action'] == 'visual') {
 
 if (isset($_GET['action']) && $_GET['action'] == 'maint') {
 	echo $twig->render('settings_maint.html', array_merge($twigarr, array('settings' => $settings, 'saved' => $saved)));
+	exit;
+}
+
+if (isset($_GET['action']) && $_GET['action'] == 'auth') {
+	echo $twig->render('settings_auth.html', array_merge($twigarr, array('settings' => $settings, 'saved' => $saved,
+		'redirect_url' => oidc_redirect_url(), 'nooidc' => (isset($_GET['error']) && $_GET['error'] == 'nooidc'))));
 	exit;
 }
 

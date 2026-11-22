@@ -10,4 +10,5 @@ require_once('includes/classes/Report.php');
 require_once('includes/session.php');
 require_once('includes/misc.php');
 require_once('includes/datatables.php');
+require_once('includes/oidc.php');
 require_once('includes/functions.php');

@@ -43,10 +43,13 @@
 				</tbody>
 			</table>
 		</div>
+{% if local_auth %}
 		<br><button type="button" class="btn btn-primary btn-s" data-bs-toggle="modal" data-bs-target="#inviteuser">Invite User</button>
+{% endif %}
 	</div>
 </div>
 
+{% if local_auth %}
 <div class="modal fade" id="inviteuser" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="inviteuserLabel" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered">
 		<form action="/users/invite/" method="post" class="modal-content">
@@ -76,6 +79,7 @@
 		</form>
 	</div>
 </div>
+{% endif %}
 
 {% endblock %}
 {% block javascript %}

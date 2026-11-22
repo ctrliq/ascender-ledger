@@ -1,6 +1,6 @@
 <?php
 
-$new_db_version = 23;
+$new_db_version = 24;
 
 $db_version = read_setting('db_version', 1);
 
@@ -163,6 +163,16 @@ if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) 
 		$db_version = 23;
 	} catch (Exception $e) {
 		error_log('Ledger: database upgrade to version 23 failed, and will be retried: ' . $e->getMessage());
+	}
+}
+
+if ($new_db_version != $db_version && $db_upgrade_locked && intval($db_version) == 23) {
+	try {
+		db_upgrade_24();
+		db_execute_prepare("UPDATE `settings` SET `value` = ? WHERE `setting` = 'db_version'", array(24));
+		$db_version = 24;
+	} catch (Exception $e) {
+		error_log('Ledger: database upgrade to version 24 failed, and will be retried: ' . $e->getMessage());
 	}
 }
 
@@ -465,4 +475,18 @@ function db_upgrade_23() {
 		PRIMARY KEY (`id`),
 		UNIQUE KEY `user_page_name` (`user`, `page`, `name`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+}
+
+/*
+	Version 24
+	- OIDC authentication: users are linked by their OIDC subject, and teams can be mapped to an
+	  OIDC group
+*/
+function db_upgrade_24() {
+	if (!db_column_exists('users', 'oidc_sub')) {
+		db_execute("ALTER TABLE `users` ADD `oidc_sub` varchar(255) NULL DEFAULT NULL, ADD UNIQUE `oidc_sub` (`oidc_sub`)");
+	}
+	if (!db_column_exists('teams', 'oidc_group')) {
+		db_execute("ALTER TABLE `teams` ADD `oidc_group` varchar(255) NOT NULL DEFAULT '' AFTER `name`");
+	}
 }

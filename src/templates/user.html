@@ -34,6 +34,18 @@
 						</select>
      	               </div>
 				</div>
+{% if user.oidc_sub %}
+				<div class="mb-3">
+					<label class="col-sm-3 form-label">OIDC</label>
+					<div class="col">
+						<div class="form-check">
+							<input type="checkbox" class="form-check-input" name=oidc_unlink id=oidc_unlink>
+							<label class="form-check-label" for="oidc_unlink">Unlink</label>
+						</div>
+						<div class="form-text">{{ user.oidc_sub }}</div>
+					</div>
+				</div>
+{% endif %}
 
 {% if account.code %}
 				<div class="mb-3">
